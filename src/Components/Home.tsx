@@ -17,7 +17,15 @@ const Video = () => {
      <div className="text-center text-white mb-11">
         <h1 className="text-5xl font-bold mb-4 text-yellow-300 text-roboto">Vehicle Acquisitions</h1>
         <p className="text-lg mb-8 text-roboto">Empower your vision with data</p>
-        <a href="Acquisitions" className="bg-yellow-300 text-zinc-900 hover:bg-yellow-100 text-lg font-bold py-2 px-6 rounded-full transition duration-300 text-roboto">Explore Acquisitions</a>
+
+        <Link to={"/Acquisitions"}> 
+        <p className="bg-yellow-300 text-zinc-900 hover:bg-yellow-100 text-lg font-bold py-2 px-6 rounded-full transition duration-300 text-roboto">Explore Acquisitions  </p>
+        </Link> 
+
+
+
+
+      
      </div>
     </div>
     
