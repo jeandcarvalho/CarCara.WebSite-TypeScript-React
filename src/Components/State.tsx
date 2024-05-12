@@ -76,7 +76,7 @@ const State = () => {
     <body>
   
   
-  <header className="bg-zinc-800 flex  px-3 ">
+  <header className="bg-zinc-900 flex  px-3 ">
   <h1 className="text-4xl font-semibold italic mt-1  mr-7 text-yellow-400 text-left"> CarCara</h1>
       <Link to={"/"}> 
         <p className="text-xl font-semibold  ml-11 mr-5 mb-4 mt-3 text-neutral-400      rounded relative hover:scale-110 duration-200">Home</p>
@@ -99,12 +99,12 @@ const State = () => {
          State: {state} 
       </h2>
     </div>
-        <section className="grid grid-cols-2 gap-4 w-full">
+        <section className="grid grid-cols-2 gap-4 w-full ">
           {uniqueCities.map((cities) => {
             return (
               cities !== "Not Found" && (
                 <Link to={`/city/${cities}`} key={cities}>
-                <article className="bg-zinc-800 rounded p-2 relative hover:scale-105 duration-200">
+                <article className="bg-zinc-800 rounded p-2 relative hover:scale-105 duration-200 h-full">
                    <p>
                     <span className="font-medium text-neutral-300 text-xl text-roboto">City: </span>
                     <span className="font-medium text-orange-300 text-xl text-roboto">{cities} </span>

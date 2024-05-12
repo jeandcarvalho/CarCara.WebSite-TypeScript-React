@@ -70,7 +70,7 @@ const Video = () => {
     return (
         <body> 
           
-          <header className="bg-zinc-800 flex  px-3 ">
+          <header className="bg-zinc-900 flex  px-3 ">
           <h1 className="text-4xl font-semibold italic mt-1  mr-7 text-yellow-400 text-left"> CarCara</h1>
       <Link to={"/"}> 
         <p className="text-xl font-semibold  ml-11 mr-5 mb-4 mt-3 text-neutral-400      rounded relative hover:scale-110 duration-200">Home</p>
