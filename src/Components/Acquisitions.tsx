@@ -56,7 +56,7 @@ export default function Acquisitions() {
   }
 
   return (
-    <body>
+    <body className='bg-zinc-900 h-screen'>
       <header className="bg-zinc-900 flex  px-3 ">
         <h1 className="text-4xl font-semibold italic mt-1  mr-7 text-yellow-400 text-left"> CarCara</h1>
         <Link to={"/"}>
@@ -66,16 +66,18 @@ export default function Acquisitions() {
           <p className="text-xl font-semibold  ml-5  mb-4 mt-3 text-neutral-400 rounded relative hover:scale-110 duration-200">About</p>
         </Link>
       </header>
-      <div className="bg-zinc-900 flex justify-center px-4  ">
-        <main className="my-5 w-full md:max-w-2xl  h-screen bg-zinc-900">
+      <div className="flex justify-center px-4 ">
+        <main className="my-5 w-full md:max-w-2xl bg-zinc-900">
           <div>
             <h1 className="text-4xl font-medium mb-4 text-yellow-100 text-left mt-5">
               Change of <br /> Acquired <span className='font-medium text-yellow-300'> States</span>
             </h1>
           </div>
           {isLoading ? (
-            <div className="w-1/6 mt-11 justify-center items-center">
-              <img src={loadgif} alt="Loading..." />
+            <div className="w-full mt-11  flex justify-center items-center">
+              <img src={loadgif} alt={loadgif} className='w-32 h-32 mt-11'/>
+          
+        
             </div>
           ) : (
               <section className="grid grid-cols-2 gap-4 w-full">
