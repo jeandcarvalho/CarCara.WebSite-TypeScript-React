@@ -73,7 +73,7 @@ const State = () => {
 }
 
   return (
-    <body>
+    <body className="bg-zinc-900  h-screen">
   
   
   <header className="bg-zinc-900 flex  px-3 ">
@@ -85,7 +85,7 @@ const State = () => {
         <p className="text-xl font-semibold  ml-5  mb-4 mt-3 text-neutral-400 rounded relative hover:scale-110 duration-200">About</p>
       </Link> 
  </header>
-    <div className="bg-zinc-900 h-screen ">
+    <div className="bg-zinc-900  ">
 
    
 

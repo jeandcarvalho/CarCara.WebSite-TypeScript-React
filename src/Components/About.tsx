@@ -3,19 +3,19 @@ import { Link } from "react-router-dom";
 
 const About = () => {
     return (
-<body className="bg-zinc-900 ">
+<body className="bg-zinc-900 h-screen">
 <header className="bg-zinc-900 flex  px-3 ">
 <h1 className="text-4xl font-semibold italic mt-1  mr-7 text-yellow-400 text-left"> CarCara</h1>
       <Link to={"/"}> 
         <p className="text-xl font-semibold  ml-11 mr-5 mb-4 mt-3 text-neutral-400      rounded relative hover:scale-110 duration-200">Home</p>
       </Link>
       <Link to={"/About"}> 
-        <p className="text-xl font-semibold  ml-5  mb-4 mt-3 text-neutral-400 rounded relative hover:scale-110 duration-200">About</p>
+        <p className="text-xl font-semibold  ml-5  mb-11 mt-3 text-neutral-400 rounded relative hover:scale-110 duration-200">About</p>
       </Link> 
  </header>
- <div className="flex items-center justify-center h-screen">
-    <div className="max-w-3xl px-2 text-center text-white mb-11">
-        <h1 className="text-5xl font-bold mb-4 text-roboto text-yellow-400">About us</h1>
+ <div className="flex items-center justify-center mt-11">
+    <div className="max-w-3xl px-2 text-center text-white mb-11 mt-11">
+        <h1 className="text-5xl font-bold mb-4 text-roboto mt-11 text-yellow-400">About us</h1>
         
         <p className="text-xl mb-4 font-bold text-roboto ">
     Welcome to <span className="italic text-yellow-300">Carcara</span>, a platform specializing in vehicle data acquisition with precise classifications, designed for testing detection and recognition algorithms.

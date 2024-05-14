@@ -68,7 +68,7 @@ const Video = () => {
 }
 
     return (
-        <body> 
+        <body className='bg-zinc-900 h-screen'> 
           
           <header className="bg-zinc-900 flex  px-3 ">
           <h1 className="text-4xl font-semibold italic mt-1  mr-7 text-yellow-400 text-left"> CarCara</h1>
@@ -79,12 +79,12 @@ const Video = () => {
         <p className="text-xl font-semibold  ml-5  mb-4 mt-3 text-neutral-400 rounded relative hover:scale-110 duration-200">About</p>
       </Link> 
  </header>
-        <div className="bg-zinc-900 h-screen ">
+        <div className="bg-zinc-900">
     
        
     
         <div className="bg-zinc-900 flex justify-center px-4  ">
-          <main className="my-5 w-full md:max-w-3xl h-screen">
+          <main className="my-5 w-full md:max-w-3xl">
           <div className="text-left">
           <h1 className="text-4xl font-medium mb-4 text-blue-100 text-left ">
        <span className='font-medium text-blue-300'> Video File</span>
