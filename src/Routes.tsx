@@ -20,11 +20,7 @@ export const Routes = createBrowserRouter ([
         {path: "City/:city", element: <City/> },
         {path: "Video/:video", element: <Video/> }
     ]
-   }
-
-    
-
-    
+   }  
 ])
    
    

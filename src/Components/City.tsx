@@ -38,7 +38,7 @@ const City = () => {
 
     filteredFilesData.sort((a, b) => a.Bairro.localeCompare(b.Bairro));
 
-    let aux = 0;
+   
 
     window.onload = function() {
       window.scrollTo(0, 0);
@@ -63,8 +63,8 @@ const City = () => {
       <div className="bg-zinc-900 flex justify-center px-4  ">
         <main className="my-5 w-full md:max-w-lg h-full">
         <div className="text-left">
-        <h1 className="text-4xl font-medium mb-4 text-blue-100 text-left mt-5">
-     <span className='font-medium text-blue-300'> Video Files</span>
+        <h1 className="text-4xl font-medium mb-4 text-orange-100 text-left mt-5">
+     <span className='font-medium text-lime-300'> Video Files</span>
         </h1>
         <h2 className="text-3xl font-normal mb-4  text-orange-300 text-left">
            City: {city} 
@@ -72,29 +72,31 @@ const City = () => {
       </div>
           <section className="grid grid-cols-1 gap-4 w-full">
           
-            {filteredFilesData.map((Files) => {
-               aux++;
-             
-              return (
-                Files.Cidade !== "Not Found" && Files.Bairro != "Not Found"  && (
+          {filteredFilesData.map((Files) => {
 
-                 
-                  <Link to={`/video/${Files.Videoname}`} key={Files.Videoname}>
-                  <article key={Files.id} className="bg-zinc-800 rounded p-2 relative hover:scale-105 duration-200">
-                     <p>
-                     <span className="font-medium text-neutral-300 text-xl">Video: </span>
-                      <span className="font-medium text-blue-300 text-xl">{aux} </span>
+  const timeStamp = new Date(Files.TimeStemp);
+  const period = timeStamp.getHours() >= 18 ? "Night" : "Day";
+  const periodColorClass = period === "Night" ? "text-blue-400 italic" : "text-yellow-400 italic";
 
-                      <span className="font-medium text-neutral-300 text-xl">District: </span>
-                      <span className="font-medium text-blue-300 text-xl">{Files.Bairro} </span>
-                    </p>
-  
-                 
-                  </article>
-                  </Link>
-                ) 
-              );
-            })}
+  return (
+    Files.Cidade !== "Not Found" && Files.Bairro !== "Not Found" && (
+      <Link to={`/video/${Files.Videoname}`} key={Files.Videoname}>
+        <article key={Files.id} className="bg-zinc-800 rounded p-2 relative hover:scale-105 duration-200">
+          <p>
+           
+          
+            <span className="font-medium text-neutral-300 text-xl">District: </span>
+            <span className="font-medium text-lime-100 text-xl">{Files.Bairro} </span>
+            <br />
+            <span className="font-medium text-neutral-300 text-xl">Period: </span>
+            <span className={`font-medium ${periodColorClass} text-xl`}>{period} </span>
+    
+          </p>
+        </article>
+      </Link>
+    )
+  );
+})}
           </section>
         </main>
       </div>

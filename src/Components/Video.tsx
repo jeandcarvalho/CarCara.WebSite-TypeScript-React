@@ -67,6 +67,8 @@ const Video = () => {
     window.scrollTo(0, 0);
 }
 
+
+
     return (
         <body className='bg-zinc-900 h-screen'> 
           
@@ -87,7 +89,7 @@ const Video = () => {
           <main className="my-5 w-full md:max-w-3xl">
           <div className="text-left">
           <h1 className="text-4xl font-medium mb-4 text-blue-100 text-left ">
-       <span className='font-medium text-blue-300'> Video File</span>
+       <span className='font-medium text-lime-300'> Video File</span>
           </h1>
         </div >
             <section className="grid grid-cols-1 gap-4 w-full">   
@@ -96,21 +98,38 @@ const Video = () => {
             </div>
          
                     <article className="bg-zinc-800 rounded p-2 relative hover:scale-105 duration-200">
-                       <p>
-                       <span className="font-medium text-neutral-400 text-xl">Video: </span>
-                        <span className="font-medium text-blue-100 text-xl">{(fileWithLink.Videoname).substring(0, fileWithLink.Videoname.length - 4)} </span>          
-                      </p>
-
-                      
-                      <p>
-                        <span className="font-medium text-neutral-400 text-xl">District: </span>
-                        <span className="font-medium text-blue-200 text-xl">{fileWithLink.Bairro} </span>
-                        </p>    
-
+                    
                       <p>
                         <span className="font-medium text-neutral-400 text-xl">City: </span>
-                        <span className="font-medium text-blue-400 text-xl">{fileWithLink.Cidade} </span>
-                        </p>    
+                        <span className="font-medium text-lime-300 text-xl">{fileWithLink.Cidade} </span>
+                        </p>   
+
+                          <p>
+                        <span className="font-medium text-neutral-400 text-xl">District: </span>
+                        <span className="font-medium text-green-300 text-xl">{fileWithLink.Bairro} </span>
+                        </p>     
+
+                        {/* Adicionando o período */}
+    {(() => {
+        const timestamp = new Date(fileWithLink.TimeStemp);
+        const hours = timestamp.getHours();
+        let period;
+        let periodColorClass;
+        if (hours >= 18 && timestamp.getMinutes() >= 30) {
+            period = 'Night';
+            periodColorClass = 'text-blue-400 italic';
+        } else {
+            period = 'Day';
+            periodColorClass = 'text-yellow-400 italic';
+        }
+
+        return (
+            <p>
+                <span className="font-medium text-neutral-400 text-xl">Period: </span>
+                <span className={`font-medium text-xl ${periodColorClass}`}>{period}</span>
+            </p>
+        );
+    })()}
 
                     </article>
             </section>
