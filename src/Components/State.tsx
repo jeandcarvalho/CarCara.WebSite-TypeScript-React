@@ -112,7 +112,7 @@ const State = () => {
 
                   <p>
                     <span className="font-medium text-neutral-300 text-roboto">Time recorded: </span>
-                    <span className="font-medium text-gray-100 text-roboto"> {formatDuration(countDocumentsByCity(cities)) }  </span>
+                    <span className="font-medium text-green-200 text-roboto"> {formatDuration(countDocumentsByCity(cities)) }  </span>
                    
                   </p>
                 </article>

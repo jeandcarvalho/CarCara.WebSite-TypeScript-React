@@ -96,7 +96,7 @@ export default function Acquisitions() {
                           </p>
                           <p>
                             <span className="font-medium text-neutral-300">Time recorded: </span>
-                            <span className="font-medium text-gray-100 "> {formatDuration(countDocumentsByState(state))}  </span>
+                            <span className="font-medium text-green-200 "> {formatDuration(countDocumentsByState(state))}  </span>
 
                           </p>
                         </article>
