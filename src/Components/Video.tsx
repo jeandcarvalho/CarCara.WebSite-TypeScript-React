@@ -101,12 +101,12 @@ const Video = () => {
                     
                       <p>
                         <span className="font-medium text-neutral-400 text-xl">City: </span>
-                        <span className="font-medium text-lime-300 text-xl">{fileWithLink.Cidade} </span>
+                        <span className="font-medium text-lime-200 text-xl">{fileWithLink.Cidade} </span>
                         </p>   
 
                           <p>
                         <span className="font-medium text-neutral-400 text-xl">District: </span>
-                        <span className="font-medium text-green-300 text-xl">{fileWithLink.Bairro} </span>
+                        <span className="font-medium text-lime-200 text-xl">{fileWithLink.Bairro} </span>
                         </p>     
 
                         {/* Adicionando o período */}

@@ -18,7 +18,7 @@ const About = () => {
         <h1 className="text-5xl font-bold mb-4 text-roboto mt-11 text-yellow-400">About us</h1>
         
         <p className="text-xl mb-4 font-bold text-roboto ">
-    Welcome to <span className="italic text-yellow-300">Carcara</span>, a platform specializing in vehicle data acquisition with precise classifications, designed for testing detection and recognition algorithms.
+    Welcome to <span className="italic text-yellow-300">CarCara</span>, a platform specializing in vehicle data acquisition with precise classifications, designed for testing detection and recognition algorithms.
 </p>
 
         <p className="text-base md:text-sm mb-8 text-roboto mt-4 text-yellow-100">Our website provides researchers with comprehensive data, including videos, measurements, and vehicle locations. Additionally, it facilitates data visualization and extraction for research in computer vision, map creation, and the calibration of sensors and radar systems. Join us in exploring the future of vehicle automation.</p>
