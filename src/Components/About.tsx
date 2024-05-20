@@ -1,10 +1,6 @@
 
-
-
-
 import { Link } from "react-router-dom";
 
-const states = ["São Paulo", "Espírito Santo", "Minas Gerais", "Rio de Janeiro", "Paraná"];
 const totalDistance = 2773; // em quilômetros
 const totalHours = 40;
 const totalGigabytes = 25;
@@ -41,9 +37,6 @@ const About = () => {
 </div>
 
 
-
-
-    
       </body>
       )
 
