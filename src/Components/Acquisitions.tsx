@@ -3,6 +3,8 @@ import { api } from '../Services/api';
 import formatDuration from '../Classes/DateTimeFormat';
 import { Link } from "react-router-dom";
 import loadgif from "../Components/img/gif.gif"
+import Select from 'react-select';
+import carcara from "../Components/img/carcara23.png";
 
 interface FilesProps {
   id: string;
@@ -16,6 +18,37 @@ interface FilesProps {
   Gps_X: number;
   Gps_Z: number;
 }
+
+
+const options = [
+  { value: '/', label: 'Home' },
+  { value: '/About', label: 'About' }
+];
+
+const handleChange = selectedOption => {
+  // Navegar para o link selecionado
+  window.location.href = selectedOption.value;
+};
+const customStyles = {
+  control: (provided, state) => ({
+      ...provided,
+      backgroundColor: 'zinc', // Altere para a cor desejada para a caixa da combobox
+      color: 'white', // Altere para a cor desejada para a fonte da combobox
+  }),
+  menu: (provided, state) => ({
+    ...provided,
+    backgroundColor: 'black', // Altere para a cor desejada para a caixa quando o menu é aberto
+   
+}),
+option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.isFocused ? 'gold ' : null, // Altere para a cor desejada quando a opção é focada
+    color: 'gray', // Altere para a cor desejada para a fonte da opção
+}),
+ 
+};
+
+
 
 export default function Acquisitions() {
 
@@ -56,21 +89,31 @@ export default function Acquisitions() {
   }
 
   return (
-    <body className='bg-zinc-900 h-screen'>
-      <header className="bg-zinc-900 flex  px-3 ">
-        <h1 className="text-4xl font-semibold italic mt-1  mr-7 text-yellow-400 text-left"> CarCara</h1>
-        <Link to={"/"}>
-          <p className="text-xl font-semibold  ml-11 mr-5 mb-4 mt-3 text-neutral-400      rounded relative hover:scale-110 duration-200">Home</p>
-        </Link>
-        <Link to={"/About"}>
-          <p className="text-xl font-semibold  ml-5  mb-4 mt-3 text-neutral-400 rounded relative hover:scale-110 duration-200">About</p>
-        </Link>
-      </header>
+    <body className='bg-zinc-950 h-screen'>
+        <header className="flex px-3">
+                <img
+                    src={carcara}
+                    alt="Descrição da imagem"
+                    className="mr-7 mt-1"
+                    width="270"
+                    style={{ height: "40px" }}
+                />
+                <div className="flex items-center mt-1">
+                    <Select
+                        options={options}
+                        onChange={handleChange}
+                        placeholder="Home"
+                        className="mr-5 font-bold"
+                        styles={customStyles} 
+                    />
+                 
+                </div>
+            </header>
       <div className="flex justify-center px-4 ">
-        <main className="my-5 w-full md:max-w-2xl bg-zinc-900">
+        <main className="my-5 w-full md:max-w-2xl bg-zinc-950">
           <div>
             <h1 className="text-4xl font-medium mb-4 text-yellow-100 text-left mt-5">
-              Change of <br /> Acquired <span className='font-medium text-yellow-300'> States</span>
+            Changing of <br /> Acquired <span className='font-medium text-yellow-300'> States</span>
             </h1>
           </div>
           {isLoading ? (
