@@ -19,7 +19,7 @@ const Video = () => {
             </header>
             <div className="flex items-center justify-center ">
                 <div className="text-center text-white mb-11 ml-7 mr-7">
-                    <h1 className="text-5xl font-bold mb-4 mt-11 text-yellow-300 text-roboto">Vehicle Acquisitions</h1>
+                    <h1 className="text-5xl font-bold mb-4 text-yellow-300 text-roboto">Vehicle Acquisitions</h1>
                     <p className="text-lg mb-8 text-roboto">Empower your vision with data</p>
 
                     <Link to={"/Acquisitions"}>
@@ -30,7 +30,7 @@ const Video = () => {
             </div>
 
 
-            <div className="  text-center ml-11 mr-11">
+            <div className="  text-center ">
                 <div>
                 <MapComponent states={states} />
 
