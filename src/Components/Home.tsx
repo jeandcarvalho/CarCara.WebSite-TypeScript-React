@@ -40,7 +40,7 @@ const Video = () => {
            
             
 
-             <p className="text-yellow-300 mt-3">States visited: 
+             <p className="text-yellow-300 mt-3">Visited States: 
              <span className="text-gray-300">
              { " " + states.join(', ')}
              </span>

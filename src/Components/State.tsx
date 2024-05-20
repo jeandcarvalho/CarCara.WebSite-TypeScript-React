@@ -93,7 +93,7 @@ const State = () => {
       <main className="my-5 w-full md:max-w-2xl h-full">
       <div className="text-left">
       <h1 className="text-4xl font-medium mb-4 text-orange-100 text-left mt-5 text-roboto">
-  Change of <br /> Acquired <span className='font-medium text-orange-300 text-roboto' > Cities</span>
+      Changing of <br /> Acquired <span className='font-medium text-orange-300 text-roboto' > Cities</span>
       </h1>
       <h2 className="text-3xl font-normal font-siz mb-4  text-yellow-300 text-left text-roboto">
          State: {state} 
