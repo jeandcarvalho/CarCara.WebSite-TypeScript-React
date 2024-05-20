@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import Select from 'react-select';
 import carcara from "../Components/img/carcara23.png";
+import { OptionTypeBase } from 'react-select';
 
 interface VideoFilesProps {
   id   : string ;
@@ -28,17 +29,29 @@ const Video = () => {
     { value: '/About', label: 'About' }
 ];
 
-const handleChange = selectedOption => {
-    // Navegar para o link selecionado
-    window.location.href = selectedOption.value;
+const handleChange = (selectedOption: OptionTypeBase) => {
+  // Navegar para o link selecionado
+  window.location.href = selectedOption.value;
 };
-const customStyles = {
-    control: (provided, state) => ({
-        ...provided,
-        backgroundColor: 'zinc', // Altere para a cor desejada para a caixa da combobox
-        color: 'white', // Altere para a cor desejada para a fonte da combobox
-    }),
-    menu: (provided, state) => ({
+
+interface Style {
+  backgroundColor?: string | null;
+  color?: string;
+}
+
+interface CustomStyles {
+  control: (provided: Style) => Style;
+  menu: (provided: Style) => Style;
+  option: (provided: Style, state: { isFocused: boolean }) => Style;
+}
+
+const customStyles : CustomStyles = {
+  control: (provided) => ({
+      ...provided,
+      backgroundColor: 'zinc', // Altere para a cor desejada para a caixa da combobox
+      color: 'white', // Altere para a cor desejada para a fonte da combobox
+  }),
+  menu: (provided) => ({
       ...provided,
       backgroundColor: 'black', // Altere para a cor desejada para a caixa quando o menu é aberto
      
@@ -48,9 +61,8 @@ const customStyles = {
       backgroundColor: state.isFocused ? 'gold ' : null, // Altere para a cor desejada quando a opção é focada
       color: 'gray', // Altere para a cor desejada para a fonte da opção
   }),
-   
+ 
 };
-
 
   const [filesdata, setFiles] = useState<VideoFilesProps[]>([]);
    

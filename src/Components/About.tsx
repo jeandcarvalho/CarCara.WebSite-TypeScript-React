@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 import Select from 'react-select';
 import carcara from "../Components/img/carcara23.png";
-
+import { OptionTypeBase } from 'react-select';
 const totalDistance = 2773; // em quilômetros
 const totalHours = 40;
 const totalGigabytes = 25;
@@ -13,17 +13,29 @@ const options = [
   { value: '/About', label: 'About' }
 ];
 
-const handleChange = selectedOption => {
+const handleChange = (selectedOption: OptionTypeBase) => {
   // Navegar para o link selecionado
   window.location.href = selectedOption.value;
 };
-const customStyles = {
-  control: (provided, state) => ({
+
+interface Style {
+  backgroundColor?: string | null;
+  color?: string;
+}
+
+interface CustomStyles {
+  control: (provided: Style) => Style;
+  menu: (provided: Style) => Style;
+  option: (provided: Style, state: { isFocused: boolean }) => Style;
+}
+
+const customStyles : CustomStyles = {
+  control: (provided) => ({
       ...provided,
       backgroundColor: 'zinc', // Altere para a cor desejada para a caixa da combobox
       color: 'white', // Altere para a cor desejada para a fonte da combobox
   }),
-  menu: (provided, state) => ({
+  menu: (provided) => ({
       ...provided,
       backgroundColor: 'black', // Altere para a cor desejada para a caixa quando o menu é aberto
      
@@ -35,6 +47,7 @@ const customStyles = {
   }),
  
 };
+
 
 
 const About = () => {

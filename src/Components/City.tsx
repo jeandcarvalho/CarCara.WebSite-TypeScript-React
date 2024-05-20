@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../Services/api';
-
+import { OptionTypeBase } from 'react-select';
 import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import Select from 'react-select';
@@ -13,28 +13,41 @@ const options = [
   { value: '/About', label: 'About' }
 ];
 
-const handleChange = selectedOption => {
+const handleChange = (selectedOption: OptionTypeBase) => {
   // Navegar para o link selecionado
   window.location.href = selectedOption.value;
 };
-const customStyles = {
-  control: (provided, state) => ({
+
+interface Style {
+  backgroundColor?: string | null;
+  color?: string;
+}
+
+interface CustomStyles {
+  control: (provided: Style) => Style;
+  menu: (provided: Style) => Style;
+  option: (provided: Style, state: { isFocused: boolean }) => Style;
+}
+
+const customStyles : CustomStyles = {
+  control: (provided) => ({
       ...provided,
       backgroundColor: 'zinc', // Altere para a cor desejada para a caixa da combobox
       color: 'white', // Altere para a cor desejada para a fonte da combobox
   }),
-  menu: (provided, state) => ({
-    ...provided,
-    backgroundColor: 'black', // Altere para a cor desejada para a caixa quando o menu é aberto
-   
-}),
-option: (provided, state) => ({
-    ...provided,
-    backgroundColor: state.isFocused ? 'gold ' : null, // Altere para a cor desejada quando a opção é focada
-    color: 'gray', // Altere para a cor desejada para a fonte da opção
-}),
+  menu: (provided) => ({
+      ...provided,
+      backgroundColor: 'black', // Altere para a cor desejada para a caixa quando o menu é aberto
+     
+  }),
+  option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isFocused ? 'gold ' : null, // Altere para a cor desejada quando a opção é focada
+      color: 'gray', // Altere para a cor desejada para a fonte da opção
+  }),
  
 };
+
 
 interface VideoFilesProps {
   id   : string ;
