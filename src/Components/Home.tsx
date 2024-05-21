@@ -11,17 +11,23 @@ const Video: React.FC = () => {
     const states = ["São Paulo", "Espírito Santo", "Minas Gerais", "Rio de Janeiro", "Paraná"];
 
     const options = [
+        
         { value: '/', label: 'Home' },
-        { value: '/About', label: 'About' }
+        { value: '/About', label: 'About' },
+        // Adicione outras rotas aqui, se necessário
     ];
-
+    
     const handleChange = (newValue: unknown) => {
         const selectedOption = newValue as { value: string; label: string; } | null;
         if (selectedOption !== null && 'value' in selectedOption) {
-            // Navegar para o link selecionado
-            window.location.href = selectedOption.value;
+            // Alterar o estado do histórico do navegador para navegar para o URL da opção selecionada
+            history.pushState(null, '', selectedOption.value);
+            // Disparar o evento popstate para garantir que os manipuladores de eventos do histórico sejam chamados
+            window.dispatchEvent(new PopStateEvent('popstate', { state: null }));
         }
     };
+
+    
       
     return (
         <div className="bg-zinc-950 h-screen">
@@ -34,6 +40,7 @@ const Video: React.FC = () => {
                     style={{ height: "40px" }}
                 />
                 <div className="flex items-center mt-1">
+                
                     <Select
                         options={options}                 
                         styles={customStyles}
