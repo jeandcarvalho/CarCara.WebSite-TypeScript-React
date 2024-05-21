@@ -3,7 +3,10 @@ import { api } from '../Services/api';
 import { useParams } from "react-router-dom";
 import Select from 'react-select';
 import carcara from "../Components/img/carcara23.png";
+import day from "../Components/img/day.png"
+import night from "../Components/img/night.png"
 import  customStyles   from '../Styles/Header.tsx'
+import { json2csv } from "json-2-csv";
 
 interface VideoFilesProps {
   id   : string ;
@@ -12,6 +15,15 @@ interface VideoFilesProps {
   Bairro :string;
   Cidade :string;
   Link :string;
+}
+
+interface CarProps {
+  id   : string ;
+  TimeStemp : Date;
+  VideoName : string;
+  Gps_X : number;
+  Gps_Y : number;
+  Gps_Z : number;
 }
 
 const Video = () => {
@@ -36,6 +48,8 @@ const handleChange = (newValue: unknown) => {
 
 
   const [filesdata, setFiles] = useState<VideoFilesProps[]>([]);
+
+  const [cardata, setCar] = useState<CarProps[]>([]);
    
   
   useEffect(() => {
@@ -47,9 +61,77 @@ const handleChange = (newValue: unknown) => {
     setFiles(response.data);
   }
 
+  useEffect(() => {
+    loadCar();
+  }, []);
+
+  async function loadCar() {
+    const response = await api.get("/measurements");
+    setCar(response.data);
+  }
+
+
+
+  function extrairIdGoogleDrive(link: string | undefined): string | null {
+    if (link && link.includes("/file/d/")) {
+        const startIdx = link.indexOf("/file/d/") + "/file/d/".length;
+        const endIdx = link.indexOf("/view", startIdx);
+        const id = link.substring(startIdx, endIdx);
+        return id;
+    } else if (link && link.includes("id=")) {
+        const startIdx = link.indexOf("id=") + "id=".length;
+        const id = link.substring(startIdx);
+        return id;
+    } else {
+        return null;
+    }
+}
+
+
+function downloadVideo(fileId: string, fileName: string) {
+  if (!fileId || !fileName) {
+      console.error("Invalid file ID or file name");
+      return;
+  }
+
+  const url: string = `https://drive.google.com/uc?export=download&id=${fileId}`;
+
+  const link: HTMLAnchorElement = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+
+function downloadCSV() {
+  if (filesdata.length === 0) {
+    console.error("No data to download");
+    return;
+  }
+  if (video !== undefined) {
+  const novaConstante: string = video.slice(0, -4);
+  const csvData = json2csv(filesdata);
+  const blob = new Blob([csvData], { type: "text/csv" });
+  const link = document.createElement("a");
+  link.href = window.URL.createObjectURL(blob);
+  link.setAttribute("download", novaConstante + ".csv");
+  document.body.appendChild(link);
+  link.click();
+
+  document.body.removeChild(link);
+  }
+
+ 
+  
+}
 
 
   const fileWithLink = filesdata.find(file => file.Videoname === video);
+  
+
 
 
   function changeViewToPreview(link: string): string {
@@ -68,6 +150,7 @@ const handleChange = (newValue: unknown) => {
 
 
 
+
   // Agora você pode acessar as propriedades desse elemento, se ele existir
   if (fileWithLink) {
     console.log("Elemento encontrado:", fileWithLink);
@@ -76,9 +159,35 @@ const handleChange = (newValue: unknown) => {
 
     const modifiedLink = changeViewToPreview(fileWithLink?.Link);
 
+    const idfile = extrairIdGoogleDrive(fileWithLink.Link);
+
+
+    
+    
+
     
   window.onload = function() {
     window.scrollTo(0, 0);
+    
+}
+
+interface DownloadButtonProps {
+  fileId: string | null;
+  fileName: string;
+}
+
+const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => {
+  const handleClick = () => {
+      if (fileId !== null) {
+          downloadVideo(fileId, fileName);
+      } else {
+          console.error("File ID is null");
+      }
+  };
+
+  return (
+      <button className='text-white' onClick={handleClick}>Download Video</button>
+  );
 }
 
 
@@ -112,34 +221,17 @@ const handleChange = (newValue: unknown) => {
     
         <div className="bg-zinc-950 flex justify-center px-4  ">
           <main className="my-5 w-full md:max-w-3xl">
-          <div className="text-left">
-          <h1 className="text-4xl font-medium mb-4 text-blue-100 text-left ">
-       <span className='font-medium text-lime-300'> Video File</span>
-          </h1>
-        </div >
+       
             <section className="grid grid-cols-1 gap-4 w-full">   
-            <div className='justify-center'>
-            <iframe className="flex w-full items-center justify-center" src={modifiedLink} width="640" height="432" allow="autoplay"></iframe>
-            </div>
-         
-                    <article className="bg-zinc-800 rounded p-2 relative hover:scale-105 duration-200">
-                    
-                      <p>
-                        <span className="font-medium text-neutral-400 text-xl">City: </span>
-                        <span className="font-medium text-lime-200 text-xl">{fileWithLink.Cidade} </span>
-                        </p>   
 
-                          <p>
-                        <span className="font-medium text-neutral-400 text-xl">District: </span>
-                        <span className="font-medium text-lime-200 text-xl">{fileWithLink.Bairro} </span>
-                        </p>     
-
+                    <article className="bg-zinc-800 rounded p-2 relative">
                         {/* Adicionando o período */}
     {(() => {
         const timestamp = new Date(fileWithLink.TimeStemp);
         const hours = timestamp.getHours();
         let period;
         let periodColorClass;
+        
         if (hours >= 18 && timestamp.getMinutes() >= 30) {
             period = 'Night';
             periodColorClass = 'text-blue-400 italic';
@@ -149,17 +241,68 @@ const handleChange = (newValue: unknown) => {
         }
 
         return (
-            <p>
-                <span className="font-medium text-neutral-400 text-xl">Period: </span>
-                <span className={`font-medium text-xl ${periodColorClass}`}>{period}</span>
-            </p>
-        );
+          <p className=''>
+            
+
+
+
+                      <span className="font-medium text-neutral-400 text-xl ">District: </span>
+                        <span className="font-medium text-lime-200 text-xl mr-5">{fileWithLink.Bairro} - {fileWithLink.Cidade} </span>
+                     
+              <span className="font-medium text-neutral-400 text-xl">Period: </span>
+              <span className={`font-medium text-xl ${periodColorClass}`}>{period}</span>
+      
+              <img
+                  src={period === 'Day' ? day : night}
+                  alt="Descrição da imagem"
+                  className="ml-1 mb-1"
+                  width={period === 'Day' ? "27" : "17"}
+                  style={{ height: "25px" , display: "inline-block"}}
+              />
+          </p>
+      );
     })()}
+    
 
                     </article>
+                    <iframe className="flex w-full items-center justify-center" src={modifiedLink} width="640" height="432" allow="autoplay"></iframe>
+                    
+                    <section className="grid grid-cols-3 gap-4 w-full ">
+
+
+                    <article className="bg-zinc-800 rounded p-2 relative w-full text-center">
+                   
+                   <DownloadButton fileId={idfile} fileName="nome_do_arquivo.mp4" />
+ 
+                   </article>
+
+                
+
+
+
+                    <article className="bg-zinc-800 rounded p-2 relative text-center w-full ">
+                    
+                    <button className='text-white' onClick={downloadCSV}>Download Measurements</button>
+    
+                    </article>
+
+                   
+
+
+                   
+                    </section>
+
+                    
+                    
+
+
             </section>
+
+            
           </main>
+          
         </div>
+        
         </div>
         </body>   
       )

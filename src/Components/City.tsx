@@ -5,7 +5,8 @@ import { useParams } from "react-router-dom";
 import Select from 'react-select';
 import carcara from "../Components/img/carcara23.png";
 import  customStyles   from '../Styles/Header.tsx'
-
+import day from "../Components/img/day.png"
+import night from "../Components/img/night.png"
 
 
 const options = [
@@ -115,6 +116,13 @@ const City = () => {
             <br />
             <span className="font-medium text-neutral-300 text-xl">Period: </span>
             <span className={`font-medium ${periodColorClass} text-xl`}>{period} </span>
+            <img
+                  src={period === 'Day' ? day : night}
+                  alt="Descrição da imagem"
+                  className=" mb-1"
+                  width={period === 'Day' ? "26" : "16"}
+                  style={{ height: "25px" , display: "inline-block"}}
+              />
     
           </p>
         </article>
