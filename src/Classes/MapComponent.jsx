@@ -4,6 +4,9 @@ import "leaflet/dist/leaflet.css"; // Importe o CSS do Leaflet
 import "./MapComponent.css"; // Importe o arquivo de estilos CSS personalizados
 import yellowicon from "../Components/img/mapicon.png"
 
+
+
+
 const MapComponent = () => {
     const mapRef = useRef(null);
 
@@ -19,12 +22,12 @@ const MapComponent = () => {
             // Cria o mapa se ainda não existir
             mapRef.current = L.map("map", {
                 center: [0, 0], // Defina o centro do mapa
-                zoom: 5, // Defina o nível de zoom inicial
+                zoom: 3, // Defina o nível de zoom inicial
                 minZoom: 3, // Defina o zoom mínimo
-                maxZoom: 6, // Defina o zoom máximo
+                maxZoom: 5, // Defina o zoom máximo
                 style: "",
-               
-              
+                scrollWheelZoom: false,
+                dragging: false,
                 doubleClickZoom: false, // Desativa o zoom ao clicar duas vezes
                
                 boxZoom: false, // Desativa o zoom ao arrastar para selecionar uma área

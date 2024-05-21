@@ -35,11 +35,11 @@ const Video: React.FC = () => {
                 <img
                     src={carcara}
                     alt="Descrição da imagem"
-                    className="mr-2 mt-1"
-                    width="260"
+                    className="mr-2 mt-2"
+                    width="250"
                     style={{ height: "40px" }}
                 />
-                <div className="flex items-center mt-1">
+                <div className="flex items-center mt-2">
                 
                     <Select
                         options={options}                 
@@ -65,10 +65,10 @@ const Video: React.FC = () => {
                 <div>
                     <MapComponent states={states} />
                 </div>
-                <p className="text-yellow-300 mt-5">Visited States:
+                <p className="text-yellow-300 text-lg mt-5">Visited States:
                     <br />
                     <span className="text-gray-300">
-                        {" " + states.join(', ')}
+                        {" " + states.join(' • ')}
                     </span>
                 </p>
             </div>

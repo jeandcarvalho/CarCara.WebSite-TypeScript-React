@@ -90,11 +90,11 @@ const handleChange = (newValue: unknown) => {
                 <img
                     src={carcara}
                     alt="Descrição da imagem"
-                    className="mr-2 mt-1"
+                    className="mr-2 mt-2"
                     width="260"
                     style={{ height: "40px" }}
                 />
-                <div className="flex items-center mt-1">
+                <div className="flex items-center mt-2">
                     <Select
                         options={options}                 
                         styles={customStyles}
