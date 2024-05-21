@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import loadgif from "../Components/img/gif.gif"
 import Select from 'react-select';
 import carcara from "../Components/img/carcara23.png";
+import  customStyles   from '../Styles/Header.tsx'
 
 interface FilesProps {
   id: string;
@@ -24,28 +25,12 @@ const options = [
   { value: '/', label: 'Home' },
   { value: '/About', label: 'About' }
 ];
-
-const handleChange = selectedOption => {
-  // Navegar para o link selecionado
-  window.location.href = selectedOption.value;
-};
-const customStyles = {
-  control: (provided, state) => ({
-      ...provided,
-      backgroundColor: 'zinc', // Altere para a cor desejada para a caixa da combobox
-      color: 'white', // Altere para a cor desejada para a fonte da combobox
-  }),
-  menu: (provided, state) => ({
-    ...provided,
-    backgroundColor: 'black', // Altere para a cor desejada para a caixa quando o menu é aberto
-   
-}),
-option: (provided, state) => ({
-    ...provided,
-    backgroundColor: state.isFocused ? 'gold ' : null, // Altere para a cor desejada quando a opção é focada
-    color: 'gray', // Altere para a cor desejada para a fonte da opção
-}),
- 
+const handleChange = (newValue: unknown) => {
+  const selectedOption = newValue as { value: string; label: string; } | null;
+  if (selectedOption !== null && 'value' in selectedOption) {
+      // Navegar para o link selecionado
+      window.location.href = selectedOption.value;
+  }
 };
 
 
@@ -95,18 +80,18 @@ export default function Acquisitions() {
                     src={carcara}
                     alt="Descrição da imagem"
                     className="mr-7 mt-1"
-                    width="270"
+                    width="260"
                     style={{ height: "40px" }}
                 />
                 <div className="flex items-center mt-1">
                     <Select
-                        options={options}
-                        onChange={handleChange}
+                        options={options}                 
+                        styles={customStyles}
                         placeholder="Home"
                         className="mr-5 font-bold"
-                        styles={customStyles} 
+                        classNamePrefix='Select'
+                        onChange={handleChange}       
                     />
-                 
                 </div>
             </header>
       <div className="flex justify-center px-4 ">
