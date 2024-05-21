@@ -17,14 +17,6 @@ interface VideoFilesProps {
   Link :string;
 }
 
-interface CarProps {
-  id   : string ;
-  TimeStemp : Date;
-  VideoName : string;
-  Gps_X : number;
-  Gps_Y : number;
-  Gps_Z : number;
-}
 
 const Video = () => {
 
@@ -49,7 +41,7 @@ const handleChange = (newValue: unknown) => {
 
   const [filesdata, setFiles] = useState<VideoFilesProps[]>([]);
 
-  const [cardata, setCar] = useState<CarProps[]>([]);
+
    
   
   useEffect(() => {
@@ -61,15 +53,8 @@ const handleChange = (newValue: unknown) => {
     setFiles(response.data);
   }
 
-  useEffect(() => {
-    loadCar();
-  }, []);
 
-  async function loadCar() {
-    const response = await api.get("/measurements");
-    setCar(response.data);
-  }
-
+ 
 
 
   function extrairIdGoogleDrive(link: string | undefined): string | null {
