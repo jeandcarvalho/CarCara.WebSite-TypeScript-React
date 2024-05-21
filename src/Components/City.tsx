@@ -66,7 +66,7 @@ const City = () => {
                 <img
                     src={carcara}
                     alt="Descrição da imagem"
-                    className="mr-7 mt-1"
+                    className="mr-2 mt-1"
                     width="260"
                     style={{ height: "40px" }}
                 />
