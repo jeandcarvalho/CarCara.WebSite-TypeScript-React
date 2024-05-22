@@ -14,10 +14,12 @@ const options = [
 ];
 const handleChange = (newValue: unknown) => {
   const selectedOption = newValue as { value: string; label: string; } | null;
-  if (selectedOption !== null && 'value' in selectedOption) {
-      // Navegar para o link selecionado
-      window.location.href = selectedOption.value;
-  }
+        if (selectedOption !== null && 'value' in selectedOption) {
+            // Alterar o estado do histórico do navegador para navegar para o URL da opção selecionada
+            history.pushState(null, '', selectedOption.value);
+            // Disparar o evento popstate para garantir que os manipuladores de eventos do histórico sejam chamados
+            window.dispatchEvent(new PopStateEvent('popstate', { state: null }));
+        }
 };
 
 interface FilesProps {
