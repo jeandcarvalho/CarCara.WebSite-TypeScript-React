@@ -254,7 +254,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
                     </article>
                     <iframe className="flex w-full items-center justify-center" src={modifiedLink} width="640" height="432" allow="autoplay"></iframe>
                     
-                    <section className="grid grid-cols-3 gap-4 w-full ">
+                    <section className="grid grid-cols-2 gap-4 w-full ">
 
 
                     <article className="bg-zinc-800 rounded p-2 relative w-full text-center">
