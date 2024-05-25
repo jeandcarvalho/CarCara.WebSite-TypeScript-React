@@ -173,6 +173,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
   };
 
   return (
+    
       <button className='text-white' onClick={handleClick}>Download Video</button>
   );
 }
@@ -255,30 +256,40 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
                     </article>
                     <iframe className="flex w-full items-center justify-center" src={modifiedLink} width="640" height="432" allow="autoplay"></iframe>
                     
-                    <section className="grid grid-cols-2 gap-4 w-full ">
+                    <section className="grid grid-cols-3 gap-4 w-full ">
 
 
-                    <article className="bg-zinc-800 rounded p-2 relative w-full text-center justify-center">
+                
                    
-                   <DownloadButton fileId={idfile} fileName="nome_do_arquivo.mp4" />
+                    <button 
+    className="bg-zinc-800 rounded p-2 relative w-full text-center justify-center" 
+    onClick={() => {
+        // Ação a ser realizada quando o botão for clicado
+    }}
+>
+    <DownloadButton fileId={idfile} fileName="nome_do_arquivo.mp4" />
+</button>
  
-                   </article>
+               
 
                 
 
 
 
-                    <article className="bg-zinc-800 rounded p-2 relative text-center justify-center items-center w-full ">
+                
                     
-                    <button className='text-white' onClick={downloadCSV}>Download Measurements
+                    <button 
+                        className='text-white bg-zinc-800 rounded p-2 relative text-center justify-center items-center w-full' 
+                        onClick={downloadCSV}>Measurements                   
+                    </button>
+
                     
-                    
-                    
-                    
+                    <button 
+                        className='text-white bg-zinc-800 rounded p-2 relative text-center justify-center items-center w-full' 
+                        onClick={downloadCSV}>Coordinates                 
                     </button>
     
-                    </article>
-
+                 
                    
 
                    
