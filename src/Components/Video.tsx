@@ -174,7 +174,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
 
   return (
     
-      <button className='text-white' onClick={handleClick}>Download Video</button>
+      <button className='text-black' onClick={handleClick}>Download Video</button>
   );
 }
 
@@ -256,13 +256,21 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
                     </article>
                     <iframe className="flex w-full items-center justify-center" src={modifiedLink} width="640" height="432" allow="autoplay"></iframe>
                     
-                    <section className="grid grid-cols-3 gap-4 w-full ">
+
+
+
+                    <article className="bg-zinc-800 rounded p-2 relative">
+                    <section className="grid grid-cols-3 gap-4 w-full">
 
 
                 
                    
+
+
+
+
                     <button 
-    className="bg-zinc-800 rounded p-2 relative w-full text-center justify-center" 
+    className="bg-yellow-500 rounded p-2 relative w-full text-center justify-center" 
     onClick={() => {
         // Ação a ser realizada quando o botão for clicado
     }}
@@ -279,13 +287,13 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
                 
                     
                     <button 
-                        className='text-white bg-zinc-800 rounded p-2 relative text-center justify-center items-center w-full' 
+                        className='text-black bg-yellow-500 rounded p-2 relative text-center justify-center items-center w-full' 
                         onClick={downloadCSV}>Measurements                   
                     </button>
 
                     
                     <button 
-                        className='text-white bg-zinc-800 rounded p-2 relative text-center justify-center items-center w-full' 
+                        className='text-black bg-yellow-500 rounded p-2 relative text-center justify-center items-center w-full' 
                         onClick={downloadCSV}>Coordinates                 
                     </button>
     
@@ -294,6 +302,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
 
                    
                     </section>
+                    </article>
 
                     
                     
