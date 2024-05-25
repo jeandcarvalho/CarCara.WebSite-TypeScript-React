@@ -234,8 +234,9 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
 
 
                       <span className="font-medium text-neutral-400 text-xl ">District: </span>
-                        <span className="font-medium text-lime-200 text-xl mr-5">{fileWithLink.Bairro} - {fileWithLink.Cidade} </span>
+                        <span className="font-medium text-lime-200 text-xl">{fileWithLink.Bairro} - {fileWithLink.Cidade} </span>
                      
+                        <br />
               <span className="font-medium text-neutral-400 text-xl">Period: </span>
               <span className={`font-medium text-xl ${periodColorClass}`}>{period}</span>
       
