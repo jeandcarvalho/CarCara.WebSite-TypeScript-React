@@ -257,7 +257,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
                     <section className="grid grid-cols-2 gap-4 w-full ">
 
 
-                    <article className="bg-zinc-800 rounded p-2 relative w-full text-center">
+                    <article className="bg-zinc-800 rounded p-2 relative w-full text-center justify-center">
                    
                    <DownloadButton fileId={idfile} fileName="nome_do_arquivo.mp4" />
  
@@ -267,14 +267,13 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
 
 
 
-                    <article className="bg-zinc-800 rounded p-2 relative text-center w-full ">
+                    <article className="bg-zinc-800 rounded p-2 relative text-center justify-center items-center w-full ">
                     
                     <button className='text-white' onClick={downloadCSV}>Download Measurements</button>
     
                     </article>
 
                    
-
 
                    
                     </section>
