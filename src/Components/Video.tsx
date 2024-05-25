@@ -219,7 +219,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
         let period;
         let periodColorClass;
         
-        if (hours >= 18 && timestamp.getMinutes() >= 30) {
+        if (hours >= 18) {
             period = 'Night';
             periodColorClass = 'text-blue-400 italic';
         } else {
@@ -236,7 +236,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
                       <span className="font-medium text-neutral-400 text-xl ">District: </span>
                         <span className="font-medium text-lime-200 text-xl">{fileWithLink.Bairro} - {fileWithLink.Cidade} </span>
                      
-                        <br />
+                    <br />
               <span className="font-medium text-neutral-400 text-xl">Period: </span>
               <span className={`font-medium text-xl ${periodColorClass}`}>{period}</span>
       
@@ -270,7 +270,12 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
 
                     <article className="bg-zinc-800 rounded p-2 relative text-center justify-center items-center w-full ">
                     
-                    <button className='text-white' onClick={downloadCSV}>Download Measurements</button>
+                    <button className='text-white' onClick={downloadCSV}>Download Measurements
+                    
+                    
+                    
+                    
+                    </button>
     
                     </article>
 
