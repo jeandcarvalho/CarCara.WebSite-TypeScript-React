@@ -174,7 +174,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
 
   return (
     
-      <button className='text-black' onClick={handleClick}>Download Video</button>
+      <button className='text-black' onClick={handleClick}>Video</button>
   );
 }
 
@@ -260,6 +260,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
 
 
                     <article className="bg-zinc-800 rounded p-2 relative">
+                      <p className='text-white mb-2 ml-2'>Downloads:</p>
                     <section className="grid grid-cols-3 gap-4 w-full">
 
 
