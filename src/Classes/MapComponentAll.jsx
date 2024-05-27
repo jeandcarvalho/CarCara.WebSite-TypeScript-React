@@ -6,6 +6,8 @@ import api from '../Services/api';
 import yellowicon from "../Components/img/mapicon.png"
 
 
+
+
 const MapComponentAll = () => {
     const mapRef = useRef(null);
 
@@ -33,7 +35,7 @@ const MapComponentAll = () => {
                 const points = response.data;
 
                 points.forEach((point, index) => {
-                    if (index % 5 === 0) { // Verifica se o índice é múltiplo de 5
+                    if (index % 10 === 0) { // Verifica se o índice é múltiplo de 5
                         const { Gps_Y, Gps_X } = point;
                         
                         L.marker([Gps_Y, Gps_X], {
