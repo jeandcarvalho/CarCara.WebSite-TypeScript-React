@@ -17,11 +17,38 @@ interface VideoFilesProps {
   Link :string;
 }
 
+interface GeoFilesProps {
+  id   : string ;
+  videoname : string;
+  timestamps : Date;
+  GPS_y : string;
+  GPS_x : string;
+  GPS_z : string;
+}
+
+interface CarFilesProps {
+  id   : string ;
+  videoname : string;
+  timestamps : Date;
+  Bairro :string;
+  Cidade :string;
+  Link :string;
+  VehicleSpeed :string;
+  WheelSpeed_F_L :string;
+  WheelSpeed_F_R :string;
+  WheelSpeed_R_L :string;
+  WheelSpeed_R_R :string;
+  SteeringWheelAngle :string;
+  SteeringWheelAngle_Offset :string;
+  SteeringWheelRotationSpeed :string;
+  BrakingPressure :string;
+  BrakingPressure_Fast :string;
+}
 
 const Video = () => {
 
   const { video } = useParams();
-
+  const videoclicked = video?.substring(0,28);
 
 
   const options = [
@@ -42,6 +69,8 @@ const handleChange = (newValue: unknown) => {
 
 
   const [filesdata, setFiles] = useState<VideoFilesProps[]>([]);
+  const [filesgeo, setGeo] = useState<GeoFilesProps[]>([]);
+  const [filescar, setCar] = useState<CarFilesProps[]>([]);
 
 
    
@@ -49,10 +78,29 @@ const handleChange = (newValue: unknown) => {
   useEffect(() => {
     loadFiles();
   }, []);
+  useEffect(() => {
+    loadGeo();
+  }, []);
+  useEffect(() => {
+    loadCar();
+  }, []);
 
   async function loadFiles() {
     const response = await api.get("/videofiles");
     setFiles(response.data);
+  }
+  async function loadGeo() {
+    
+    
+
+
+
+    const response = await api.get("/coordinates"+"?page=1&pageSize=3000&searchString=" + videoclicked);  
+    setGeo(response.data);
+  }
+  async function loadCar() {
+    const response = await api.get("/vehicle"+"?page=1&pageSize=3000&searchString=" + videoclicked);
+    setCar(response.data);
   }
 
 
@@ -93,14 +141,36 @@ function downloadVideo(fileId: string, fileName: string) {
 }
 
 
-function downloadCSV() {
-  if (filesdata.length === 0) {
+function downloadCarCSV() {
+  if (filescar.length === 0) {
     console.error("No data to download");
     return;
   }
   if (video !== undefined) {
   const novaConstante: string = video.slice(0, -4);
-  const csvData = json2csv(filesdata);
+  const csvData = json2csv(filescar);
+  const blob = new Blob([csvData], { type: "text/csv" });
+  const link = document.createElement("a");
+  link.href = window.URL.createObjectURL(blob);
+  link.setAttribute("download", novaConstante + ".csv");
+  document.body.appendChild(link);
+  link.click();
+
+  document.body.removeChild(link);
+  }
+
+ 
+  
+}
+
+function downloadGeoCSV() {
+  if (filesgeo.length === 0) {
+    console.error("No data to download");
+    return;
+  }
+  if (video !== undefined) {
+  const novaConstante: string = video.slice(0, -4);
+  const csvData = json2csv(filesgeo);
   const blob = new Blob([csvData], { type: "text/csv" });
   const link = document.createElement("a");
   link.href = window.URL.createObjectURL(blob);
@@ -174,7 +244,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
 
   return (
     
-      <button className='text-black' onClick={handleClick}>Video</button>
+      <button className="bg-yellow-500 text-black rounded relative w-full text-center justify-center" onClick={handleClick} title="Video File in .mp4">Video File</button>
   );
 }
 
@@ -260,7 +330,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
 
 
                     <article className="bg-zinc-800 rounded p-2 relative">
-                      <p className='text-white mb-2 ml-2'>Downloads:</p>
+                      <p className='text-white mb-2 ml-2'>Download:</p>
                     <section className="grid grid-cols-3 gap-4 w-full">
 
 
@@ -272,9 +342,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
 
                     <button 
     className="bg-yellow-500 rounded p-2 relative w-full text-center justify-center" 
-    onClick={() => {
-        // Ação a ser realizada quando o botão for clicado
-    }}
+  
 >
     <DownloadButton fileId={idfile} fileName="nome_do_arquivo.mp4" />
 </button>
@@ -289,13 +357,16 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
                     
                     <button 
                         className='text-black bg-yellow-500 rounded p-2 relative text-center justify-center items-center w-full' 
-                        onClick={downloadCSV}>Measurements                   
+                        onClick={downloadCarCSV}
+                        title="VEHICLE SPEED | BRAKING PRESSURE | ALL WHEEL SPEEDS | ALL WHEEL STEERING ANGLES">Vehicle Data (1ms)  
+                                    
                     </button>
 
                     
                     <button 
                         className='text-black bg-yellow-500 rounded p-2 relative text-center justify-center items-center w-full' 
-                        onClick={downloadCSV}>Coordinates                 
+                        onClick={downloadGeoCSV}
+                        title="All coordinates: GPS_X, GPS_Y, and GPS_Z">Geo Data (1ms)               
                     </button>
     
                  
