@@ -152,7 +152,7 @@ function downloadCarCSV() {
   const blob = new Blob([csvData], { type: "text/csv" });
   const link = document.createElement("a");
   link.href = window.URL.createObjectURL(blob);
-  link.setAttribute("download", novaConstante + ".csv");
+  link.setAttribute("download","(VEHICLE DATA) " + novaConstante + ".csv");
   document.body.appendChild(link);
   link.click();
 
@@ -174,7 +174,7 @@ function downloadGeoCSV() {
   const blob = new Blob([csvData], { type: "text/csv" });
   const link = document.createElement("a");
   link.href = window.URL.createObjectURL(blob);
-  link.setAttribute("download", novaConstante + ".csv");
+  link.setAttribute("download", "(GEO DATA) " + novaConstante + ".csv");
   document.body.appendChild(link);
   link.click();
 
