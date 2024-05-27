@@ -97,17 +97,19 @@ const State = () => {
                     src={carcara}
                     alt="Descrição da imagem"
                     className="mr-2 mt-2"
-                    width="260"
+                    width="250"
                     style={{ height: "40px" }}
                 />
                 <div className="flex items-center mt-2">
+                
                     <Select
                         options={options}                 
                         styles={customStyles}
                         placeholder="Home"
                         className="mr-5 font-bold"
                         classNamePrefix='Select'
-                        onChange={handleChange}       
+                        onChange={handleChange} 
+                              
                     />
                 </div>
             </header>
@@ -118,7 +120,7 @@ const State = () => {
     <div className="bg-zinc-950 flex justify-center px-4  ">
       <main className="my-5 w-full md:max-w-2xl h-full">
       <div className="text-left">
-      <h1 className="text-4xl font-medium mb-4 text-orange-100 text-left mt-5 text-roboto">
+      <h1 className="text-4xl font-medium mb-4 text-orange-100 text-left  text-roboto">
       Changing of <br /> Acquired <span className='font-medium text-orange-300 text-roboto' > Cities</span>
       </h1>
       <h2 className="text-3xl font-normal font-siz mb-4  text-yellow-300 text-left text-roboto">

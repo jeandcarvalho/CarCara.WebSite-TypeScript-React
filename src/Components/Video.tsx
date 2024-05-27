@@ -258,18 +258,19 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
                     src={carcara}
                     alt="Descrição da imagem"
                     className="mr-2 mt-2"
-                    width="260"
+                    width="250"
                     style={{ height: "40px" }}
                 />
                 <div className="flex items-center mt-2">
+                
                     <Select
                         options={options}                 
                         styles={customStyles}
                         placeholder="Home"
                         className="mr-5 font-bold"
                         classNamePrefix='Select'
-                        onChange={handleChange}       
-                        tabIndex={-1}
+                        onChange={handleChange} 
+                              
                     />
                 </div>
             </header>

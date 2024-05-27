@@ -70,17 +70,19 @@ const City = () => {
                     src={carcara}
                     alt="Descrição da imagem"
                     className="mr-2 mt-2"
-                    width="260"
+                    width="250"
                     style={{ height: "40px" }}
                 />
                 <div className="flex items-center mt-2">
+                
                     <Select
                         options={options}                 
                         styles={customStyles}
                         placeholder="Home"
                         className="mr-5 font-bold"
                         classNamePrefix='Select'
-                        onChange={handleChange}       
+                        onChange={handleChange} 
+                              
                     />
                 </div>
             </header>
@@ -91,7 +93,7 @@ const City = () => {
       <div className="bg-zinc-950 flex justify-center px-4  ">
         <main className="my-5 w-full md:max-w-lg h-full">
         <div className="text-left">
-        <h1 className="text-4xl font-medium mb-4 text-orange-100 text-left mt-5">
+        <h1 className="text-4xl font-medium mb-4 text-orange-100 text-left">
      <span className='font-medium text-lime-300'> Video Files</span>
         </h1>
         <h2 className="text-3xl font-normal mb-4  text-orange-300 text-left">

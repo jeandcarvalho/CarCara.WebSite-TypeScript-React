@@ -32,20 +32,22 @@ const About = () => {
                     src={carcara}
                     alt="Descrição da imagem"
                     className="mr-2 mt-2"
-                    width="260"
+                    width="250"
                     style={{ height: "40px" }}
                 />
                 <div className="flex items-center mt-2">
+                
                     <Select
                         options={options}                 
                         styles={customStyles}
-                        placeholder="About"
+                        placeholder="Home"
                         className="mr-5 font-bold"
                         classNamePrefix='Select'
-                        onChange={handleChange}       
+                        onChange={handleChange} 
+                              
                     />
                 </div>
-  </header>
+            </header>
  <div className="flex justify-center  mt-3  ">
     <div className=" mr-7 ml-7 max-w-3xl px-2 text-center text-white">
 

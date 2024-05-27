@@ -81,29 +81,31 @@ export default function Acquisitions() {
   return (
     <body className='bg-zinc-950 min-h-screen'>
   
-      <header className="flex px-3">
+  <header className="flex px-3">
                 <img
                     src={carcara}
                     alt="Descrição da imagem"
-                    className="mr-2 mt-1"
-                    width="260"
+                    className="mr-2 mt-2"
+                    width="250"
                     style={{ height: "40px" }}
                 />
-                <div className="flex items-center mt-1">
+                <div className="flex items-center mt-2">
+                
                     <Select
                         options={options}                 
                         styles={customStyles}
                         placeholder="Home"
                         className="mr-5 font-bold"
                         classNamePrefix='Select'
-                        onChange={handleChange}       
+                        onChange={handleChange} 
+                              
                     />
                 </div>
             </header>
       <div className="flex justify-center px-4 ">
         <main className="my-5 w-full h-full md:max-w-2xl bg-zinc-950">
           <div>
-            <h1 className="text-4xl font-medium mb-4 text-yellow-100 text-left mt-5">
+            <h1 className="text-4xl font-medium mb-4 text-yellow-100 text-left">
             Changing of <br /> Acquired <span className='font-medium text-yellow-300'> States</span>
             </h1>
           </div>
