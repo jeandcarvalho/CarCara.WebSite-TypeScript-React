@@ -33,7 +33,7 @@ const MapComponentAll = () => {
                 const points = response.data;
 
                 points.forEach((point, index) => {
-                    if (index % 1 === 0) { // Verifica se o índice é múltiplo de 5
+                    if (index % 5 === 0) { // Verifica se o índice é múltiplo de 5
                         const { Gps_Y, Gps_X } = point;
                         
                         L.marker([Gps_Y, Gps_X], {
