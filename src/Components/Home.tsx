@@ -30,7 +30,7 @@ const Video: React.FC = () => {
     
       
     return (
-        <div className="bg-zinc-950 h-screen">
+        <div className="bg-zinc-950 min-h-screen">
             <header className="flex px-3">
                 <img
                     src={carcara}
@@ -62,7 +62,7 @@ const Video: React.FC = () => {
                 </div>
             </div>
             <div className="  text-center ">
-                <div>
+                <div className='ml-3 mr-3'>
                     <MapComponent states={states} />
                 </div>
                 <p className="text-yellow-300 text-lg mt-5">Visited States:

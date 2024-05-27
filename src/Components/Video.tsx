@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { api } from '../Services/api';
+import  api  from '../Services/api';
 import { useParams } from "react-router-dom";
 import Select from 'react-select';
 import carcara from "../Components/img/carcara23.png";
@@ -290,7 +290,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
         let period;
         let periodColorClass;
         
-        if (hours >= 18) {
+        if (hours >= 19) {
             period = 'Night';
             periodColorClass = 'text-blue-400 italic';
         } else {

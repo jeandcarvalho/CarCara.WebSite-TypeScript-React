@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { api } from '../Services/api';
+import  api  from '../Services/api';
 import formatDuration from '../Classes/DateTimeFormat';
 import { Link } from "react-router-dom";
 import loadgif from "../Components/img/gif.gif"
 import Select from 'react-select';
 import carcara from "../Components/img/carcara23.png";
 import  customStyles   from '../Styles/Header.tsx'
+
+import MapComponentAll from "../Classes/MapComponentAll"
 
 interface FilesProps {
   id: string;
@@ -16,7 +18,7 @@ interface FilesProps {
   Estado: string;
   Link: string;
   Gps_y: number;
-  Gps_X: number;
+   Gps_X: number;
   Gps_Z: number;
 }
 
@@ -75,9 +77,11 @@ export default function Acquisitions() {
     window.scrollTo(0, 0);
   }
 
+
   return (
-    <body className='bg-zinc-950 h-screen'>
-        <header className="flex px-3">
+    <body className='bg-zinc-950 min-h-screen'>
+  
+      <header className="flex px-3">
                 <img
                     src={carcara}
                     alt="Descrição da imagem"
@@ -97,28 +101,39 @@ export default function Acquisitions() {
                 </div>
             </header>
       <div className="flex justify-center px-4 ">
-        <main className="my-5 w-full md:max-w-2xl bg-zinc-950">
+        <main className="my-5 w-full h-full md:max-w-2xl bg-zinc-950">
           <div>
             <h1 className="text-4xl font-medium mb-4 text-yellow-100 text-left mt-5">
             Changing of <br /> Acquired <span className='font-medium text-yellow-300'> States</span>
             </h1>
           </div>
           {isLoading ? (
+           
             <div className="w-full mt-11  flex justify-center items-center">
-              <img src={loadgif} alt={loadgif} className='w-32 h-32 mt-11'/>
+              <img src={loadgif} alt={loadgif} className='w-32 h-32 mt-11 mb-11'/>
+           
+           
+              
           
-        
             </div>
+            
           ) : (
-              <section className="grid grid-cols-2 gap-4 w-full">
+
+            <div className=''>
+                  <MapComponentAll />
+              
+            
+              <section className="grid grid-cols-2 gap-4 w-full mt-4">
+
+
                 {uniqueStates.map((state, index) => {
                   return (
                     state !== "Not Found" ? (
                       <Link to={`/state/${state}`} key={state}>
-                        <article key={index} className="bg-zinc-800 rounded p-2 relative hover:scale-105 duration-200">
+                        <article key={index} className="bg-zinc-800 rounded p-2 relative hover:scale-105 duration-200 h-full">
                           <p>
-                            <span className="font-medium text-neutral-300 text-xl">State: </span>
-                            <span className="font-medium text-yellow-300 text-xl">{state} </span>
+                            <span className="font-medium text-neutral-300">State: </span>
+                            <span className="font-medium text-yellow-300">{state} </span>
                           </p>
                           <p>
                             <span className="font-medium text-neutral-300">Country: </span>
@@ -135,9 +150,12 @@ export default function Acquisitions() {
                   );
                 })}
               </section>
+              </div>
             )}
         </main>
       </div>
+    
+       
     </body>
   )
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { api } from '../Services/api';
+import  api  from '../Services/api';
 import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import Select from 'react-select';
@@ -103,7 +103,7 @@ const City = () => {
           {filteredFilesData.map((Files) => {
 
   const timeStamp = new Date(Files.TimeStemp);
-  const period = timeStamp.getHours() >= 18 ? "Night" : "Day";
+  const period = timeStamp.getHours() >= 19 ? "Night" : "Day";
   const periodColorClass = period === "Night" ? "text-blue-400 italic" : "text-yellow-400 italic";
 
   return (
