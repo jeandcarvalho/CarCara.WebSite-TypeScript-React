@@ -13,10 +13,6 @@ const MapComponent = () => {
 
         
 
-    mapRef.current.scrollWheelZoom.disable(); // Desativar zoom com a roda do mouse
-    //   mapRef.current.dragging.disable(); // Desativar arrastar o mapa com o mouse
-  //     mapRef.current.touchZoom.disable(); // Desativar zoom com gestos de toque
-       mapRef.current.doubleClickZoom.disable();
 
 
 
@@ -29,8 +25,7 @@ const MapComponent = () => {
                 minZoom: 3, // Defina o zoom mínimo
                 maxZoom: 5, // Defina o zoom máximo
                 style: "",
-                scrollWheelZoom: false,
-                dragging: false,
+             
                 doubleClickZoom: false, // Desativa o zoom ao clicar duas vezes
                
                 boxZoom: false, // Desativa o zoom ao arrastar para selecionar uma área
@@ -53,7 +48,11 @@ const MapComponent = () => {
             { name: "mg", latitude: -18.246247268507634, longitude: -44.23527152369491 } , 
         ];
 
-
+        mapRef.current.scrollWheelZoom.disable(); // Desativar zoom com a roda do mouse
+        //   mapRef.current.dragging.disable(); // Desativar arrastar o mapa com o mouse
+      //     mapRef.current.touchZoom.disable(); // Desativar zoom com gestos de toque
+           mapRef.current.doubleClickZoom.disable();
+    
 
         states.forEach(state => {
             L.marker([state.latitude, state.longitude], {
