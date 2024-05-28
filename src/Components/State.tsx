@@ -6,6 +6,7 @@ import { useParams } from "react-router-dom";
 import Select from 'react-select';
 import carcara from "../Components/img/carcara23.png";
 import  customStyles   from '../Styles/Header.tsx'
+import MapState from '../Classes/MapState'
 
 
 const options = [
@@ -127,7 +128,8 @@ const State = () => {
          State: {state} 
       </h2>
     </div>
-        <section className="grid grid-cols-2 gap-4 w-full ">
+    <MapState estadoSelecionado={state} />
+        <section className="grid grid-cols-2 gap-4 w-full mt-4">
           {uniqueCities.map((cities) => {
             return (
               cities !== "Not Found" && (
