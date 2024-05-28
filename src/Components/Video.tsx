@@ -245,7 +245,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
 
   return (
     
-      <button className="bg-yellow-500 text-black rounded relative w-full text-center justify-center" onClick={handleClick} title="Video File in .mp4">Video File</button>
+      <button className="bg-yellow-500 hover:scale-105 duration-200 text-black rounded relative w-full text-center justify-center" onClick={handleClick} title="Video File in .mp4">Video File</button>
   );
 }
 
@@ -343,7 +343,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
 
 
                     <button 
-    className="bg-yellow-500 rounded p-2 relative w-full text-center justify-center" 
+    className="bg-yellow-500 rounded p-2 relative w-full text-center justify-center hover:scale-105 duration-200" 
   
 >
     <DownloadButton fileId={idfile} fileName="nome_do_arquivo.mp4" />
@@ -358,7 +358,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
                 
                     
                     <button 
-                        className='text-black bg-yellow-500 rounded p-2 relative text-center justify-center items-center w-full' 
+                        className='text-black hover:scale-105 duration-200 bg-yellow-500 rounded p-2 relative text-center justify-center items-center w-full' 
                         onClick={downloadCarCSV}
                         title="VEHICLE SPEED | BRAKING PRESSURE | ALL WHEEL SPEEDS | ALL WHEEL STEERING ANGLES">Vehicle Data (1ms)  
                                     
@@ -366,7 +366,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
 
                     
                     <button 
-                        className='text-black bg-yellow-500 rounded p-2 relative text-center justify-center items-center w-full' 
+                        className='text-black hover:scale-105 duration-200 bg-yellow-500 rounded p-2 relative text-center justify-center items-center w-full' 
                         onClick={downloadGeoCSV}
                         title="All coordinates: GPS_X, GPS_Y, and GPS_Z">Geo Data (1ms)               
                     </button>
