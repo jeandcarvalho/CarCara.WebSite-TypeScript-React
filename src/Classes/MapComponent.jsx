@@ -13,7 +13,10 @@ const MapComponent = () => {
 
         
 
-
+    mapRef.current.scrollWheelZoom.disable(); // Desativar zoom com a roda do mouse
+    //   mapRef.current.dragging.disable(); // Desativar arrastar o mapa com o mouse
+  //     mapRef.current.touchZoom.disable(); // Desativar zoom com gestos de toque
+       mapRef.current.doubleClickZoom.disable();
 
 
 

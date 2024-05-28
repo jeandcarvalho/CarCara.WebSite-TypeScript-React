@@ -7,7 +7,7 @@ import carcara from "../Components/img/carcara23.png";
 import  customStyles   from '../Styles/Header.tsx'
 import day from "../Components/img/day.png"
 import night from "../Components/img/night.png"
-
+import MapCity from '../Classes/MapCity'
 
 const options = [
   { value: '/', label: 'Home' },
@@ -88,16 +88,30 @@ const City = () => {
             </header>
       <div className="bg-zinc-950">
   
-     
+    
   
       <div className="bg-zinc-950 flex justify-center px-4  ">
-        <main className="my-5 w-full md:max-w-lg h-full">
+        <main className="my-5 w-full md:max-w-2xl h-full">
         <div className="text-left">
         <h1 className="text-4xl font-medium mb-4 text-orange-100 text-left">
      <span className='font-medium text-lime-300'> Video Files</span>
         </h1>
-        <h2 className="text-3xl font-normal mb-4  text-orange-300 text-left">
-           City: {city} 
+        <div className='mb'>
+
+        </div>
+        <MapCity cidadeSelecionada={city} />
+        <h2 className="text-2xl  mb-3 mt-3 w-1/2 text-orange-300 text-left">
+          <p>
+            <span className='text-gray-400 font-normal'>
+            City:
+
+            </span>
+            <span className='text-orange-300 font-semibold'>
+            {" "+ city} 
+            </span>
+         
+          </p>
+          
         </h2>
       </div>
           <section className="grid grid-cols-1 gap-4 w-full">

@@ -7,6 +7,7 @@ import day from "../Components/img/day.png"
 import night from "../Components/img/night.png"
 import  customStyles   from '../Styles/Header.tsx'
 import { json2csv } from "json-2-csv";
+import MapVideo from '../Classes/MapVideo';
 
 interface VideoFilesProps {
   id   : string ;
@@ -280,7 +281,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
     
         <div className="bg-zinc-950 flex justify-center px-4  ">
           <main className="my-5 w-full md:max-w-3xl">
-       
+         
             <section className="grid grid-cols-1 gap-4 w-full">   
 
                     <article className="bg-zinc-800 rounded p-2 relative">
@@ -376,6 +377,8 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
                    
                     </section>
                     </article>
+
+                    <MapVideo videoName={video} />
 
                     
                     

@@ -124,12 +124,24 @@ const State = () => {
       <h1 className="text-4xl font-medium mb-4 text-orange-100 text-left  text-roboto">
       Changing of <br /> Acquired <span className='font-medium text-orange-300 text-roboto' > Cities</span>
       </h1>
-      <h2 className="text-3xl font-normal font-siz mb-4  text-yellow-300 text-left text-roboto">
-         State: {state} 
-      </h2>
+      
     </div>
     <MapState estadoSelecionado={state} />
-        <section className="grid grid-cols-2 gap-4 w-full mt-4">
+    <h2 className="text-2xl font-normal font-siz  text-yellow-300 text-left mt-3 text-roboto">
+
+    <p>
+            <span className='text-gray-400 font-normal'>
+            State:
+
+            </span>
+            <span className='text-yellow-300 font-semibold'>
+            {" "+ state} 
+            </span>
+         
+          </p>
+      
+      </h2>
+        <section className="grid grid-cols-2 gap-4 w-full mt-3">
           {uniqueCities.map((cities) => {
             return (
               cities !== "Not Found" && (
