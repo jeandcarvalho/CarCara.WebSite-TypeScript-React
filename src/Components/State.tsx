@@ -118,7 +118,7 @@ const State = () => {
                   { value: 'timeRecorded', label: 'Time recorded' },
                   { value: 'city', label: 'City' },
                 ]}
-                defaultValue={{ value: 'timeRecorded', label: 'Order by:' }}         
+                defaultValue={{ value: 'timeRecorded', label: 'Order:' }}         
                 className="mr-5 font-bold text-white"
                 classNamePrefix="Select"
                 onChange={handleChange}
