@@ -16,13 +16,10 @@ const stateCoordinates = {
 
 const MapState = ({ estadoSelecionado }) => {
     const mapRef = useRef(null);
-
     useEffect(() => {
         if (!mapRef.current) {
             const defaultPosition = [-21.0505, -44.6333]; // Posição padrão do mapa
-
             const center = stateCoordinates[estadoSelecionado] || defaultPosition;
-
             mapRef.current = L.map("map", {
                 center: center,
                 zoom: 8,
@@ -34,26 +31,21 @@ const MapState = ({ estadoSelecionado }) => {
                 keyboard: false,
                 tap: false,
             });
-
             L.tileLayer("https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png", {
                 attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
             }).addTo(mapRef.current);
         }
-
         mapRef.current.scrollWheelZoom.disable(); // Desativar zoom com a roda do mouse
         //   mapRef.current.dragging.disable(); // Desativar arrastar o mapa com o mouse
       //     mapRef.current.touchZoom.disable(); // Desativar zoom com gestos de toque
            mapRef.current.doubleClickZoom.disable();
-
         const loadPoints = async () => {
             try {
                 const response = await api.get("/videofiles");
                 const points = response.data;
-
                 points.forEach((point, index) => {
                     if (index % 1 === 0 && point.Estado === estadoSelecionado) {
                         const { Gps_Y, Gps_X } = point;
-
                         L.marker([Gps_Y, Gps_X], {
                             icon: L.icon({
                                 iconUrl: yellowicon,
@@ -62,17 +54,13 @@ const MapState = ({ estadoSelecionado }) => {
                             })
                         }).addTo(mapRef.current);
                     }
-                });
-                
+                });         
             } catch (error) {
                 console.error("Erro ao carregar pontos do MongoDB:", error);
             }
         };
-
         loadPoints();
-
     }, [estadoSelecionado]);
-
     return (
         <div id="map" className="custom-map"></div>
     );

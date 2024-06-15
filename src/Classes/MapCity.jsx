@@ -8,7 +8,6 @@ import yellowicon from "../Components/img/mapicon.png";
 const MapCity = ({ cidadeSelecionada }) => {
     const mapRef = useRef(null);
     const defaultPosition = [-21.0505, -44.6333]; // Posição padrão do mapa
-
     useEffect(() => {
         if (!mapRef.current) {
             mapRef.current = L.map("map", {
@@ -35,15 +34,11 @@ const MapCity = ({ cidadeSelecionada }) => {
             try {
                 const response = await api.get("/videofiles");
                 const points = response.data;
-
                 let hasCityPoint = false; // Flag para verificar se a cidade tem pontos
-
                 points.forEach((point) => {
                     if (point.Cidade === cidadeSelecionada) {
                         hasCityPoint = true;
-
                         const { Gps_Y, Gps_X } = point;
-
                         L.marker([Gps_Y, Gps_X], {
                             icon: L.icon({
                                 iconUrl: yellowicon,
@@ -53,7 +48,6 @@ const MapCity = ({ cidadeSelecionada }) => {
                         }).addTo(mapRef.current);
                     }
                 });
-
                 if (hasCityPoint) {
                     // Se houver pontos na cidade, centralize o mapa na primeira coordenada encontrada
                     const cityPoint = points.find(point => point.Cidade === cidadeSelecionada);
@@ -62,16 +56,12 @@ const MapCity = ({ cidadeSelecionada }) => {
                     // Se não houver pontos na cidade, mantenha a posição padrão do mapa
                     mapRef.current.setView(defaultPosition, 8);
                 }
-                
             } catch (error) {
                 console.error("Erro ao carregar pontos do MongoDB:", error);
             }
         };
-
         loadPoints();
-
     }, [cidadeSelecionada, defaultPosition]);
-
     return (
         <div id="map" className="custom-map"></div>
     );

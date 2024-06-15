@@ -21,10 +21,8 @@ const MapVideo = ({ videoName }) => {
                 keyboard: false,
                 tap: false,
             });
-
             mapRef.current.scrollWheelZoom.disable(); // Desativar zoom com a roda do mouse
             mapRef.current.doubleClickZoom.disable(); // Desativar zoom com duplo clique
-
             L.tileLayer("https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png", {
                 attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
             }).addTo(mapRef.current);
@@ -67,11 +65,8 @@ const MapVideo = ({ videoName }) => {
                 console.error("Erro ao carregar pontos do MongoDB:", error);
             }
         };
-
         loadPoints();
-
     }, [videoName, defaultCenter]);
-
     return (
         <div id="map" className="custom-map"></div>
     );

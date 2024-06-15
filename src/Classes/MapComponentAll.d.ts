@@ -7,9 +7,6 @@ interface FilesProps {
     Cidade :string;
     Estado :string;
 }
-
-
-
 interface MapComponentProps {
     states?: LatLngLiteral[];
 }
