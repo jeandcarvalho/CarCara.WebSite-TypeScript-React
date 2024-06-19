@@ -7,8 +7,9 @@ import yellowicon from "../Components/img/mapicon.png";
 
 const MapCity = ({ cidadeSelecionada }) => {
     const mapRef = useRef(null);
-    const defaultPosition = [-21.0505, -44.6333]; // Posição padrão do mapa
+  
     useEffect(() => {
+        const defaultPosition = [-21.0505, -44.6333]; // Posição padrão do mapa
         if (!mapRef.current) {
             mapRef.current = L.map("map", {
                 center: defaultPosition,
@@ -61,7 +62,8 @@ const MapCity = ({ cidadeSelecionada }) => {
             }
         };
         loadPoints();
-    }, [cidadeSelecionada, defaultPosition]);
+        [cidadeSelecionada, defaultPosition]
+    }, );
     return (
         <div id="map" className="custom-map"></div>
     );
