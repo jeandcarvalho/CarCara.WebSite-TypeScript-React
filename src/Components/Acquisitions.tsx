@@ -6,7 +6,6 @@ import loadgif from "../Components/img/gif.gif"
 import Select from 'react-select';
 import carcara from "../Components/img/carcara23.png";
 import  customStyles   from '../Styles/Header.tsx'
-
 import MapComponentAll from "../Classes/MapComponentAll"
 
 interface FilesProps {
@@ -22,11 +21,11 @@ interface FilesProps {
   Gps_Z: number;
 }
 
-
 const options = [
   { value: '/', label: 'Home' },
   { value: '/About', label: 'About' }
 ];
+
 const handleChange = (newValue: unknown) => {
   const selectedOption = newValue as { value: string; label: string; } | null;
   if (selectedOption !== null && 'value' in selectedOption) {
@@ -37,17 +36,12 @@ const handleChange = (newValue: unknown) => {
   }
 };
 
-
-
 export default function Acquisitions() {
-
   const [filesdata, setFiles] = useState<FilesProps[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
   useEffect(() => {
     loadFiles();
   }, []);
-
   async function loadFiles() {
     try {
       const response = await api.get("/videofiles");
@@ -58,10 +52,8 @@ export default function Acquisitions() {
       setIsLoading(false);
     }
   }
-
   const uniqueStates = [...new Set(filesdata.map(item => item.Estado))];
   console.log(uniqueStates.length)
-
   function countDocumentsByState(state: string): number {
     const count = filesdata.reduce((acc, curr) => {
       if (curr.Estado === state) {
@@ -69,19 +61,14 @@ export default function Acquisitions() {
       }
       return acc;
     }, 0);
-
     return count * 300;
   }
-
   window.onload = function () {
     window.scrollTo(0, 0);
   }
-
-
   return (
-    <body className='bg-zinc-950 min-h-screen'>
-  
-  <header className="flex px-3">
+  <body className='bg-zinc-950 min-h-screen'>
+   <header className="flex px-3">
                 <img
                     src={carcara}
                     alt="Descrição da imagem"
@@ -89,45 +76,32 @@ export default function Acquisitions() {
                     width="250"
                     style={{ height: "40px" }}
                 />
-                <div className="flex items-center mt-2">
-                
+                <div className="flex items-center mt-2">              
                     <Select
                         options={options}                 
                         styles={customStyles}
                         placeholder="Home"
                         className="mr-5 font-bold"
                         classNamePrefix='Select'
-                        onChange={handleChange} 
-                              
+                        onChange={handleChange}                             
                     />
                 </div>
-            </header>
-      <div className="flex justify-center px-4 ">
+   </header>
+   <div className="flex justify-center px-4 ">
         <main className="my-5 w-full h-full md:max-w-2xl bg-zinc-950">
           <div>
             <h1 className="text-4xl font-medium mb-4 text-yellow-100 text-left">
             Changing of <br /> Acquired <span className='font-medium text-yellow-300'> States</span>
             </h1>
           </div>
-          {isLoading ? (
-           
-            <div className="w-full mt-11  flex justify-center items-center">
-              <img src={loadgif} alt={loadgif} className='w-32 h-32 mt-11 mb-11'/>
-           
-           
-              
-          
-            </div>
-            
+          {isLoading ? (        
+           <div className="w-full mt-11  flex justify-center items-center">
+              <img src={loadgif} alt={loadgif} className='w-32 h-32 mt-11 mb-11'/>  
+            </div>          
           ) : (
-
             <div className=''>
-                  <MapComponentAll />
-              
-            
+                  <MapComponentAll />            
               <section className="grid grid-cols-2 gap-4 w-full mt-4">
-
-
                 {uniqueStates.map((state, index) => {
                   return (
                     state !== "Not Found" ? (
@@ -144,7 +118,6 @@ export default function Acquisitions() {
                           <p>
                             <span className="font-medium text-neutral-300">Time recorded: </span>
                             <span className="font-medium text-green-200 "> {formatDuration(countDocumentsByState(state))}  </span>
-
                           </p>
                         </article>
                       </Link>
@@ -155,9 +128,7 @@ export default function Acquisitions() {
               </div>
             )}
         </main>
-      </div>
-    
-       
-    </body>
+   </div>   
+ </body>
   )
 }
