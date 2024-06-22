@@ -42,10 +42,6 @@ const City = () => {
   const { city } = useParams();
    
   const [filesdata, setFiles] = useState<VideoFilesProps[]>([]);
-
-
- 
-
   useEffect(() => {
     loadFiles();
   }, []);
@@ -74,22 +70,17 @@ const City = () => {
                     style={{ height: "40px" }}
                 />
                 <div className="flex items-center mt-2">
-                
                     <Select
                         options={options}                 
                         styles={customStyles}
                         placeholder="Home"
                         className="mr-5 font-bold"
                         classNamePrefix='Select'
-                        onChange={handleChange} 
-                              
+                        onChange={handleChange}                      
                     />
                 </div>
             </header>
       <div className="bg-zinc-950">
-  
-    
-  
       <div className="bg-zinc-950 flex justify-center px-4  ">
         <main className="my-5 w-full md:max-w-2xl h-full">
         <div className="text-left">
@@ -97,7 +88,6 @@ const City = () => {
      <span className='font-medium text-lime-300'> Video Files</span>
         </h1>
         <div className='mb'>
-
         </div>
         <MapCity cidadeSelecionada={city} />
         <h2 className="text-2xl  mb-3 mt-3 w-1/2 text-orange-300 text-left">
