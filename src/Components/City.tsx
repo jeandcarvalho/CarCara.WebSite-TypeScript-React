@@ -38,7 +38,6 @@ const City = () => {
     setFiles(response.data);
   }
 
-
   const { city } = useParams();
    
   const [filesdata, setFiles] = useState<VideoFilesProps[]>([]);
@@ -46,22 +45,15 @@ const City = () => {
     loadFiles();
   }, []);
 
-
   if (city !== undefined) {
     const filteredFilesData = filesdata.filter(item => item.Cidade.includes(city));
-
     filteredFilesData.sort((a, b) => a.Bairro.localeCompare(b.Bairro));
-
-   
-
     window.onload = function() {
       window.scrollTo(0, 0);
   }
     return (
       <body className='bg-zinc-950 h-screen'>
-    
-    
-    <header className="flex px-3">
+        <header className="flex px-3">
                 <img
                     src={carcara}
                     alt="Descrição da imagem"
@@ -79,68 +71,53 @@ const City = () => {
                         onChange={handleChange}                      
                     />
                 </div>
-            </header>
+       </header>
       <div className="bg-zinc-950">
-      <div className="bg-zinc-950 flex justify-center px-4  ">
+       <div className="bg-zinc-950 flex justify-center px-4  ">
         <main className="my-5 w-full md:max-w-2xl h-full">
-        <div className="text-left">
-        <h1 className="text-4xl font-medium mb-4 text-orange-100 text-left">
-     <span className='font-medium text-lime-300'> Video Files</span>
-        </h1>
-        <div className='mb'>
-        </div>
-        <MapCity cidadeSelecionada={city} />
-        <h2 className="text-2xl  mb-3 mt-3 w-1/2 text-orange-300 text-left">
-          <p>
-            <span className='text-gray-400 font-normal'>
-            City:
-
-            </span>
-            <span className='text-orange-300 font-semibold'>
-            {" "+ city} 
-            </span>
-         
-          </p>
-          
-        </h2>
-      </div>
-          <section className="grid grid-cols-1 gap-4 w-full">
-          
+         <div className="text-left">
+            <h1 className="text-4xl font-medium mb-4 text-orange-100 text-left">
+               <span className='font-medium text-lime-300'> Video Files</span>
+            </h1>   
+            <MapCity cidadeSelecionada={city} />
+            <h2 className="text-2xl  mb-3 mt-3 w-1/2 text-orange-300 text-left">
+             <p>
+                <span className='text-gray-400 font-normal'>
+                   City:
+                </span>
+                <span className='text-orange-300 font-semibold'>
+                 {" "+ city} 
+                 </span>
+             </p>        
+           </h2>
+         </div>
+         <section className="grid grid-cols-1 gap-4 w-full">   
           {filteredFilesData.map((Files) => {
-
-  const timeStamp = new Date(Files.TimeStemp);
-  const period = timeStamp.getHours() >= 19 ? "Night" : "Day";
-  const periodColorClass = period === "Night" ? "text-blue-400 italic" : "text-yellow-400 italic";
-
-  return (
-    Files.Cidade !== "Not Found" && Files.Bairro !== "Not Found" && (
-      <Link to={`/video/${Files.Videoname}`} key={Files.Videoname}>
-        <article key={Files.id} className="bg-zinc-800 rounded p-2 relative hover:scale-105 duration-200">
-          <p>
-           
-          
-            <span className="font-medium text-neutral-300 text-xl">District: </span>
-            <span className="font-medium text-lime-100 text-xl">{Files.Bairro} </span>
-            <br />
-            <span className="font-medium text-neutral-300 text-xl">Period: </span>
-            <span className={`font-medium ${periodColorClass} text-xl`}>{period} </span>
-            <img
-                  src={period === 'Day' ? day : night}
-                  alt="Descrição da imagem"
-                  className=" mb-1"
-                  width={period === 'Day' ? "26" : "16"}
-                  style={{ height: "25px" , display: "inline-block"}}
-              />
-    
-          </p>
-        </article>
-      </Link>
-    )
-  );
-})}
+            const timeStamp = new Date(Files.TimeStemp);
+            const period = timeStamp.getHours() >= 19 ? "Night" : "Day";
+            const periodColorClass = period === "Night" ? "text-blue-400 italic" : "text-yellow-400 italic";
+            return (Files.Cidade !== "Not Found" && Files.Bairro !== "Not Found" && (
+              <Link to={`/video/${Files.Videoname}`} key={Files.Videoname}>
+                <article key={Files.id} className="bg-zinc-800 rounded p-2 relative hover:scale-105 duration-200">
+                  <p>
+                     <span className="font-medium text-neutral-300 text-xl">District: </span>
+                     <span className="font-medium text-lime-100 text-xl">{Files.Bairro} </span>
+                     <br />
+                     <span className="font-medium text-neutral-300 text-xl">Period: </span>
+                     <span className={`font-medium ${periodColorClass} text-xl`}>{period} </span>
+                     <img
+                          src={period === 'Day' ? day : night}
+                          alt="Descrição da imagem"
+                          className=" mb-1"
+                          width={period === 'Day' ? "26" : "16"}
+                          style={{ height: "25px" , display: "inline-block"}}
+                     />
+                  </p>
+                </article>       
+              </Link>));})}
           </section>
         </main>
-      </div>
+       </div>
       </div>
       </body>
         
