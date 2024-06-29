@@ -100,7 +100,7 @@ export default function Acquisitions() {
             </div>          
           ) : (
             <div className=''>
-                  <MapComponentAll />            
+              <MapComponentAll />            
               <section className="grid grid-cols-2 gap-4 w-full mt-4">
                 {uniqueStates.map((state, index) => {
                   return (

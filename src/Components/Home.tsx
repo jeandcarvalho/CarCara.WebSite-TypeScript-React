@@ -4,14 +4,11 @@ import carcara from "../Components/img/carcara23.png";
 import MapComponent from "../Classes/MapComponent";
 import  customStyles   from '../Styles/Header.tsx'
 
-
-
 const Video: React.FC = () => {
     // Dados estáticos dos estados percorridos e outras informações
     const states = ["São Paulo", "Espírito Santo", "Minas Gerais", "Rio de Janeiro", "Paraná"];
 
-    const options = [
-        
+    const options = [  
         { value: '/', label: 'Home' },
         { value: '/About', label: 'About' },
         // Adicione outras rotas aqui, se necessário
@@ -27,8 +24,6 @@ const Video: React.FC = () => {
         }
     };
 
-    
-      
     return (
         <div className="bg-zinc-950 min-h-screen">
             <header className="flex px-3">
@@ -40,15 +35,13 @@ const Video: React.FC = () => {
                     style={{ height: "40px" }}
                 />
                 <div className="flex items-center mt-2">
-                
                     <Select
                         options={options}                 
                         styles={customStyles}
                         placeholder="Home"
                         className="mr-5 font-bold"
                         classNamePrefix='Select'
-                        onChange={handleChange} 
-                              
+                        onChange={handleChange}             
                     />
                 </div>
             </header>

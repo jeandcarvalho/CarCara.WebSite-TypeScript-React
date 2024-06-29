@@ -13,6 +13,7 @@ const options = [
   { value: '/', label: 'Home' },
   { value: '/About', label: 'About' }
 ];
+
 const handleChange = (newValue: unknown) => {
   const selectedOption = newValue as { value: string; label: string; } | null;
   if (selectedOption !== null && 'value' in selectedOption) {
@@ -72,7 +73,6 @@ const City = () => {
                     />
                 </div>
        </header>
-      <div className="bg-zinc-950">
        <div className="bg-zinc-950 flex justify-center px-4  ">
         <main className="my-5 w-full md:max-w-2xl h-full">
          <div className="text-left">
@@ -116,28 +116,12 @@ const City = () => {
                 </article>       
               </Link>));})}
           </section>
-        </main>
+        </main>   
        </div>
-      </div>
-      </body>
-        
+      </body>     
     )
   } else {
     // Lidar com o caso em que city é undefined
   }
-
-
-
-
-
-
-
-
-
-
-
-  
-
-  
 }
 export default City;

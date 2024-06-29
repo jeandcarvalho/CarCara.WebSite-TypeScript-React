@@ -98,52 +98,37 @@ const State = () => {
           />
         </div>
       </header>
-      <div className="bg-zinc-900 ">
-        <div className="bg-zinc-950 flex justify-center px-4 ">
-          <main className="my-5 w-full md:max-w-2xl h-full">
+
+      <div className="bg-zinc-950 flex justify-center px-4 ">
+        <main className="my-5 w-full md:max-w-2xl h-full">
             <div className="text-left">
               <h1 className="text-4xl font-medium mb-4 text-orange-100 text-left text-roboto">
                 Changing of <br /> Acquired <span className="font-medium text-orange-300 text-roboto">Cities</span>
               </h1>
             </div>
             <MapState estadoSelecionado={state} />
-
             <div className='flex'>
-
-            <div className='mt-5 mb-2 ml-1'>              
-            <Select
-            styles={customStyles}
-            placeholder="Time recorded"
-                options={[
-                  { value: 'timeRecorded', label: 'Time recorded' },
-                  { value: 'city', label: 'City' },
-                ]}
-                defaultValue={{ value: 'timeRecorded', label: 'Order:' }}         
-                className="mr-5 font-bold text-white"
-                classNamePrefix="Select"
-                onChange={handleChange}
-              />
-            </div>
-
-
-
-            <h2 className="text-2xl font-normal font-siz text-yellow-300 text-left mt-5 text-roboto">
-              <p>
-                <span className="text-gray-400 font-normal">State:</span>
-                <span className="text-orange-300 font-semibold"> {state} </span>
-              </p>             
-            </h2>
-           
-
-
-           
-            </div>
-           
-            <div className='text-white'>
-
-            </div>
-           
-            <section className="grid grid-cols-2 gap-4 w-full mt-3">
+              <div className='mt-5 mb-2 ml-1'>              
+                <Select
+                  styles={customStyles}
+                  placeholder="Time recorded"
+                  options={[
+                       { value: 'timeRecorded', label: 'Time recorded' },
+                       { value: 'city', label: 'City' }, ]}
+                  defaultValue={{ value: 'timeRecorded', label: 'Order:' }}         
+                  className="mr-5 font-bold text-white"
+                  classNamePrefix="Select"
+                  onChange={handleChange}
+                />
+              </div>
+              <h2 className="text-2xl font-normal font-siz text-yellow-300 text-left mt-5 text-roboto">
+                <p>
+                  <span className="text-gray-400 font-normal">State:</span>
+                  <span className="text-orange-300 font-semibold"> {state} </span>
+                </p>             
+              </h2>
+           </div>         
+           <section className="grid grid-cols-2 gap-4 w-full mt-3">
               {sortedCities.map((city) => (
                 <Link to={`/city/${city}`} key={city}>
                   <article className="bg-zinc-800 rounded p-2 relative hover:scale-105 duration-200 h-full">
@@ -161,10 +146,9 @@ const State = () => {
                   </article>
                 </Link>
               ))}
-            </section>
-          </main>
-        </div>
-      </div>
+           </section>
+        </main>
+     </div>
     </body>
   );
 };
