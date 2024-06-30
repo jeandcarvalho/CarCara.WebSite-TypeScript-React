@@ -50,8 +50,6 @@ const Video = () => {
 
   const { video } = useParams();
   const videoclicked = video?.substring(0,28);
-
-
   const options = [
     { value: '/', label: 'Home' },
     { value: '/About', label: 'About' }
@@ -65,17 +63,10 @@ const handleChange = (newValue: unknown) => {
       window.dispatchEvent(new PopStateEvent('popstate', { state: null }));
   }
 };
-
-
-
-
   const [filesdata, setFiles] = useState<VideoFilesProps[]>([]);
   const [filesgeo, setGeo] = useState<GeoFilesProps[]>([]);
   const [filescar, setCar] = useState<CarFilesProps[]>([]);
 
-
-   
-  
   useEffect(() => {
     loadFiles();
   }, []);
@@ -91,11 +82,6 @@ const handleChange = (newValue: unknown) => {
     setFiles(response.data);
   }
   async function loadGeo() {
-    
-    
-
-
-
     const response = await api.get("/coordinates"+"?page=1&pageSize=3000&searchString=" + videoclicked);  
     setGeo(response.data);
   }
@@ -103,10 +89,6 @@ const handleChange = (newValue: unknown) => {
     const response = await api.get("/vehicle"+"?page=1&pageSize=3000&searchString=" + videoclicked);
     setCar(response.data);
   }
-
-
- 
-
 
   function extrairIdGoogleDrive(link: string | undefined): string | null {
     if (link && link.includes("/file/d/")) {
@@ -122,7 +104,6 @@ const handleChange = (newValue: unknown) => {
         return null;
     }
 }
-
 
 function downloadVideo(fileId: string, fileName: string) {
   if (!fileId || !fileName) {
@@ -141,7 +122,6 @@ function downloadVideo(fileId: string, fileName: string) {
   document.body.removeChild(link);
 }
 
-
 function downloadCarCSV() {
   if (filescar.length === 0) {
     console.error("No data to download");
@@ -156,12 +136,8 @@ function downloadCarCSV() {
   link.setAttribute("download","(VEHICLE DATA) " + novaConstante + ".csv");
   document.body.appendChild(link);
   link.click();
-
   document.body.removeChild(link);
   }
-
- 
-  
 }
 
 function downloadGeoCSV() {
@@ -178,20 +154,10 @@ function downloadGeoCSV() {
   link.setAttribute("download", "(GEO DATA) " + novaConstante + ".csv");
   document.body.appendChild(link);
   link.click();
-
   document.body.removeChild(link);
   }
-
- 
-  
 }
-
-
   const fileWithLink = filesdata.find(file => file.Videoname === video);
-  
-
-
-
   function changeViewToPreview(link: string): string {
     // Verifica se o link contém "/view"
     if (link.includes("/view")) {
@@ -203,30 +169,14 @@ function downloadGeoCSV() {
         return link;
     }
 }
-
-
-
-
-
-
   // Agora você pode acessar as propriedades desse elemento, se ele existir
   if (fileWithLink) {
     console.log("Elemento encontrado:", fileWithLink);
-
     console.log("link encontrado:", fileWithLink.Link);
-
     const modifiedLink = changeViewToPreview(fileWithLink?.Link);
-
     const idfile = extrairIdGoogleDrive(fileWithLink.Link);
-
-
-    
-    
-
-    
-  window.onload = function() {
-    window.scrollTo(0, 0);
-    
+    window.onload = function() {
+    window.scrollTo(0, 0);   
 }
 
 interface DownloadButtonProps {
@@ -240,20 +190,10 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
           downloadVideo(fileId, fileName);
       } else {
           console.error("File ID is null");
-      }
-  };
-
-  return (
-    
-      <button className="bg-yellow-500 hover:scale-105 duration-200 text-black rounded relative w-full text-center justify-center" onClick={handleClick} title="Video File in .mp4">Video File</button>
-  );
+    }}; return (<button className="bg-yellow-500 hover:scale-105 duration-200 text-black rounded relative w-full text-center justify-center" onClick={handleClick} title="Video File in .mp4">Video File</button>);
 }
-
-
-
     return (
-        <body className='bg-zinc-950 h-screen'> 
-          
+      <body className='bg-zinc-950 h-screen'>          
           <header className="flex px-3">
                 <img
                     src={carcara}
@@ -263,142 +203,77 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
                     style={{ height: "40px" }}
                 />
                 <div className="flex items-center mt-2">
-                
                     <Select
                         options={options}                 
                         styles={customStyles}
                         placeholder="Home"
                         className="mr-5 font-bold"
                         classNamePrefix='Select'
-                        onChange={handleChange} 
-                              
+                        onChange={handleChange}                           
                     />
                 </div>
             </header>
-        <div className="bg-zinc-950">
-    
-       
-    
         <div className="bg-zinc-950 flex justify-center px-4  ">
-          <main className="my-5 w-full md:max-w-3xl">
-         
+          <main className="my-5 w-full md:max-w-3xl">      
             <section className="grid grid-cols-1 gap-4 w-full">   
-
                     <article className="bg-zinc-800 rounded p-2 relative">
                         {/* Adicionando o período */}
-    {(() => {
-        const timestamp = new Date(fileWithLink.TimeStemp);
-        const hours = timestamp.getHours();
-        let period;
-        let periodColorClass;
-        
-        if (hours >= 19) {
-            period = 'Night';
-            periodColorClass = 'text-blue-400 italic';
-        } else {
-            period = 'Day';
-            periodColorClass = 'text-yellow-400 italic';
-        }
-
-        return (
-          <p className=''>
-            
-
-
-
-                      <span className="font-medium text-neutral-400 text-xl ">District: </span>
-                        <span className="font-medium text-lime-200 text-xl">{fileWithLink.Bairro} - {fileWithLink.Cidade} </span>
-                     
-                    <br />
-              <span className="font-medium text-neutral-400 text-xl">Period: </span>
-              <span className={`font-medium text-xl ${periodColorClass}`}>{period}</span>
-      
-              <img
-                  src={period === 'Day' ? day : night}
-                  alt="Descrição da imagem"
-                  className="ml-1 mb-1"
-                  width={period === 'Day' ? "27" : "17"}
-                  style={{ height: "25px" , display: "inline-block"}}
-              />
-          </p>
-      );
-    })()}
-    
-
+                          {(() => {
+                             const timestamp = new Date(fileWithLink.TimeStemp);
+                             const hours = timestamp.getHours();
+                             let period;
+                             let periodColorClass;
+                             if (hours >= 19) {
+                                  period = 'Night';
+                                  periodColorClass = 'text-blue-400 italic';
+                              } else {
+                                  period = 'Day';
+                                  periodColorClass = 'text-yellow-400 italic';
+                              }
+                              return (
+                                <p className=''>
+                                    <span className="font-medium text-neutral-400 text-xl ">District: </span>
+                                    <span className="font-medium text-lime-200 text-xl">{fileWithLink.Bairro} - {fileWithLink.Cidade} </span>            
+                                     <br />
+                                    <span className="font-medium text-neutral-400 text-xl">Period: </span>
+                                    <span className={`font-medium text-xl ${periodColorClass}`}>{period}</span>      
+                                    <img
+                                        src={period === 'Day' ? day : night}
+                                        alt="Descrição da imagem"
+                                        className="ml-1 mb-1"
+                                        width={period === 'Day' ? "27" : "17"}
+                                        style={{ height: "25px" , display: "inline-block"}}
+                                    />
+                                </p>
+                            );})()}
                     </article>
                     <iframe className="flex w-full items-center justify-center" src={modifiedLink} width="640" height="432" allow="autoplay"></iframe>
-                    
-
-
-
                     <article className="bg-zinc-800 rounded p-2 relative">
-                      <p className='text-white mb-2 ml-2'>Download:</p>
-                    <section className="grid grid-cols-3 gap-4 w-full">
-
-
-                
-                   
-
-
-
-
-                    <button 
-    className="bg-yellow-500 rounded p-2 relative w-full text-center justify-center hover:scale-105 duration-200" 
-  
->
-    <DownloadButton fileId={idfile} fileName="nome_do_arquivo.mp4" />
-</button>
- 
-               
-
-                
-
-
-
-                
-                    
-                    <button 
-                        className='text-black hover:scale-105 duration-200 bg-yellow-500 rounded p-2 relative text-center justify-center items-center w-full' 
-                        onClick={downloadCarCSV}
-                        title="VEHICLE SPEED | BRAKING PRESSURE | ALL WHEEL SPEEDS | ALL WHEEL STEERING ANGLES">Vehicle Data (1ms)  
-                                    
-                    </button>
-
-                    
-                    <button 
-                        className='text-black hover:scale-105 duration-200 bg-yellow-500 rounded p-2 relative text-center justify-center items-center w-full' 
-                        onClick={downloadGeoCSV}
-                        title="All coordinates: GPS_X, GPS_Y, and GPS_Z">Geo Data (1ms)               
-                    </button>
-    
-                 
-                   
-
-                   
-                    </section>
+                        <p className='text-white mb-2 ml-2'>Download:</p>
+                      <section className="grid grid-cols-3 gap-4 w-full">
+                      <button className="bg-yellow-500 rounded p-2 relative w-full text-center justify-center hover:scale-105 duration-200">
+                        <DownloadButton fileId={idfile} fileName="nome_do_arquivo.mp4" />
+                      </button>
+                      <button 
+                          className='text-black hover:scale-105 duration-200 bg-yellow-500 rounded p-2 relative text-center justify-center items-center w-full' 
+                          onClick={downloadCarCSV}
+                          title="VEHICLE SPEED | BRAKING PRESSURE | ALL WHEEL SPEEDS | ALL WHEEL STEERING ANGLES">Vehicle Data (1ms)                                    
+                      </button>                  
+                      <button 
+                          className='text-black hover:scale-105 duration-200 bg-yellow-500 rounded p-2 relative text-center justify-center items-center w-full' 
+                          onClick={downloadGeoCSV}
+                          title="All coordinates: GPS_X, GPS_Y, and GPS_Z">Geo Data (1ms)               
+                      </button>
+                      </section>
                     </article>
-
                     <MapVideo videoName={video} />
-
-                    
-                    
-
-
-            </section>
-
-            
-          </main>
-          
+            </section>           
+          </main>       
         </div>
-        
-        </div>
-        </body>   
+      </body>   
       )
-
-
   } else {
     console.log("Nenhum elemento encontrado com o link fornecido.");
   }
-
 }
 export default Video;
