@@ -2,7 +2,7 @@ import axios from 'axios'
 
 
 const api = axios.create({
-    baseURL:"http://34.95.140.25"
+    baseURL:"https://carcara-web-api.onrender.com"
 
 })
 
