@@ -6,6 +6,8 @@ import App from "./App";
 import Video from "./Components/Video";
 import Acquisitions from "./Components/Acquisitions";
 import About from "./Components/About";
+import Search from "./Components/Search";
+import Query from "./Components/Query";
 
 
 export const Routes = createBrowserRouter ([
@@ -18,7 +20,9 @@ export const Routes = createBrowserRouter ([
         {path: "About", element: <About/> },
         {path: "State/:state", element: <State/> }, // Adicionamos "/:state" para capturar o parâmetro
         {path: "City/:city", element: <City/> },
-        {path: "Video/:video", element: <Video/> }
+        {path: "Video/:video", element: <Video/> },
+        {path: "Search", element: <Search/> },
+        {path: "Query/:city", element: <Query/> }
     ]
    }  
 ])

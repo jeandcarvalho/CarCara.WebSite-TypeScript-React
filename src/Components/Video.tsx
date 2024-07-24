@@ -10,12 +10,21 @@ import { json2csv } from "json-2-csv";
 import MapVideo from '../Classes/MapVideo';
 
 interface VideoFilesProps {
-  id   : string ;
-  TimeStemp : Date;
-  Videoname : string;
-  Bairro :string;
-  Cidade :string;
-  Link :string;
+  id: string;
+  VideoFile: string;
+  Link: string;
+  Date: string;
+  District: string;
+  City: string;
+  State: string;
+  Gps_y: string;
+  Gps_x: string;
+  Area: string;
+  RoadType: string;
+  Traffic: string;
+  Misc: string;
+  Weather: string;
+  Period: string;
 }
 
 interface GeoFilesProps {
@@ -78,7 +87,7 @@ const handleChange = (newValue: unknown) => {
   }, []);
 
   async function loadFiles() {
-    const response = await api.get("/videofiles");
+    const response = await api.get("/videofiless?page=1&pageSize=300&searchString=!!!!!");
     setFiles(response.data);
   }
   async function loadGeo() {
@@ -157,7 +166,7 @@ function downloadGeoCSV() {
   document.body.removeChild(link);
   }
 }
-  const fileWithLink = filesdata.find(file => file.Videoname === video);
+  const fileWithLink = filesdata.find(file => file.VideoFile === video);
   function changeViewToPreview(link: string): string {
     // Verifica se o link contém "/view"
     if (link.includes("/view")) {
@@ -169,6 +178,11 @@ function downloadGeoCSV() {
         return link;
     }
 }
+
+const formatString = (input: string): string => {
+  return input.split(',').map(part => part.trim()).join(', ');
+};
+console.log(filesdata)
   // Agora você pode acessar as propriedades desse elemento, se ele existir
   if (fileWithLink) {
     console.log("Elemento encontrado:", fileWithLink);
@@ -219,23 +233,23 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
                     <article className="bg-zinc-800 rounded p-2 relative">
                         {/* Adicionando o período */}
                           {(() => {
-                             const timestamp = new Date(fileWithLink.TimeStemp);
-                             const hours = timestamp.getHours();
+                   
+                        
                              let period;
                              let periodColorClass;
-                             if (hours >= 19) {
-                                  period = 'Night';
-                                  periodColorClass = 'text-blue-400 italic';
-                              } else {
-                                  period = 'Day';
-                                  periodColorClass = 'text-yellow-400 italic';
-                              }
+                            
                               return (
                                 <p className=''>
-                                    <span className="font-medium text-neutral-400 text-xl ">District: </span>
-                                    <span className="font-medium text-lime-200 text-xl">{fileWithLink.Bairro} - {fileWithLink.Cidade} </span>            
-                                     <br />
-                                    <span className="font-medium text-neutral-400 text-xl">Period: </span>
+                                   <span className='font-medium text-yellow-300 text-xl'>{formatString(fileWithLink.District)+' - '}</span>
+                                    <span className="font-medium text-yellow-300 text-xl">{fileWithLink.City}{' - '}{fileWithLink.State} </span>
+                  
+                    
+                                    <br />
+                     <span className='font-medium text-zinc-400 text-xl'>{formatString(' '+fileWithLink.RoadType)+' Road'}</span>
+                     <span className='font-medium text-white text-xl'>{' - '}</span>
+                  
+                     <span className='font-medium text-blue-400 text-xl mt-1'>{fileWithLink.Weather+' '}</span>
+                     <span className={`font-medium text-blue-400 text-xl`}>{fileWithLink.Period} </span>
                                     <span className={`font-medium text-xl ${periodColorClass}`}>{period}</span>      
                                     <img
                                         src={period === 'Day' ? day : night}
@@ -247,7 +261,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
                                 </p>
                             );})()}
                     </article>
-                    <iframe className="flex w-full items-center justify-center" src={modifiedLink} width="640" height="432" allow="autoplay"></iframe>
+                    <iframe className="flex w-full items-center justify-center" src={modifiedLink+'&vq=hd1080'} width="940" height="432" allow=""></iframe>
                     <article className="bg-zinc-800 rounded p-2 relative">
                         <p className='text-white mb-2 ml-2'>Download:</p>
                       <section className="grid grid-cols-3 gap-4 w-full">
