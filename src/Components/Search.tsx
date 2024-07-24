@@ -201,7 +201,7 @@ export default function Acquisitions() {
 
 
 
-              <section className="grid grid-cols-3 gap-4 w-full mt-2">
+              <section className="grid grid-cols-2 gap-4 w-full mt-2">
 
               <form className='text-white text-base'>
               <article className="bg-gray-900 rounded p-2 mr-1 ml-1 relative h-full">
@@ -368,18 +368,33 @@ export default function Acquisitions() {
         </article>
 
         
+
+        
       </form>
-      
-     
 
-   </section>
+      <article className="bg-zinc-900 rounded p-2 relative h-full mr-1 ml-1"> 
 
-              <section className="grid grid-cols-2 gap-4 w-full mt-5">
-                 <article className="bg-zinc-900 rounded p-2 relative h-full mr-1 ml-1"> 
+      <form className='text-white text-lg  border-2 border-yellow-400 rounded-md'>
+              <article className="bg-zinc-700 rounded p-2 relative h-full ">
+                <p className='justify-center items-center flex text-xl text-zinc-100 '>
+                Available Data:
+                </p>
+
+                <p className='justify-center items-center flex text-2xl mt-2 text-yellow-400 font-bold'>
+                {(timeFormatted)}
+                </p>
+                <Link to={`/Query/${searchString}`} key={searchString}>
+                        <p className=" bg-yellow-400 text-zinc-900 mx-3 my-3  hover:bg-yellow-100 text-2xl text-center   font-bold py-2 px-2 rounded-full transition duration-300 text-roboto">Search</p>
+                    </Link>
+              </article>
+       </form>
+
+
+
 
                  <form className='text-white text-lg'>
               <article className="bg-zinc-900 rounded p-2 relative h-full ">
-                <p className='justify-center items-center text-2xl  font-semibold  text-yellow-300 '>
+                <p className='justify-center items-center text-2xl mt-1  font-semibold  text-yellow-300 '>
                   Others
                 </p>
                 
@@ -407,34 +422,17 @@ export default function Acquisitions() {
         </article>
       </form>
 
+      
+
+
                  </article>
 
+      
+     
 
+   </section>
 
-              <article className="bg-zinc-600 rounded p-2 relative h-full mr-1 ml-1">
-
-                
-      <form className='text-white text-lg'>
-              <article className="bg-zinc-600 rounded p-2 relative h-full ">
-                <p className='justify-center items-center flex text-2xl text-zinc-100 mt-5'>
-                Available Data:
-                </p>
-
-                <p className='justify-center items-center flex text-3xl mt-2 text-yellow-400 font-bold'>
-                {(timeFormatted)}
-                </p>
-                <Link to={`/Query/${searchString}`} key={searchString}>
-                        <p className=" bg-yellow-400 text-zinc-900 hover:bg-yellow-100 text-2xl text-center mt-7  font-bold py-3 px-5 rounded-full transition duration-300 text-roboto">Search</p>
-                    </Link>
-              </article>
-       </form>
-
-
-              </article>
-                
-                
-                
-                 </section>
+         
               </div>
             )}
         </main>
