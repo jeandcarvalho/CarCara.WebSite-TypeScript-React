@@ -8,7 +8,7 @@ import  customStyles   from '../Styles/Header.tsx'
 import day from "../Components/img/day.png"
 import night from "../Components/img/night.png"
 import loadgif from "../Components/img/gif.gif"
-import MapCity from '../Classes/MapCity'
+
 // <MapCity cidadeSelecionada={city} />
 
 const options = [
