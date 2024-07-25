@@ -3,8 +3,7 @@ import  api  from '../Services/api';
 import { useParams } from "react-router-dom";
 import Select from 'react-select';
 import carcara from "../Components/img/carcara23.png";
-import day from "../Components/img/day.png"
-import night from "../Components/img/night.png"
+
 import  customStyles   from '../Styles/Header.tsx'
 import { json2csv } from "json-2-csv";
 import MapVideo from '../Classes/MapVideo';
@@ -235,8 +234,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
                           {(() => {
                    
                         
-                             let period;
-                             let periodColorClass;
+               
                             
                               return (
                                 <p className=''>
@@ -250,14 +248,8 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName }) => 
                   
                      <span className='font-medium text-blue-400 text-xl mt-1'>{fileWithLink.Weather+' '}</span>
                      <span className={`font-medium text-blue-400 text-xl`}>{fileWithLink.Period} </span>
-                                    <span className={`font-medium text-xl ${periodColorClass}`}>{period}</span>      
-                                    <img
-                                        src={period === 'Day' ? day : night}
-                                        alt="Descrição da imagem"
-                                        className="ml-1 mb-1"
-                                        width={period === 'Day' ? "27" : "17"}
-                                        style={{ height: "25px" , display: "inline-block"}}
-                                    />
+                              
+                               
                                 </p>
                             );})()}
                     </article>
