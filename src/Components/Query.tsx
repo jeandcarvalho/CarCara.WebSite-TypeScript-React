@@ -148,7 +148,7 @@ const City = () => {
                      <span className='font-medium text-zinc-400 text-xl'>{formatString(Files.RoadType)+' Road'}</span>
                      <br />
                      <span className='font-medium text-blue-200 text-xl mt-1'>{Files.Weather+' '}</span>
-                     <span className={`font-medium text-blue-200 text-xl`}>{period} </span>
+                     <span className={`font-medium text-blue-200 text-xl`}>{Files.Period} </span>
                      <img
                           src={period === 'Day' ? day : night}
                           alt="Descrição da imagem"

@@ -183,10 +183,10 @@ export default function Acquisitions() {
                 </div>
    </header>
    <div className="flex justify-center px-4 ">
-        <main className="my-5 w-full h-full md:max-w-2xl bg-zinc-950">
+        <main className="my-0 w-full h-full md:max-w-2xl bg-zinc-950">
           <div>
             <h1 className="text-4xl font-medium mb-4 text-yellow-100 text-left">
-            Search of <br /> Acquisitions <span className='font-medium text-yellow-300'></span>
+            Search<span className='font-medium text-yellow-300'></span>
             </h1>
           </div>
           {isLoading ? (        
@@ -201,7 +201,7 @@ export default function Acquisitions() {
 
 
 
-              <section className="grid grid-cols-2 gap-4 w-full mt-2">
+              <section className="grid grid-cols-2 gap-4 w-full">
 
               <form className='text-white text-base'>
               <article className="bg-gray-900 rounded p-2 mr-1 ml-1 relative h-full">
