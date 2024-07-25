@@ -134,14 +134,14 @@ const City = () => {
               <img src={loadgif} alt={loadgif} className='w-32 h-32 mt-11 mb-11'/>  
             </div>          
           ) : (
-         <section className="grid grid-cols-2 gap-4 w-full h-full">   
+         <section className="grid grid-cols-2 gap-4 w-full">   
           {filesdata.map((Files) => {
             const timeStamp = new Date(Files.Date);
             const period = timeStamp.getHours() >= 19 ? "Night" : "Day";
            
             return (Files.City !== "Not Found" && Files.District !== "Not Found" && (
               <Link to={`/video/${Files.VideoFile}`} key={Files.VideoFile}>
-                <article key={Files.id} className="bg-zinc-800 rounded p-3 relative hover:scale-105 duration-200">
+                <article key={Files.id} className="bg-zinc-800 rounded p-3 relative hover:scale-105 duration-200  h-full">
                   <p>
                      <span className="font-medium text-yellow-200 text-xl">{Files.City}{' - '}{Files.State} </span>
                      <br />
