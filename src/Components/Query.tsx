@@ -134,7 +134,7 @@ const City = () => {
               <img src={loadgif} alt={loadgif} className='w-32 h-32 mt-11 mb-11'/>  
             </div>          
           ) : (
-         <section className="grid grid-cols-2 gap-4 w-full">   
+         <section className="grid grid-cols-2 gap-4 w-full h-full">   
           {filesdata.map((Files) => {
             const timeStamp = new Date(Files.Date);
             const period = timeStamp.getHours() >= 19 ? "Night" : "Day";
