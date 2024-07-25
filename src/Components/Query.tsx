@@ -5,8 +5,6 @@ import { useParams } from "react-router-dom";
 import Select from 'react-select';
 import carcara from "../Components/img/carcara23.png";
 import  customStyles   from '../Styles/Header.tsx'
-import day from "../Components/img/day.png"
-import night from "../Components/img/night.png"
 import loadgif from "../Components/img/gif.gif"
 
 // <MapCity cidadeSelecionada={city} />
@@ -135,10 +133,7 @@ const City = () => {
             </div>          
           ) : (
          <section className="grid grid-cols-2 gap-4 w-full">   
-          {filesdata.map((Files) => {
-            const timeStamp = new Date(Files.Date);
-            const period = timeStamp.getHours() >= 19 ? "Night" : "Day";
-           
+          {filesdata.map((Files) => {      
             return (Files.City !== "Not Found" && Files.District !== "Not Found" && (
               <Link to={`/video/${Files.VideoFile}`} key={Files.VideoFile}>
                 <article key={Files.id} className="bg-zinc-800 rounded p-3 relative hover:scale-105 duration-200  h-full">
@@ -149,13 +144,7 @@ const City = () => {
                      <br />
                      <span className='font-medium text-blue-200 text-xl mt-1'>{Files.Weather+' '}</span>
                      <span className={`font-medium text-blue-200 text-xl`}>{Files.Period} </span>
-                     <img
-                          src={period === 'Day' ? day : night}
-                          alt="Descrição da imagem"
-                          className=" mb-1"
-                          width={period === 'Day' ? "26" : "16"}
-                          style={{ height: "25px" , display: "inline-block"}}
-                     />
+                
                     
                   
                   </p>
