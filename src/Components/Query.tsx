@@ -42,7 +42,17 @@ interface VideoFilesProps {
   Period: string;
 }
 
-
+function changeViewToPreview(link: string): string {
+  // Verifica se o link contém "/view"
+  if (link.includes("/view")) {
+      // Substitui "/view" por "/preview"
+      const modifiedLink = link.replace("/view", "/preview");
+      return modifiedLink;
+  } else {
+      // Se "/view" não estiver presente, retorna o link original
+      return link;
+  }
+}
 
 const City = () => {
   async function loadFiles() {
@@ -74,6 +84,7 @@ const City = () => {
  const partss = parts.filter(part => part.trim() !== "");
 
  const result = partss.join(' - ');
+
 
  const formatString = (input: string): string => {
   return input.split(',').map(part => part.trim()).join(', ');
@@ -138,6 +149,7 @@ const City = () => {
               <Link to={`/video/${Files.VideoFile}`} key={Files.VideoFile}>
                 <article key={Files.id} className="bg-zinc-800 rounded p-3 relative hover:scale-105 duration-200  h-full">
                   <p>
+                  <iframe className="flex w-full items-center justify-center" src={changeViewToPreview(Files.Link)+'&vq=hd1080'} width="240" height="172" allow=""></iframe>
                      <span className="font-medium text-yellow-200 text-xl">{Files.City}{' - '}{Files.State} </span>
                      <br />
                      <span className='font-medium text-zinc-400 text-xl'>{formatString(Files.RoadType)+' Road'}</span>
