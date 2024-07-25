@@ -183,7 +183,7 @@ export default function Acquisitions() {
                 </div>
    </header>
    <div className="flex justify-center px-4 ">
-        <main className="my-0 w-full h-full md:max-w-2xl bg-zinc-950">
+        <main className="my-4 w-full h-full md:max-w-2xl bg-zinc-950">
           <div>
             <h1 className="text-4xl font-medium mb-4 text-yellow-100 text-left">
             Search<span className='font-medium text-yellow-300'></span>
