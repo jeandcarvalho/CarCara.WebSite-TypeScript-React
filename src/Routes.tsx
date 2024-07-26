@@ -8,6 +8,7 @@ import Acquisitions from "./Components/Acquisitions";
 import About from "./Components/About";
 import Search from "./Components/Search";
 import Query from "./Components/Query";
+import OurModels from "./Components/OurModels";
 
 
 export const Routes = createBrowserRouter ([
@@ -22,7 +23,8 @@ export const Routes = createBrowserRouter ([
         {path: "City/:city", element: <City/> },
         {path: "Video/:video", element: <Video/> },
         {path: "Search", element: <Search/> },
-        {path: "Query/:city", element: <Query/> }
+        {path: "Query/:city", element: <Query/> },
+        {path: "OurModels", element: <OurModels/>}
     ]
    }  
 ])

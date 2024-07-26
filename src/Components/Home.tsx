@@ -3,10 +3,30 @@ import Select from 'react-select';
 import carcara from "../Components/img/carcara23.png";
 import MapComponent from "../Classes/MapComponent";
 import  customStyles   from '../Styles/Header.tsx'
+import api from '../Services/api';
+import { useEffect} from 'react';
+
+
+interface FilesProps {
+    id: string;
+    visitantes: number;
+}
+
+
 
 const Video: React.FC = () => {
     // Dados estáticos dos estados percorridos e outras informações
     const states = ["São Paulo", "Espírito Santo", "Minas Gerais", "Rio de Janeiro", "Paraná"];
+
+
+
+
+    
+
+
+
+
+  
 
     const options = [  
         { value: '/', label: 'Home' },
@@ -23,6 +43,24 @@ const Video: React.FC = () => {
             window.dispatchEvent(new PopStateEvent('popstate', { state: null }));
         }
     };
+
+
+    
+    useEffect(() => {
+        loadFiles();
+      }, []);
+      async function loadFiles() {
+        try {
+          await api.post<FilesProps[]>("/homecounter");
+     
+  
+  
+  
+        } catch (error) {
+          console.error("Error loading files:", error);
+        }
+      }
+  
 
     return (
         <div className="bg-zinc-950 min-h-screen">
