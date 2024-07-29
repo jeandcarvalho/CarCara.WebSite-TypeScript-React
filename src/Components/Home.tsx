@@ -80,9 +80,9 @@ const Video: React.FC = () => {
                 <img
                     src={logoscarcara}
                     alt="Descrição da imagem"
-                    className="mr-2"
-                    width="400"
-                    style={{ height: "160px", display: 'inline-block'}}
+                    className=""
+                    width="370"
+                    style={{ height: "140px", display: 'inline-block'}}
                 />
             </div>
 
