@@ -81,7 +81,6 @@ const Video: React.FC = () => {
                 </div>
             </div>
             <div className="text-center">
-          
                 <img
                     src={logoscarcara}
                     alt="Descrição da imagem"
@@ -92,7 +91,7 @@ const Video: React.FC = () => {
             </div>
             <footer className="bg-zinc-900 text-white py-4">
                 <div className="container mx-auto text-center">
-                    <p className="text-sm px-2">&copy; 2024 GSA - Grupo de Sistemas Automotivos. Todos os direitos reservados.</p>
+                    <p className="text-sm px-2">&copy; 2024 GSA. All rights reserved.</p>
                   
                 </div>
             </footer>
