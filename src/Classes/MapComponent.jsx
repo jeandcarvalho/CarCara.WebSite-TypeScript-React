@@ -13,7 +13,7 @@ const MapComponent = () => {
                 center: [0, 0], // Defina o centro do mapa
                 zoom: 3, // Defina o nível de zoom inicial
                 minZoom: 3, // Defina o zoom mínimo
-                maxZoom: 5, // Defina o zoom máximo
+                maxZoom: 3, // Defina o zoom máximo
                 style: "",
                 doubleClickZoom: false, // Desativa o zoom ao clicar duas vezes
                 boxZoom: false, // Desativa o zoom ao arrastar para selecionar uma área
