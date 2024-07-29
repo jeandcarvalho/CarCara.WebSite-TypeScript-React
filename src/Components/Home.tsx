@@ -75,21 +75,22 @@ const Video: React.FC = () => {
                     </span>
                 </p>
                 <MapComponent states={states} />
+                <div className="text-center mb-2">
+                <p className='text-sm font-semibold text-zinc-400 mt-11'> Partners</p>
+                <img
+                    src={logoscarcara}
+                    alt="Descrição da imagem"
+                    className="mr-2"
+                    width="400"
+                    style={{ height: "160px", display: 'inline-block'}}
+                />
+            </div>
 
 
                 
                 </div>
             </div>
-            <div className="text-center mb-2">
-                <p className='text-sm font-semibold text-zinc-400 mt-5'> Partners</p>
-                <img
-                    src={logoscarcara}
-                    alt="Descrição da imagem"
-                    className="mr-2"
-                    width="450"
-                    style={{ height: "175px", display: 'inline-block'}}
-                />
-            </div>
+        
             <footer className="bg-zinc-900 text-white py-4">
                 <div className="container mx-auto text-center">
                     <p className="text-sm px-2">&copy; 2024 GSA. All rights reserved.</p>
