@@ -80,13 +80,14 @@ const Video: React.FC = () => {
                 
                 </div>
             </div>
-            <div className="text-center">
+            <div className="text-center mb-2">
+                <p className='text-sm font-semibold text-zinc-400 mt-5'> Partners</p>
                 <img
                     src={logoscarcara}
                     alt="Descrição da imagem"
                     className="mr-2"
-                    width="310"
-                    style={{ height: "120px", display: 'inline-block'}}
+                    width="450"
+                    style={{ height: "175px", display: 'inline-block'}}
                 />
             </div>
             <footer className="bg-zinc-900 text-white py-4">
