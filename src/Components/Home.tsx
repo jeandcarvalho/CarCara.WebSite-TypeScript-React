@@ -69,19 +69,19 @@ const Video: React.FC = () => {
                     <Link to={"/Search"}>
                         <p className="bg-yellow-300 text-zinc-900 hover:bg-yellow-100 text-lg font-bold py-1 px-6 rounded-full transition duration-300 text-roboto">Explore Acquisitions</p>
                     </Link>
-                </div>
-            </div>
-            <div className="text-center mr-3 ml-3 mt-2">
-            <p className="text-yellow-300 text-sm mb-2">Visited States:
+                    <p className="text-yellow-300 text-sm py-3">Visited States:
                     <span className="text-gray-300">
                         {" " + states.join(' • ')}
                     </span>
                 </p>
-               <MapComponent states={states} />
-               <p className='text-zinc-500 text-sm font-extralight mt-11'>
-                Partners:
-               </p>
-               
+                <MapComponent states={states} />
+
+
+                
+                </div>
+            </div>
+            <div className="text-center">
+          
                 <img
                     src={logoscarcara}
                     alt="Descrição da imagem"
