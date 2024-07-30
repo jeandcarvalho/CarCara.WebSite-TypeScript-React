@@ -97,10 +97,10 @@ const Video: React.FC = () => {
                 <div className="container mx-auto text-center">
                     <p className="text-sm px-2">&copy; 2024 GSA. All rights reserved.</p>
                     <nav className="mt-2">
-                        <a href="#home" className="text-zinc-400 hover:text-white mx-2">Home</a>
-                        <a href="#about" className="text-zinc-400 hover:text-white mx-2">About</a>
-                        <a href="#services" className="text-zinc-400 hover:text-white mx-2">Acquisitions</a>
-                        <a href="#contact" className="text-zinc-400 hover:text-white mx-2">Our Models</a>
+                        <a href="/" className="text-zinc-400 hover:text-white mx-2">Home</a>
+                        <a href="/About" className="text-zinc-400 hover:text-white mx-2">About</a>
+                        <a href="/Search" className="text-zinc-400 hover:text-white mx-2">Acquisitions</a>
+                        <a href="/ourmodels" className="text-zinc-400 hover:text-white mx-2">Our Models</a>
                     </nav>
                   
                 </div>

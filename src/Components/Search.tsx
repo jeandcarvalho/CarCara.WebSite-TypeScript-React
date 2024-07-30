@@ -162,8 +162,8 @@ export default function Acquisitions() {
 
   
   return (
-  <body className='bg-zinc-950 min-h-screen'>
-   <header className="flex px-3">
+    <div className='min-h-screen flex flex-col bg-zinc-950'>
+       <header className="flex px-3">
                 <img
                     src={carcara}
                     alt="Descrição da imagem"
@@ -181,36 +181,25 @@ export default function Acquisitions() {
                         onChange={handleChange}                             
                     />
                 </div>
-   </header>
-   <div className="flex justify-center px-4 ">
-        <main className="my-4 w-full h-full md:max-w-2xl bg-zinc-950">
-          <div>
-            <h1 className="text-4xl font-medium mb-4 text-yellow-100 text-left">
-            Search<span className='font-medium text-yellow-300'></span>
-            </h1>
-          </div>
+       </header>
+    
+       <div className="flex-grow flex justify-center mt-7">
+        <main className="my-4 mx-11 w-full ">
+          <h1 className="text-4xl font-medium mb-4 text-yellow-100 text-left">
+             Search Acquisitions<span className='font-medium text-yellow-300'></span>
+          </h1>
           {isLoading ? (        
            <div className="w-full mt-11  flex justify-center items-center">
               <img src={loadgif} alt={loadgif} className='w-32 h-32 mt-11 mb-11'/>  
             </div>          
           ) : (
-            <div className=''>       
-
-
-
-
-
-
-              <section className="grid grid-cols-2 gap-4 w-full">
-
+            <section className="grid grid-cols-2 gap-4 w-full md:grid-cols-4">
               <form className='text-white text-base'>
               <article className="bg-gray-900 rounded p-2 mr-1 ml-1 relative h-full">
-
-                
-                <p className='justify-center items-center text-2xl font-semibold  text-yellow-300 '>
+              <p className='justify-center items-center text-2xl font-semibold  text-yellow-300 '>
                   Traffic
                 </p>
-        <div className='mt-2'>
+                <div className='mt-2'>
           <input type="checkbox" id="choice11" name="Free Flow" value="Free Flow"  onChange={handleCheckboxTrafficChange}/>
           <label  htmlFor="choice11"> Free Flow</label>
         </div>
@@ -234,8 +223,6 @@ export default function Acquisitions() {
           <input type="checkbox" id="choice16" name="Slow Moving" value="Slow Moving"  onChange={handleCheckboxTrafficChange}/>
           <label htmlFor="choice16"> Slow Moving</label>
         </div>
-
-
         <p className='justify-center items-center  font-semibold  text-yellow-300  text-2xl mt-2'>
                   Road Type
                 </p>
@@ -255,15 +242,9 @@ export default function Acquisitions() {
           <input type="checkbox" id="choice20" name="Local" value="Local"  onChange={handleCheckboxRoadTypeChange}/>
           <label htmlFor="choice20"> Local</label>
         </div>
-        
- 
- 
         </article>
-
-        
-      </form>
-
-      <form className='text-white text-xl'>
+        </form>
+        <form className='text-white text-xl'>
               <article className="bg-sky-950 rounded p-2 relative h-full ml-1 mr-1">
                 <p className='justify-center items-center  font-semibold  text-yellow-300  text-2xl mb-3'>
                   Weather
@@ -284,7 +265,6 @@ export default function Acquisitions() {
           <input type="checkbox" id="choice24" name="Partly Cloudy" value="Partly Cloudy"  onChange={handleCheckboxWeatherChange}/>
           <label htmlFor="choice24"> Partly Cloudy</label>
         </div>
-
         <p className='justify-center items-center text-2xl mt-5  font-semibold  text-yellow-300 '>
                   Period
                 </p>
@@ -296,9 +276,6 @@ export default function Acquisitions() {
           <input type="checkbox" id="choice26" name="Night" value="Night" onChange={handleCheckboxPeriodChange} />
           <label htmlFor="choice26"> Night</label>
         </div>
-
-
-        
         <div className='mt-2'>
           <input type="checkbox" id="choice27" name="Dawn" value="Dawn" onChange={handleCheckboxPeriodChange} />
           <label  htmlFor="choice27"> Dawn</label>
@@ -307,24 +284,14 @@ export default function Acquisitions() {
           <input type="checkbox" id="choice28" name="Dusk" value="Dusk" onChange={handleCheckboxPeriodChange} />
           <label htmlFor="choice28"> Dusk</label>
         </div>
-        
- 
- 
         </article>
-
-        
-      </form>
-
-
-                
-              <form className='text-white text-lg'>
-              <article className="bg-teal-950 rounded p-2 relative h-full ml-1 mr-1">
-                <p className='justify-center items-center text-2xl  font-semibold  text-yellow-300 '>
-                  Areas
-                </p>
-                
-
-                <div className='mt-2'>
+        </form>
+        <form className='text-white text-lg'>
+         <article className="bg-teal-950 rounded p-2 relative h-full ml-1 mr-1">
+             <p className='justify-center items-center text-2xl  font-semibold  text-yellow-300 '>
+               Areas
+             </p>
+             <div className='mt-2'>
           <input type="checkbox" id="choice1" name="Metropoly" value="Metropoly"  onChange={handleCheckboxAreaChange}/>
           <label  htmlFor="choice1"> Metropoly</label>
         </div>
@@ -366,39 +333,13 @@ export default function Acquisitions() {
           <label htmlFor="choice10"> Residential</label>
         </div>
         </article>
-
-        
-
-        
-      </form>
-
-      <article className="bg-zinc-900 rounded p-2 relative h-full mr-1 ml-1"> 
-
-      <form className='text-white text-lg  border-2 border-yellow-400 rounded-md'>
-              <article className="bg-zinc-700 rounded p-2 relative h-full ">
-                <p className='justify-center items-center flex text-xl text-zinc-100 '>
-                Available Data:
-                </p>
-
-                <p className='justify-center items-center flex text-2xl mt-2 text-yellow-400 font-bold'>
-                {(timeFormatted)}
-                </p>
-                <Link to={`/Query/${searchString}`} key={searchString}>
-                        <p className=" bg-yellow-400 text-zinc-900 mx-3 my-3  hover:bg-yellow-100 text-2xl text-center   font-bold py-2 px-2 rounded-full transition duration-300 text-roboto">Search</p>
-                    </Link>
-              </article>
-       </form>
-
-
-
-
-                 <form className='text-white text-lg'>
-              <article className="bg-zinc-900 rounded p-2 relative h-full ">
-                <p className='justify-center items-center text-2xl mt-1  font-semibold  text-yellow-300 '>
+        </form>
+      <article className="bg-zinc-900 rounded p-1 relative h-full mr-1 ml-1"> 
+      <form className='text-white text-lg'>
+                <article className="bg-zinc-900 rounded p-2 relative h-full ">
+                <p className='justify-center items-center text-2xl font-semibold  text-yellow-300 '>
                   Others
                 </p>
-                
-
                 <div className='mt-2'>
           <input type="checkbox" id="choice31" name="Fog" value="Fog"  onChange={handleCheckboxOthersChange} />
           <label  htmlFor="choice31"> Fog</label>
@@ -420,23 +361,26 @@ export default function Acquisitions() {
           <label htmlFor="choice35"> Poorly Marked</label>
         </div>
         </article>
-      </form>
+        </form>
+        <form className='text-white text-lg  border-2 border-yellow-400 rounded-md'>
+              <article className="bg-zinc-700 rounded p-2 relative h-full ">
+                <p className='justify-center items-center flex text-xl text-zinc-100 '>
+                Available Data:
+                </p>
 
-      
-
-
-                 </article>
-
-      
-     
-
-   </section>
-
-         
-              </div>
-            )}
-        </main>
-   </div>   
- </body>
+                <p className='justify-center items-center flex text-2xl mt-2 text-yellow-400 font-bold'>
+                {(timeFormatted)}
+                </p>
+                <Link to={`/Query/${searchString}`} key={searchString}>
+                        <p className=" bg-yellow-400 text-zinc-900 mx-3 my-3  hover:bg-yellow-100 text-2xl text-center   font-bold py-2 px-2 rounded-full transition duration-300 text-roboto">Search</p>
+                    </Link>
+              </article>
+       </form>
+       </article>
+       </section>
+        )}
+     </main>
+     </div>
+     </div>
   )
 }
