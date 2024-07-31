@@ -6,6 +6,7 @@ import Select from 'react-select';
 import carcara from "../Components/img/carcara23.png";
 import  customStyles   from '../Styles/Header.tsx'
 import loadgif from "../Components/img/gif.gif"
+import MapVideo from '../Classes/MapVideo';
 
 // <MapCity cidadeSelecionada={city} />
 
@@ -149,7 +150,20 @@ const City = () => {
               <Link to={`/video/${Files.VideoFile}`} key={Files.VideoFile}>
                 <article key={Files.id} className="bg-zinc-800 rounded p-3 relative hover:scale-105 duration-200  h-full">
                   <p>
-                  <iframe className="flex w-full items-center justify-center" src={changeViewToPreview(Files.Link)+'&vq=hd1080'} width="240" height="172" allow=""></iframe>
+                  <img
+  className="flex w-full items-center justify-center"
+  src={`https://drive.google.com/thumbnail?id=${Files.Link?.match(/[-\w]{25,}/)?.[0] || ''}`}
+  width="240"
+  height="172"
+  alt="Video Thumbnail"
+/>
+
+
+
+
+     
+                  
+
                      <span className="font-medium text-yellow-200 text-xl">{Files.City}{' - '}{Files.State} </span>
                      <br />
                      <span className='font-medium text-zinc-400 text-xl'>{formatString(Files.RoadType)+' Road'}</span>
