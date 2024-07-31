@@ -346,7 +346,7 @@ export default function Acquisitions() {
         </div>
         <div className='mt-2'>
           <input type="checkbox" id="choice32" name="Dense Fog" value="Dense Fog" onChange={handleCheckboxOthersChange} />
-          <label htmlFor="choice2"> Dense Fog</label>
+          <label htmlFor="choice32"> Dense Fog</label>
         </div>
         <div className='mt-2'>
           <input type="checkbox" id="choice33" name="Poor Road" value="Poor Road" onChange={handleCheckboxOthersChange} />
