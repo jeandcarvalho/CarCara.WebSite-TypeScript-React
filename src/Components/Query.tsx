@@ -43,17 +43,7 @@ interface VideoFilesProps {
   Period: string;
 }
 
-function changeViewToPreview(link: string): string {
-  // Verifica se o link contém "/view"
-  if (link.includes("/view")) {
-      // Substitui "/view" por "/preview"
-      const modifiedLink = link.replace("/view", "/preview");
-      return modifiedLink;
-  } else {
-      // Se "/view" não estiver presente, retorna o link original
-      return link;
-  }
-}
+
 
 const City = () => {
   async function loadFiles() {
@@ -151,31 +141,27 @@ const City = () => {
                 <article key={Files.id} className="bg-zinc-800 rounded p-3 relative hover:scale-105 duration-200  h-full">
                   <p>
                   <img
-  className="flex w-full items-center justify-center"
-  src={`https://drive.google.com/thumbnail?id=${Files.Link?.match(/[-\w]{25,}/)?.[0] || ''}`}
-  width="240"
-  height="172"
-  alt="Video Thumbnail"
-/>
+                    className="flex w-full items-center justify-center"
+                   src={`https://drive.google.com/thumbnail?id=${Files.Link?.match(/[-\w]{25,}/)?.[0] || ''}`}
+                   width="240"
+                   height="172"
+                   alt="Video Thumbnail"
+                  />
 
-
-
-
-     
-                  
-
+                    
                      <span className="font-medium text-yellow-200 text-xl">{Files.City}{' - '}{Files.State} </span>
                      <br />
                      <span className='font-medium text-zinc-400 text-xl'>{formatString(Files.RoadType)+' Road'}</span>
                      <br />
                      <span className='font-medium text-blue-200 text-xl mt-1'>{Files.Weather+' '}</span>
                      <span className={`font-medium text-blue-200 text-xl`}>{Files.Period} </span>
-                
-                    
-                  
                   </p>
-                </article>       
-              </Link>));})}
+                </article>    
+              
+              </Link>
+              
+            
+            ));})}
           </section>
           )}
         </main>   
