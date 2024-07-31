@@ -6,7 +6,6 @@ import Select from 'react-select';
 import carcara from "../Components/img/carcara23.png";
 import  customStyles   from '../Styles/Header.tsx'
 import loadgif from "../Components/img/gif.gif"
-import MapVideo from '../Classes/MapVideo';
 
 // <MapCity cidadeSelecionada={city} />
 

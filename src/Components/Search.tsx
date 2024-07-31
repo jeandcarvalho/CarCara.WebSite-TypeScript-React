@@ -25,9 +25,13 @@ interface FilesProps {
   Period: string;
 }
 
+
 const options = [
   { value: '/', label: 'Home' },
-  { value: '/About', label: 'About' }
+  { value: '/Search', label: 'Acquisitions' },
+  { value: '/About', label: 'About' },
+  { value: '/OurModels', label: 'Our Models' },
+  // Adicione outras rotas aqui, se necessário
 ];
 
 const handleChange = (newValue: unknown) => {
@@ -171,12 +175,12 @@ export default function Acquisitions() {
                     width="250"
                     style={{ height: "40px" }}
                 />
-                <div className="flex items-center mt-2">              
+                <div className="flex items-center">              
                     <Select
                         options={options}                 
                         styles={customStyles}
                         placeholder="Home"
-                        className="mr-5 font-bold"
+                        className="mr-5 font-bold p-2"
                         classNamePrefix='Select'
                         onChange={handleChange}                             
                     />
@@ -381,6 +385,27 @@ export default function Acquisitions() {
         )}
      </main>
      </div>
+     <footer className="bg-zinc-900 text-white py-4">
+                <div className="container mx-auto text-center">
+                    <p className="text-sm px-2">&copy; 2024 GSA. All rights reserved.</p>
+                    <nav className="mt-2">
+                    <Link to={"/"}>
+                       <a className="text-zinc-400 hover:text-white mx-2">Home</a>                                 
+                    </Link>
+                    <Link to={"/Search"}>
+                       <a className="text-zinc-400 hover:text-white mx-2">Acquisitions</a>                       
+                    </Link>
+                    
+                    <Link to={"/About"}>
+                       <a className="text-zinc-400 hover:text-white mx-2">About</a>                                     
+                    </Link>
+                    <Link to={"/OurModels"}>
+                       <a href="/ourmodels" className="text-zinc-400 hover:text-white mx-2">Our Models</a>                                       
+                    </Link>                   
+                    </nav>
+                  
+                </div>
+            </footer>
      </div>
   )
 }

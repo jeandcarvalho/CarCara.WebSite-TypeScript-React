@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import Select from 'react-select';
 import carcara from "../Components/img/carcara23.png";
-import logoscarcara from "../Components/img/LOGOSCARCARA.jpg";
+import logoscarcara from "../Components/img/LOGOSCARCARA2.jpg";
 import MapComponent from "../Classes/MapComponent";
 import customStyles from '../Styles/Header.tsx';
 import api from '../Services/api';
@@ -17,7 +17,9 @@ const Video: React.FC = () => {
 
     const options = [
         { value: '/', label: 'Home' },
+        { value: '/Search', label: 'Acquisitions' },
         { value: '/About', label: 'About' },
+        { value: '/OurModels', label: 'Our Models' },
         // Adicione outras rotas aqui, se necessário
     ];
 
@@ -51,12 +53,12 @@ const Video: React.FC = () => {
                     width="250"
                     style={{ height: "40px" }}
                 />
-                <div className="flex items-center mt-2">
+                <div className="flex items-center">
                     <Select
                         options={options}
                         styles={customStyles}
                         placeholder="Home"
-                        className="mr-5 font-bold"
+                        className="mr-5 font-bold p-2"
                         classNamePrefix='Select'
                         onChange={handleChange}
                     />
@@ -76,20 +78,14 @@ const Video: React.FC = () => {
                 </p>
                 <MapComponent states={states} />
                 <div className="text-center mb-2">
-                <p className='text-sm font-semibold text-zinc-400 mt-11 mb-2'> Partners</p>
+                <p className='text-sm font-semibold text-zinc-400 mt-2 mb-2'> Partners</p>
                 <img
     src={logoscarcara}
     alt="Descrição da imagem"
-    className="w-full max-w-[800px] h-auto"
-    style={{ maxHeight: "300px", display:'inline-block' }}
+    className="w-full max-w-[500px] h-auto"
+    style={{ maxHeight: "150px", display:'inline-block' }}
 />
-
-
-
-            </div>
-
-
-                
+            </div>       
                 </div>
             </div>
         
