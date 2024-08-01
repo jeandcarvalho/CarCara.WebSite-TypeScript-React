@@ -176,7 +176,7 @@ const Video: React.FC = () => {
                         className='text-black hover:scale-105 duration-200 bg-yellow-500 rounded relative w-full text-center justify-center'
                         onClick={downloadGeoCSV}
                       >
-                        <span className='text-black'>Geo Coordinates (1 ms)</span>
+                        <span className='text-black'>Geo Coordinates</span>
                       </button>
                     </section>
                   </article>

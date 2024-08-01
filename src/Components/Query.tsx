@@ -98,7 +98,7 @@ const City: React.FC = () => {
                         alt="Video Thumbnail"
                       />
                       <p>
-                        <span className="font-medium text-yellow-200 text-xl">{Files.City} - {Files.State}</span>
+                        <span className="font-medium text-yellow-200 text-xl mt-1">{Files.City} - {Files.State}</span>
                         <br />
                         <article key={Files.id} className="bg-gray-800 rounded mt-3 p-1 max-w-fit inline-block h-full">
                         <span className='font-medium text-gray-100 text-xl'>{formatString(Files.RoadType)} Road</span>
