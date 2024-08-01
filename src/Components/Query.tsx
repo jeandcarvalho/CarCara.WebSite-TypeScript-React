@@ -100,10 +100,25 @@ const City: React.FC = () => {
                       <p>
                         <span className="font-medium text-yellow-200 text-xl">{Files.City} - {Files.State}</span>
                         <br />
-                        <span className='font-medium text-zinc-400 text-xl'>{formatString(Files.RoadType)} Road</span>
+                        <article key={Files.id} className="bg-gray-800 rounded mt-3 p-1 max-w-fit inline-block h-full">
+                        <span className='font-medium text-gray-100 text-xl'>{formatString(Files.RoadType)} Road</span>
+                      
+                        </article>
+                        
                         <br />
-                        <span className='font-medium text-blue-200 text-xl mt-1'>{Files.Weather} </span>
-                        <span className='font-medium text-blue-200 text-xl'>{Files.Period}</span>
+                        <article key={Files.id} className="bg-sky-950 my-2 rounded  p-1 max-w-fit inline-block h-full">
+                        <span className='font-medium text-sky-100 text-xl mt-1'>{formatString(Files.Weather)} </span>
+                        <span className='font-medium text-sky-100 text-xl'>{Files.Period}</span>
+                      
+                        </article>
+                        
+                        <br />
+                        <article key={Files.id} className="bg-teal-950 rounded p-1 max-w-fit inline-block h-full">
+                           <span className='font-medium px-1 text-teal-100 text-xl mt-1'>{formatString(Files.Area)}</span>
+                        </article>
+  
+
+                       
                       </p>
                     </article>
                   </Link>
