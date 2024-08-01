@@ -64,28 +64,29 @@ const Video: React.FC = () => {
                     />
                 </div>
             </header>
+
             <div className="flex-grow flex justify-center mt-7">
                 <div className="text-center text-white w-4/6">
                     <h1 className="text-5xl font-bold mb-4 text-yellow-300 text-roboto">Vehicle Acquisitions</h1>
                     <p className="text-lg mb-5 text-roboto">Empower your vision with data</p>
-                    <Link to={"/Search"}>
-                        <p className="bg-yellow-300 text-zinc-900 hover:bg-yellow-100 text-lg font-bold py-1 px-6 rounded-full transition duration-300 text-roboto">Explore Acquisitions</p>
-                    </Link>
+                      <Link to={"/Search"}>
+                         <p className="bg-yellow-300 text-zinc-900 hover:bg-yellow-100 text-lg font-bold py-1 px-6 rounded-full transition duration-300 text-roboto">Explore Acquisitions</p>
+                      </Link>
                     <p className="text-yellow-300 text-sm py-3">Visited States:
-                    <span className="text-gray-300">
-                        {" " + states.join(' • ')}
-                    </span>
-                </p>
-                <MapComponent states={states} />
-                <div className="text-center mb-2">
-                <p className='text-sm font-semibold text-zinc-400 mt-2 mb-2'> Partners</p>
-                <img
-    src={logoscarcara}
-    alt="Descrição da imagem"
-    className="w-full max-w-[500px] h-auto"
-    style={{ maxHeight: "150px", display:'inline-block' }}
-/>
-            </div>       
+                      <span className="text-gray-300">
+                         {" " + states.join(' • ')}
+                      </span>
+                    </p>
+                    <MapComponent states={states} />
+                    <div className="text-center mb-2">
+                    <p className='text-sm font-semibold text-zinc-400 mt-2 mb-2'> Partners</p>
+                    <img
+                        src={logoscarcara}
+                        alt="Descrição da imagem"
+                        className="w-full max-w-[580px] h-auto"
+                        style={{ maxHeight: "150px", display:'inline-block' }}
+                    />
+                    </div>       
                 </div>
             </div>
         
@@ -98,16 +99,14 @@ const Video: React.FC = () => {
                     </Link>
                     <Link to={"/Search"}>
                        <a className="text-zinc-400 hover:text-white mx-2">Acquisitions</a>                       
-                    </Link>
-                    
+                    </Link>             
                     <Link to={"/About"}>
                        <a className="text-zinc-400 hover:text-white mx-2">About</a>                                     
                     </Link>
                     <Link to={"/OurModels"}>
                        <a href="/ourmodels" className="text-zinc-400 hover:text-white mx-2">Our Models</a>                                       
                     </Link>                   
-                    </nav>
-                  
+                    </nav>                
                 </div>
             </footer>
         </div>
@@ -115,6 +114,9 @@ const Video: React.FC = () => {
 }
 
 export default Video;
+
+
+
 /*
 
   <nav className="mt-2">
