@@ -66,7 +66,7 @@ const Video: React.FC = () => {
             </header>
 
             <div className="flex-grow flex justify-center mt-7">
-                <div className="text-center text-white w-4/6">
+                <div className="text-center text-white w-full px-3">
                     <h1 className="text-5xl font-bold mb-4 text-yellow-300 text-roboto">Vehicle Acquisitions</h1>
                     <p className="text-lg mb-5 text-roboto">Empower your vision with data</p>
                       <Link to={"/Search"}>

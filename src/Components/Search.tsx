@@ -187,8 +187,8 @@ export default function Acquisitions() {
                 </div>
        </header>
     
-       <div className="flex-grow flex justify-center mt-7">
-        <main className="my-4 mx-11 w-full ">
+       <div className="flex-grow flex justify-center">
+        <main className="my-4 mx-3 w-full ">
           <h1 className="text-4xl font-medium mb-4 text-yellow-100 text-left">
              Search Acquisitions<span className='font-medium text-yellow-300'></span>
           </h1>
@@ -376,7 +376,7 @@ export default function Acquisitions() {
                 {(timeFormatted)}
                 </p>
                 <Link to={`/Query/${searchString}`} key={searchString}>
-                        <p className=" bg-yellow-400 text-zinc-900 mx-3 my-3  hover:bg-yellow-100 text-2xl text-center   font-bold py-2 px-2 rounded-full transition duration-300 text-roboto">Search</p>
+                        <p className=" bg-yellow-400 text-zinc-900 mx-3 my-3  hover:bg-yellow-100 text-xl text-center   font-bold py-2 px-2 rounded-full transition duration-300 text-roboto">Search</p>
                     </Link>
               </article>
        </form>
