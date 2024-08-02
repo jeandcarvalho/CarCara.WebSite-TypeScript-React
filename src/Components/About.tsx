@@ -1,43 +1,18 @@
-import Select from 'react-select';
-import carcara from "../Components/img/carcara23.png";
 import carcaraS from "../Components/img/carcara2.png";
-import customStyles from '../Styles/Header.tsx';
 import api from '../Services/api';
 import { useEffect, useState } from 'react';
+import Header from '../Components/Header';
+//import Footer from '../Components/Footer';
 
 interface FilesProps {
     'unique id': string;
     visitantes: number;
   }
-
-
-
 const totalDistance = 2773; // em quilômetros
 const totalHours = 35;
 const totalGigabytes = 25;
-
-const options = [
-  { value: '/', label: 'Home' },
-  { value: '/About', label: 'About' }
-];
-
-const handleChange = (newValue: unknown) => {
-    const selectedOption = newValue as { value: string; label: string; } | null;
-    if (selectedOption !== null && 'value' in selectedOption) {
-        history.pushState(null, '', selectedOption.value);
-        window.dispatchEvent(new PopStateEvent('popstate', { state: null }));
-    }
-};
-
 const About = () => {
-
-
     const [filesdata, setFiles] = useState<FilesProps[]>([]);
-
-
-
-
-
     useEffect(() => {
       loadFiles();
     }, []);
@@ -51,16 +26,8 @@ const About = () => {
         console.error("Error loading files:", error);
       }
     }
-
     const visitors = Array.isArray(filesdata) ? filesdata.map(item => item.visitantes) : [];
     console.log(visitors)
-
-
-
-
-
-
-
     const handleButtonClick = () => {
         // Redirecionar para a página de modelos
         history.pushState(null, '', '/OurModels');
@@ -69,25 +36,7 @@ const About = () => {
 
     return (
         <body className="bg-zinc-950 min-h-screen">
-            <header className="flex px-3">
-                <img
-                    src={carcara}
-                    alt="Descrição da imagem"
-                    className="mr-2 mt-2"
-                    width="250"
-                    style={{ height: "40px" }}
-                />
-                <div className="flex items-center mt-2">
-                    <Select
-                        options={options}
-                        styles={customStyles}
-                        placeholder="Home"
-                        className="mr-5 font-bold"
-                        classNamePrefix='Select'
-                        onChange={handleChange}
-                    />
-                </div>
-            </header>
+           <Header/>
             <div className="flex justify-center mt-3">
                 <div className="mr-7 ml-7 max-w-3xl px-2 text-center text-white">
                     <img

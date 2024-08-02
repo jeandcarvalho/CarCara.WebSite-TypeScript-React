@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
 import  api  from '../Services/api.ts';
 import loadgif from "../Components/img/gif.gif"
-import Select from 'react-select';
-import carcara from "../Components/img/carcara23.png";
-import  customStyles   from '../Styles/Header.tsx'
 import { Link } from 'react-router-dom';
+import Header from '../Components/Header';
+import Footer from '../Components/Footer';
 
 
 interface FilesProps {
@@ -24,25 +23,6 @@ interface FilesProps {
   Weather: string;
   Period: string;
 }
-
-
-const options = [
-  { value: '/', label: 'Home' },
-  { value: '/Search', label: 'Acquisitions' },
-  { value: '/About', label: 'About' },
-  { value: '/OurModels', label: 'Our Models' },
-  // Adicione outras rotas aqui, se necessário
-];
-
-const handleChange = (newValue: unknown) => {
-  const selectedOption = newValue as { value: string; label: string; } | null;
-  if (selectedOption !== null && 'value' in selectedOption) {
-      // Alterar o estado do histórico do navegador para navegar para o URL da opção selecionada
-      history.pushState(null, '', selectedOption.value);
-      // Disparar o evento popstate para garantir que os manipuladores de eventos do histórico sejam chamados
-      window.dispatchEvent(new PopStateEvent('popstate', { state: null }));
-  }
-};
 
 export default function Acquisitions() {
   const [filesdata, setFiles] = useState<FilesProps[]>([]);
@@ -116,8 +96,6 @@ export default function Acquisitions() {
   const weatherString = selectedWeather.join('-');
   const PeriodString = selectedPeriod.join('-');
   const OthersString = selectedOthers.join('-');
-
-  
   const areas = areasString.replace(/\s+/g, '_');
   const traffic = trafficString.replace(/\s+/g, '_');
   const roadType = roadTypeString.replace(/\s+/g, '_');
@@ -127,8 +105,6 @@ export default function Acquisitions() {
 
   const searchString = areas+"!"+traffic+"!"+roadType+"!"+weather+"!"+period+"!"+others+"!";
   console.log(searchString)
-
-
 
   useEffect(() => {
     loadFiles();
@@ -144,16 +120,8 @@ export default function Acquisitions() {
     }
   }
 
-
-
-  
-
-
   const uniqueAreas = [...new Set(filesdata.map(item => item.Date))];
   console.log(uniqueAreas)
-
-  
-
   window.onload = function () {
   window.scrollTo(0, 0);
   }
@@ -162,36 +130,15 @@ export default function Acquisitions() {
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
   const timeFormatted = `${hours}h ${minutes}m`;
-  
 
-  
   return (
     <div className='min-h-screen flex flex-col bg-zinc-950'>
-       <header className="flex px-3">
-                <img
-                    src={carcara}
-                    alt="Descrição da imagem"
-                    className="mr-2 mt-2"
-                    width="250"
-                    style={{ height: "40px" }}
-                />
-                <div className="flex items-center">              
-                    <Select
-                        options={options}                 
-                        styles={customStyles}
-                        placeholder="Home"
-                        className="mr-5 font-bold p-2"
-                        classNamePrefix='Select'
-                        onChange={handleChange}                             
-                    />
-                </div>
-       </header>
-    
+       <Header/>
        <div className="flex-grow flex justify-center">
         <main className="my-4 mx-3 w-full ">
-          <h1 className="text-4xl font-medium mb-4 text-yellow-100 text-left">
+          <h2 className="text-4xl font-medium mb-4 text-yellow-100 text-left">
              Search Acquisitions<span className='font-medium text-yellow-300'></span>
-          </h1>
+          </h2>
           {isLoading ? (        
            <div className="w-full mt-11  flex justify-center items-center">
               <img src={loadgif} alt={loadgif} className='w-32 h-32 mt-11 mb-11'/>  
@@ -385,27 +332,7 @@ export default function Acquisitions() {
         )}
      </main>
      </div>
-     <footer className="bg-zinc-900 text-white py-4">
-                <div className="container mx-auto text-center">
-                    <p className="text-sm px-2">&copy; 2024 GSA. All rights reserved.</p>
-                    <nav className="mt-2">
-                    <Link to={"/"}>
-                       <a className="text-zinc-400 hover:text-white mx-2">Home</a>                                 
-                    </Link>
-                    <Link to={"/Search"}>
-                       <a className="text-zinc-400 hover:text-white mx-2">Acquisitions</a>                       
-                    </Link>
-                    
-                    <Link to={"/About"}>
-                       <a className="text-zinc-400 hover:text-white mx-2">About</a>                                     
-                    </Link>
-                    <Link to={"/OurModels"}>
-                       <a href="/ourmodels" className="text-zinc-400 hover:text-white mx-2">Our Models</a>                                       
-                    </Link>                   
-                    </nav>
-                  
-                </div>
-            </footer>
+     <Footer/>
      </div>
   )
 }

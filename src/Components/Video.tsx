@@ -5,8 +5,6 @@ import api from '../Services/api';
 import { useParams } from "react-router-dom";
 import { json2csv } from "json-2-csv";
 import MapVideo from '../Classes/MapVideo';
-
-//... (restante do código)
 interface VideoFilesProps {
     id: string;
     VideoFile: string;
@@ -34,8 +32,6 @@ interface VideoFilesProps {
     GPS_z: string;
   }
   
-
-
 const Video: React.FC = () => {
   const { video } = useParams<{ video?: string }>();
   const videoclicked = video?.substring(0, 28);
@@ -51,8 +47,6 @@ const Video: React.FC = () => {
     loadGeo();
   }, []);
 
-
-
   async function loadFiles() {
     const response = await api.get("/videofiless?page=1&pageSize=300&searchString=!!!!!");
     setFiles(response.data);
@@ -62,8 +56,6 @@ const Video: React.FC = () => {
     const response = await api.get(`/coordinates?page=1&pageSize=3000&searchString=${videoclicked}`);
     setGeo(response.data);
   }
-
-
 
   function extrairIdGoogleDrive(link: string | undefined): string | null {
     if (link && link.includes("/file/d/")) {
@@ -95,8 +87,6 @@ const Video: React.FC = () => {
     link.click();
     document.body.removeChild(link);
   }
-
-  
 
   function downloadGeoCSV() {
     if (filesgeo.length === 0) {
@@ -170,8 +160,7 @@ const Video: React.FC = () => {
                     <section className="grid grid-cols-2 gap-4 w-full mb-2">
                       <button className="bg-yellow-500 rounded p-2 relative w-full text-center justify-center hover:scale-105 duration-200">
                         <DownloadButton fileId={idfile} fileName="nome_do_arquivo.mp4" />
-                      </button>
-                     
+                      </button>                   
                       <button
                         className='text-black hover:scale-105 duration-200 bg-yellow-500 rounded relative w-full text-center justify-center'
                         onClick={downloadGeoCSV}
@@ -180,8 +169,7 @@ const Video: React.FC = () => {
                       </button>
                     </section>
                   </article>
-                  <section className="grid grid-cols-2 gap-4 w-full">
-                   
+                  <section className="grid grid-cols-2 gap-4 w-full">              
                     <article className="bg-zinc-900  ml-1 rounded p-2 relative ">
             
                          <span className='font-medium text-yellow-300 text-xl'>{formatString(fileWithLink.District) + ' - '}</span>
@@ -198,16 +186,11 @@ const Video: React.FC = () => {
                   <article key={fileWithLink.id} className="bg-teal-950 rounded mb-2 p-1 max-w-fit inline-block">
                     <span className='font-medium text-teal-200 text-xl'>{formatString(' ' + fileWithLink.Area+' ')}</span>   
                   </article>
-
                     </article>
                     <article className="bg-zinc-900 rounded p-1 relative">
                     <MapVideo videoName={video} />
-
                     </article>
-
-                  </section>
-                  
-                 
+                  </section>                           
                 </p>
               )}
             </article>

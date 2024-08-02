@@ -1,47 +1,12 @@
-import Select from 'react-select';
-import carcara from "../Components/img/carcara23.png";
 import carcaraS from "../Components/img/carcara2.png";
 //import previewModelImg from "../Components/img/previewModel.png";
 //import fullModelImg from "../Components/img/fullModel.png";
-import customStyles from '../Styles/Header.tsx';
-
-
-
-const options = [
-  { value: '/', label: 'Home' },
-  { value: '/About', label: 'About' }
-];
-
-const handleChange = (newValue: unknown) => {
-    const selectedOption = newValue as { value: string; label: string; } | null;
-    if (selectedOption !== null && 'value' in selectedOption) {
-        history.pushState(null, '', selectedOption.value);
-        window.dispatchEvent(new PopStateEvent('popstate', { state: null }));
-    }
-};
+import Header from '../Components/Header';
 
 const OurModels = () => {
     return (
         <body className="bg-zinc-950 min-h-screen">
-            <header className="flex px-3">
-                <img
-                    src={carcara}
-                    alt="Descrição da imagem"
-                    className="mr-2 mt-2"
-                    width="250"
-                    style={{ height: "40px" }}
-                />
-                <div className="flex items-center mt-2">
-                    <Select
-                        options={options}
-                        styles={customStyles}
-                        placeholder="Home"
-                        className="mr-5 font-bold"
-                        classNamePrefix='Select'
-                        onChange={handleChange}
-                    />
-                </div>
-            </header>
+            <Header/>
             <div className="flex justify-center mt-3">
                 <div className="mr-7 ml-7 max-w-3xl px-2 text-center text-white py-3">
                     <img
@@ -51,7 +16,6 @@ const OurModels = () => {
                         width="150"
                         style={{ height: "150px", display: "inline-block" }}
                     />
-           
                     <div className="mt-8">
                         <h2 className="text-4xl font-bold mb-4 text-roboto text-left text-yellow-400">Our Models</h2>
                         <div className="flex flex-col md:flex-row items-center  mb-8">
