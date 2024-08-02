@@ -151,11 +151,11 @@ const Video: React.FC = () => {
     <div className='bg-zinc-950 min-h-screen flex flex-col'>
       <Header />
       <div className="flex-grow flex justify-center px-4">
-        <main className="my-5 w-full md:max-w-7xl">
+        <main className="my-5 w-full md:w-full">
         <section className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mt-1">
             {fileWithLink && (
              <iframe
-             className="flex w-full items-center justify-center h-64 md:h-full"
+             className="flex w-full items-center justify-center h-64 md:h-96"
              src={modifiedLink + '&vq=hd1080'}
              width="1040"
              height="355"
