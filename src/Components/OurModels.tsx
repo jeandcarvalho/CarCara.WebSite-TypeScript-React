@@ -1,4 +1,4 @@
-import carcaraS from "../Components/img/carcara2.png";
+
 //import previewModelImg from "../Components/img/previewModel.png";
 //import fullModelImg from "../Components/img/fullModel.png";
 import Header from '../Components/Header';
