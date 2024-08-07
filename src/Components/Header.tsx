@@ -5,7 +5,7 @@ import customStyles from '../Styles/Header.tsx';
 
 const options = [
   { value: '/', label: 'Home' },
-  { value: '/Search', label: 'Acquisitions' },
+  { value: '/Intermediary', label: 'Acquisitions' },
   { value: '/About', label: 'About' },
   { value: '/OurModels', label: 'Our Models' },
 ];

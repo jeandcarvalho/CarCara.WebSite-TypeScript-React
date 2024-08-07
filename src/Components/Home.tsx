@@ -33,7 +33,7 @@ const Video: React.FC = () => {
                 <div className="text-center text-white w-full px-3">
                     <h1 className="text-5xl font-bold mb-4 text-yellow-300 text-roboto">Vehicle Acquisitions</h1>
                     <p className="text-lg mb-5 text-roboto">Empower your vision with data</p>
-                      <Link to={"/Search"}>
+                      <Link to={"/Intermediary"}>
                          <p className="bg-yellow-300 text-zinc-900 hover:bg-yellow-100 text-lg font-bold py-1 px-6 rounded-full transition duration-300 text-roboto">Explore Acquisitions</p>
                       </Link>
                     <p className="text-yellow-300 text-sm py-3">Visited States:
