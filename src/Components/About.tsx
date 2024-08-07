@@ -2,32 +2,37 @@ import carcaraS from "../Components/img/carcara2.png";
 import api from '../Services/api';
 import { useEffect, useState } from 'react';
 import Header from '../Components/Header';
-//import Footer from '../Components/Footer';
+import Footer from '../Components/Footer';
 
 interface FilesProps {
     'unique id': string;
     visitantes: number;
-  }
+}
+
 const totalDistance = 2773; // em quilômetros
 const totalHours = 35;
 const totalGigabytes = 25;
+
 const About = () => {
     const [filesdata, setFiles] = useState<FilesProps[]>([]);
+    
     useEffect(() => {
-      loadFiles();
+        loadFiles();
     }, []);
+    
     async function loadFiles() {
-      try {
-        const response = await api.get<FilesProps[]>("/counter");
-        setFiles(response.data);
-        console.log(response)
-
-      } catch (error) {
-        console.error("Error loading files:", error);
-      }
+        try {
+            const response = await api.get<FilesProps[]>("/counter");
+            setFiles(response.data);
+            console.log(response);
+        } catch (error) {
+            console.error("Error loading files:", error);
+        }
     }
+    
     const visitors = Array.isArray(filesdata) ? filesdata.map(item => item.visitantes) : [];
-    console.log(visitors)
+    console.log(visitors);
+    
     const handleButtonClick = () => {
         // Redirecionar para a página de modelos
         history.pushState(null, '', '/OurModels');
@@ -35,16 +40,16 @@ const About = () => {
     };
 
     return (
-        <body className="bg-zinc-950 min-h-screen">
-           <Header/>
-            <div className="flex justify-center mt-3">
+        <div className="bg-zinc-950 min-h-screen flex flex-col">
+            <Header/>
+            <div className="flex-grow flex justify-center mt-3">
                 <div className="mr-7 ml-7 max-w-3xl px-2 text-center text-white">
                     <img
                         src={carcaraS}
                         alt="Descrição da imagem"
                         className="mr-2 mt-1"
-                        width="150"
-                        style={{ height: "150px", display: "inline-block" }}
+                        width="70"
+                        style={{ height: "70px", display: "inline-block" }}
                     />
                     <h1 className="text-5xl font-bold mb-4 text-roboto text-yellow-400">About us</h1>
                     <p className="text-2xl mb-3 font-bold text-roboto">
@@ -65,7 +70,8 @@ const About = () => {
                     <p className="text-gray-400">Total Terabytes Used: {totalGigabytes} TB</p>
                 </div>
             </div>
-        </body>
+            <Footer/>
+        </div>
     );
 };
 

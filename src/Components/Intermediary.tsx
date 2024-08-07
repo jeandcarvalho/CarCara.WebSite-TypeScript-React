@@ -3,11 +3,13 @@ import logoscarcara from "../Components/img/LOGOSCARCARA2.jpg";
 import Header from './Header';
 import Footer from './Footer';
 
+
 const IntermediaryPage: React.FC = () => {
     return (
         <div className="min-h-screen flex flex-col bg-zinc-950">
             <Header/>
             <div className="flex-grow flex justify-center mt-7">
+            
                 <div className="text-center text-white w-full px-3">
                     <h1 className="text-5xl font-bold mb-7 text-yellow-300 text-roboto">Vehicle Acquisitions</h1>
                     <p className="text-lg mb-5 text-roboto">Choose your next action</p>
