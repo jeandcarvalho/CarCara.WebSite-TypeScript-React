@@ -4,7 +4,7 @@ import Footer from '../Components/Footer';
 import api from '../Services/api';
 import { useParams } from "react-router-dom";
 import { json2csv } from "json-2-csv";
-import MapVideo from '../Classes/MapVideo';
+import MapVideo from '../Maps/MapVideo';
 interface VideoFilesProps {
     id: string;
     VideoFile: string;
