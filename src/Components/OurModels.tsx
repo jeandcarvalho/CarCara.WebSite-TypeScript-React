@@ -3,7 +3,7 @@
 //import fullModelImg from "../Components/img/fullModel.png";
 import Header from '../Components/Header';
 import Footer from '../Components/Footer';
-import carcaraS from './img/carcara2.png'
+
 
 const OurModels = () => {
     return (
