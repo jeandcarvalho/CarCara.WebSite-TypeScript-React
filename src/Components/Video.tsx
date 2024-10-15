@@ -4,7 +4,7 @@ import Footer from '../Components/Footer';
 import api from '../Services/api';
 import { useParams } from "react-router-dom";
 import MapVideo from '../Maps/MapVideo';
-import { Link } from "react-router-dom"; // Import Link to navigate to the Extractor page
+import { Link } from "react-router-dom";
 
 interface VideoFilesProps {
     id: string;
@@ -38,6 +38,7 @@ const Video: React.FC = () => {
     const csv = csvdata[0];
     
     useEffect(() => {
+        window.scrollTo(0, 0); // Scroll to top on component load
         loadFiles();
     }, []);
 
@@ -176,7 +177,9 @@ const Video: React.FC = () => {
                                             </article>
                                         </article>
                                         <article className="bg-zinc-900 rounded p-1 relative">
+                                        <div className='relative z-0'>
                                             <MapVideo videoName={video} />
+                                        </div>
                                         </article>
                                     </section>
                                 </p>
