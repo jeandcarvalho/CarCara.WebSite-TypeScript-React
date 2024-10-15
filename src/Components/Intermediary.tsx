@@ -28,15 +28,22 @@ const IntermediaryPage: React.FC = () => {
                                 All Acquisitions
                             </button>
                         </Link>
+                       
                     </div>
+                    <div>
+                    <p className='mt-7'>
+                    Partners:
 
-                    <div className="text-center mt-11 flex justify-center">
+                    </p>
+
+                    <div className="text-center mt-3 flex justify-center">                                      
                         <img
                             src={logoscarcara}
                             alt="Descrição da imagem"
-                            className="w-full max-w-[300px] md:max-w-[580px] h-auto"  // Ajustei o max-width da imagem para mobile
-                            style={{ maxHeight: "150px", display: 'inline-block' }}
+                            className="w-full max-w-[500px] md:max-w-[700px] h-auto"  // Ajustei o max-width da imagem para mobile
+                            style={{ maxHeight: "300px", display: 'inline-block' }}
                         />
+                    </div>
                     </div>
                 </div>
             </div>
