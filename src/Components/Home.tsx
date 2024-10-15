@@ -33,9 +33,9 @@ const Home: React.FC = () => {
                         </span>
                     </p>
 
+                   
+                    <div className='mb-4 relative z-0'>
                     <MapComponent states={states} />
-                    <div className='mb-4'>
-
                     </div>
     
                 </div>
