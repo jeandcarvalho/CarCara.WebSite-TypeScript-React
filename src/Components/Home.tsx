@@ -1,7 +1,6 @@
 // Pages/Home.tsx
 import { Link } from 'react-router-dom';
 import { useEffect } from 'react';
-import logoscarcara from "../Components/img/LOGOSCARCARA2.jpg";
 import MapComponent from "../Maps/MapComponent";
 import Header from '../Components/Header';
 import Footer from '../Components/Footer';
@@ -35,6 +34,9 @@ const Home: React.FC = () => {
                     </p>
 
                     <MapComponent states={states} />
+                    <div className='mb-8'>
+
+                    </div>
     
                 </div>
             </div>      
