@@ -35,15 +35,7 @@ const Home: React.FC = () => {
                     </p>
 
                     <MapComponent states={states} />
-                    <div className="text-center mb-2">
-                        <p className='text-xs md:text-sm font-semibold text-zinc-400 mt-2 mb-2'>Partners</p>
-                        <img
-                            src={logoscarcara}
-                            alt="Descrição da imagem"
-                            className="w-full max-w-[300px] md:max-w-[580px] h-auto"  // Ajustei o max-width da imagem para mobile
-                            style={{ maxHeight: "150px", display: 'inline-block' }}
-                        />
-                    </div>
+    
                 </div>
             </div>      
             <Footer/>
