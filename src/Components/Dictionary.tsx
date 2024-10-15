@@ -1,7 +1,12 @@
+import React, { useEffect } from 'react';
 import Header from './Header';
 import Footer from './Footer';
 
 const Dictionary = () => {
+    useEffect(() => {
+        window.scrollTo(0, 0); // Rola para o topo da página ao carregar
+    }, []);
+
     return (
         <div className="bg-zinc-950 min-h-screen flex flex-col">
             <Header />
