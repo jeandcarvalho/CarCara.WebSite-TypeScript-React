@@ -2,6 +2,7 @@
 import Header from './Header';
 import Footer from './Footer';
 import extractorpic from "../Components/img/extractorpic.jpg";
+import { Link } from 'react-router-dom';
 
 const Extractor = () => {
     return (
@@ -41,31 +42,33 @@ const Extractor = () => {
 </div>
 
                         {/* Section for What the Extractor Does */}
-                        <div className="text-left mb-8">
-                            <h3 className="text-2xl font-bold mb-2 text-roboto text-yellow-300">What the CarCara Extractor Does</h3>
-                            <p className="text-base font-semi md:text-sm text-roboto text-white">
-                                The CarCara Extractor allows you to:
-                            </p>
-                            <ul className="list-disc list-inside text-left mb-4">
-                                <li>Extract images from video files at intervals of 1 second, 5 seconds, or 10 seconds.</li>
-                                <li>Extract data from CSV files such as:
-                                    <ul className="list-disc list-inside text-white pl-5">
-                                        <li>GPS (location data)</li>
-                                        <li>IMU (inertial sensor data)</li>
-                                        <li>Speed and braking data</li>
-                                        <li>Steering wheel movements</li>
-                                        <li>RGB camera frames</li>
-                                        <li>Fuel efficiency</li>
-                                        <li>Battery voltage</li>
-                                        <li>Engine and transmission data</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                            <p className="text-base font-semi md:text-sm text-roboto text-white">
-                                Once the extraction is complete, the data and images are saved in a folder in the same directory as the CSV or video file.
-                            </p>
-                        </div>
-
+<div className="text-left mb-8">
+    <h3 className="text-2xl font-bold mb-2 text-roboto text-yellow-300">What the CarCara Extractor Does</h3>
+    <p className="text-base font-semi md:text-sm text-roboto text-white">
+        The CarCara Extractor allows you to:
+    </p>
+    <ul className="list-disc list-inside text-left mb-4">
+        <li>Extract images from video files at intervals of 1 second, 5 seconds, or 10 seconds.</li>
+        <li>Extract data from CSV files such as:
+            <ul className="list-disc list-inside text-white pl-5">
+                <li>GPS (location data)</li>
+                <li>IMU (inertial sensor data)</li>
+                <li>Speed and braking data</li>
+                <li>Steering wheel movements</li>
+                <li>RGB camera frames</li>
+                <li>Fuel efficiency</li>
+                <li>Battery voltage</li>
+                <li>Engine and transmission data</li>
+            </ul>
+        </li>
+    </ul>
+    <p className="text-base font-semi md:text-sm text-roboto text-white">
+        Once the extraction is complete, the data and images are saved in a folder in the same directory as the CSV or video file.
+    </p>
+    <p className="text-base font-semi md:text-sm text-roboto text-white">
+        For more detailed information about the extracted data, visit the <Link to="/dictionary" className="text-yellow-400 underline">Data Dictionary</Link>.
+    </p>
+</div>
                         {/* Section for How to Start */}
                         <div className="text-left mb-8">
     <h3 className="text-2xl font-bold mb-2 text-roboto text-yellow-300">How to Start</h3>

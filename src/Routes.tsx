@@ -8,6 +8,7 @@ import Query from "./Components/Query";
 import OurModels from "./Components/OurModels";
 import Intermediary from "./Components/Intermediary";
 import Extractor from "./Components/Extractor";
+import Dictionary from "./Components/Dictionary";
 
 
 export const Routes = createBrowserRouter ([
@@ -23,6 +24,7 @@ export const Routes = createBrowserRouter ([
         {path: "OurModels", element: <OurModels/>},
         {path: "Intermediary", element: <Intermediary/> },
         {path: "Extractor", element: <Extractor/> },
+        {path: "Dictionary", element: <Dictionary/> },
     ]
    }  
 ])

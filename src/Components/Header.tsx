@@ -8,6 +8,7 @@ const options = [
   { value: '/', label: 'Home' },
   { value: '/Intermediary', label: 'Acquisitions' },
   { value: '/Extractor', label: 'Extract' },
+  { value: '/Dictionary', label: 'Data Dictionary' },
   { value: '/OurModels', label: 'Our Models' },
   { value: '/About', label: 'About' },  
 ];
