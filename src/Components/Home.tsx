@@ -34,7 +34,7 @@ const Home: React.FC = () => {
                     </p>
 
                     <MapComponent states={states} />
-                    <div className='mb-8'>
+                    <div className='mb-4'>
 
                     </div>
     
