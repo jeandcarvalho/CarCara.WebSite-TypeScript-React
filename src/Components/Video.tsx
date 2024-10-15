@@ -3,7 +3,6 @@ import Header from '../Components/Header';
 import Footer from '../Components/Footer';
 import api from '../Services/api';
 import { useParams } from "react-router-dom";
-import { json2csv } from "json-2-csv";
 import MapVideo from '../Maps/MapVideo';
 interface VideoFilesProps {
     id: string;
@@ -22,40 +21,41 @@ interface VideoFilesProps {
     Weather: string;
     Period: string;
   }
-  
-  interface GeoFilesProps {
-    id: string;
+
+  interface CsvFileProps {
     videoname: string;
-    timestamps: Date;
-    GPS_y: string;
-    GPS_x: string;
-    GPS_z: string;
+    timestamps: string;
   }
+
   
 const Video: React.FC = () => {
   const { video } = useParams<{ video?: string }>();
   const videoclicked = video?.substring(0, 28);
 
   const [filesdata, setFiles] = useState<VideoFilesProps[]>([]);
-  const [filesgeo, setGeo] = useState<GeoFilesProps[]>([]);
-
+  const [csvdata, setCsv] = useState<CsvFileProps[]>([]);
+  const csv = csvdata[0];
   useEffect(() => {
     loadFiles();
   }, []);
 
   useEffect(() => {
-    loadGeo();
+    loadCsv();
   }, []);
+
+
+
 
   async function loadFiles() {
     const response = await api.get("/videofiless?page=1&pageSize=300&searchString=!!!!!");
     setFiles(response.data);
   }
 
-  async function loadGeo() {
-    const response = await api.get(`/coordinates?page=1&pageSize=3000&searchString=${videoclicked}`);
-    setGeo(response.data);
+  async function loadCsv() {
+    const response = await api.get("vehicle?page=1&pageSize=10&searchString="+ videoclicked);
+    setCsv(response.data);
   }
+
 
   function extrairIdGoogleDrive(link: string | undefined): string | null {
     if (link && link.includes("/file/d/")) {
@@ -77,33 +77,13 @@ const Video: React.FC = () => {
       console.error("Invalid file ID or file name");
       return;
     }
-
     const url = `https://drive.google.com/uc?export=download&id=${fileId}`;
     const link = document.createElement("a");
     link.href = url;
     link.download = fileName;
-
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  }
-
-  function downloadGeoCSV() {
-    if (filesgeo.length === 0) {
-      console.error("No data to download");
-      return;
-    }
-    if (video !== undefined) {
-      const novaConstante: string = video.slice(0, -4);
-      const csvData = json2csv(filesgeo);
-      const blob = new Blob([csvData], { type: "text/csv" });
-      const link = document.createElement("a");
-      link.href = window.URL.createObjectURL(blob);
-      link.setAttribute("download", `(GEO DATA) ${novaConstante}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
   }
 
   const fileWithLink = filesdata.find(file => file.VideoFile === video);
@@ -120,8 +100,14 @@ const Video: React.FC = () => {
     return input.split(',').map(part => part.trim()).join(', ');
   };
 
+
+
   const modifiedLink = fileWithLink ? changeViewToPreview(fileWithLink.Link) : '';
   const idfile = fileWithLink ? extrairIdGoogleDrive(fileWithLink.Link) : '';
+
+  const idfilecsv = csv ? extrairIdGoogleDrive(csv.timestamps) : '';
+
+  console.log(csv)
 
   const DownloadButton: React.FC<{ fileId: string | null; fileName: string }> = ({ fileId, fileName }) => {
     const handleClick = () => {
@@ -134,6 +120,21 @@ const Video: React.FC = () => {
 
     return (
       <button className="bg-yellow-500 hover:scale-105 duration-200 text-black rounded relative w-full text-center justify-center" onClick={handleClick} title="Video File in .mp4">Video File 1080p</button>
+    );
+  };
+
+  const DownloadButtonCsv: React.FC<{ fileId: string | null; fileName: string }> = ({ fileId, fileName }) => {
+    const handleClick = () => {
+      if (fileId !== null) {
+        downloadVideo(fileId, fileName);
+        window.open(csv.timestamps, '_blank');
+      } else {
+        console.error("File ID is null");
+      }
+    };
+
+    return (
+      <button className="bg-yellow-500 hover:scale-105 duration-200 text-black rounded relative w-full text-center justify-center" onClick={handleClick} title="Video File in .mp4">CSV Dataset</button>
     );
   };
 
@@ -161,12 +162,9 @@ const Video: React.FC = () => {
                       <button className="bg-yellow-500 rounded p-2 relative w-full text-center justify-center hover:scale-105 duration-200">
                         <DownloadButton fileId={idfile} fileName="nome_do_arquivo.mp4" />
                       </button>                   
-                      <button
-                        className='text-black hover:scale-105 duration-200 bg-yellow-500 rounded relative w-full text-center justify-center'
-                        onClick={downloadGeoCSV}
-                      >
-                        <span className='text-black'>Geo Coordinates</span>
-                      </button>
+                      <button className="bg-yellow-500 rounded p-2 relative w-full text-center justify-center hover:scale-105 duration-200">
+                        <DownloadButtonCsv fileId={idfilecsv} fileName="nome_do_arquivo.csv" />
+                      </button>         
                     </section>
                   </article>
                   <section className="grid grid-cols-2 gap-4 w-full">              
