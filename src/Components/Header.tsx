@@ -7,8 +7,9 @@ import customStyles from '../Styles/Header.tsx';
 const options = [
   { value: '/', label: 'Home' },
   { value: '/Intermediary', label: 'Acquisitions' },
-  { value: '/About', label: 'About' },
+  { value: '/Extractor', label: 'Extract' },
   { value: '/OurModels', label: 'Our Models' },
+  { value: '/About', label: 'About' },  
 ];
 
 const Header: React.FC = () => {
