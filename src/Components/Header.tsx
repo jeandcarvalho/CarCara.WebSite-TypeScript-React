@@ -23,7 +23,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="flex flex-col md:flex-row items-center justify-between p-3 bg-zinc-950 shadow-md">
+    <header className="flex flex-col md:flex-row items-center justify-between p-3 bg-black shadow-md">
       <img
         src={carcara}
         alt="Descrição da imagem"
