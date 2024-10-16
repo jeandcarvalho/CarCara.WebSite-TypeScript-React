@@ -117,6 +117,18 @@ const Extractor = () => {
                                 </li>
                             </ul>
                         </div>
+                         {/* Image of Software Interface */}
+                         <div className="text-left mb-8">
+                            <h3 className="text-2xl font-bold mb-2 text-roboto text-yellow-300">Software Interface</h3>
+                            <img
+                                 src={extractorpic}
+                                alt="CarCara Extractor Interface"
+                                className="w-full max-w-xl mx-auto"
+                            />
+                            <p className="text-base font-semi md:text-sm text-roboto text-white mt-4">
+                                The CarCara Extractor's interface is simple and intuitive, allowing users to quickly load files and begin extracting valuable data and images.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
