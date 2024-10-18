@@ -1,8 +1,8 @@
 import Header from './Header';
 import Footer from './Footer';
-import acquisitionImg from '../Components/img/frontCamera.png'; // Imagem sobre as aquisições
-import extractorImg from '../Components/img/extractorpic.jpg'; // Imagem sobre o extractor
-import analysisImg from '../Components/img/examples.png'; // Imagem sobre a análise
+import acquisitionImg from '../Components/img/frontCamera.png'; // Image about acquisitions
+import extractorImg from '../Components/img/extractorpic.jpg'; // Image about the extractor
+import analysisImg from '../Components/img/examples.png'; // Image about analysis
 import { Link } from 'react-router-dom';
 
 const HowTo = () => {
@@ -13,7 +13,7 @@ const HowTo = () => {
                 <div className="mr-7 ml-7 max-w-5xl px-4 text-center text-white py-3">
                     <h2 className="text-5xl font-bold mb-6 text-roboto text-yellow-400 text-left">How to Use CarCara</h2>
                     
-                    {/* Seção 1 - Aquisições */}
+                    {/* Section 1 - Acquisitions */}
                     <div className="flex flex-col md:flex-row items-center mb-8">
                         <img
                             src={acquisitionImg}
@@ -37,7 +37,9 @@ const HowTo = () => {
                         </div>
                     </div>
 
-                    {/* Seção 2 - Extractor */}
+                    <hr className="my-8 border-yellow-400" /> {/* Divider with yellow color */}
+
+                    {/* Section 2 - Extractor */}
                     <div className="flex flex-col md:flex-row items-center mb-8">
                         <img
                             src={extractorImg}
@@ -59,9 +61,10 @@ const HowTo = () => {
                         </div>
                     </div>
 
-                    {/* Seção 3 - Data Analysis */}
+                    <hr className="my-8 border-yellow-400" /> {/* Divider with yellow color */}
+
+                    {/* Section 3 - Data Analysis */}
                     <div className="flex flex-col items-center ">
-                      
                         <div className="text-left md:ml-8 mb-8">
                             <h3 className="text-2xl font-bold mb-2 text-roboto text-yellow-300">3. Data Analysis</h3>
                             <p className="text-base font-semi md:text-sm text-roboto text-white">
@@ -79,8 +82,8 @@ const HowTo = () => {
                         <img
                             src={analysisImg}
                             alt="Data Analysis Overview"
-                            className="mb-4" // Adicione uma margem na parte inferior para espaçamento
-                            style={{ width: "100%", height: "auto", maxWidth: "600px" }} // Ajuste a largura máxima para 600px
+                            className="mb-4" // Added margin at the bottom for spacing
+                            style={{ width: "100%", height: "auto", maxWidth: "600px" }} // Adjusted max width to 600px
                         />
                     </div>
                 </div>

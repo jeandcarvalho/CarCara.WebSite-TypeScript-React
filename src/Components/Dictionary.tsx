@@ -25,7 +25,7 @@ const Dictionary = () => {
 
                             {/* IMU Data */}
                             <tr>
-                                <td colSpan="4" className="px-4 py-2 text-xl font-bold text-roboto text-yellow-400">IMU Data</td>
+                                <td colSpan={4} className="px-4 py-2 text-xl font-bold text-roboto text-yellow-400">IMU Data</td>
                             </tr>
                             <tr>
                                 <td className="px-4 py-2">IMU Data</td>
@@ -90,12 +90,12 @@ const Dictionary = () => {
                             
                             {/* Separador entre grupos */}
                             <tr>
-                                <td colSpan="4" className="h-4"></td>
+                                <td colSpan={4} className="h-4"></td>
                             </tr>
 
                             {/* Battery Voltage Data */}
                             <tr>
-                                <td colSpan="4" className="px-4 py-2 text-xl font-bold text-roboto text-yellow-400">Battery Voltage Data</td>
+                                <td colSpan={4} className="px-4 py-2 text-xl font-bold text-roboto text-yellow-400">Battery Voltage Data</td>
                             </tr>
                             <tr>
                                 <td className="px-4 py-2">Battery Voltage Data</td>
@@ -118,12 +118,12 @@ const Dictionary = () => {
 
                             {/* Separador entre grupos */}
                             <tr>
-                                <td colSpan="4" className="h-4"></td>
+                                <td colSpan={4} className="h-4"></td>
                             </tr>
 
                             {/* Steering Wheel Data */}
                             <tr>
-                                <td colSpan="4" className="px-4 py-2 text-xl font-bold text-roboto text-yellow-400">Steering Wheel Data</td>
+                                <td colSpan={4} className="px-4 py-2 text-xl font-bold text-roboto text-yellow-400">Steering Wheel Data</td>
                             </tr>
                             <tr>
                                 <td className="px-4 py-2">Steering Wheel Data</td>
@@ -152,12 +152,12 @@ const Dictionary = () => {
 
                             {/* Separador entre grupos */}
                             <tr>
-                                <td colSpan="4" className="h-4"></td>
+                                <td colSpan={4} className="h-4"></td>
                             </tr>
 
                             {/* Fuel Efficiency Data */}
                             <tr>
-                                <td colSpan="4" className="px-4 py-2 text-xl font-bold text-roboto text-yellow-400">Fuel Efficiency Data</td>
+                                <td colSpan={4} className="px-4 py-2 text-xl font-bold text-roboto text-yellow-400">Fuel Efficiency Data</td>
                             </tr>
                             <tr>
                                 <td className="px-4 py-2">Fuel Efficiency Data</td>
@@ -198,12 +198,12 @@ const Dictionary = () => {
 
                             {/* Separador entre grupos */}
                             <tr>
-                                <td colSpan="4" className="h-4"></td>
+                                <td colSpan={4} className="h-4"></td>
                             </tr>
 
                             {/* Speed and Braking Data */}
                             <tr>
-                                <td colSpan="4" className="px-4 py-2 text-xl font-bold text-roboto text-yellow-400">Speed and Braking Data</td>
+                                <td colSpan={4} className="px-4 py-2 text-xl font-bold text-roboto text-yellow-400">Speed and Braking Data</td>
                             </tr>
                             <tr>
                                 <td className="px-4 py-2">Speed and Braking Data</td>
@@ -213,23 +213,57 @@ const Dictionary = () => {
                             </tr>
                             <tr>
                                 <td></td>
-                                <td><strong>Speed</strong></td>
-                                <td>Measured speed of the vehicle.</td>
+                                <td><strong>VehicleSpeed</strong></td>
+                                <td>Measured vehicle speed.</td>
                                 <td>km/h</td>
                             </tr>
                             <tr>
                                 <td></td>
-                                <td><strong>BrakePressure</strong></td>
-                                <td>Measured brake pressure.</td>
-                                <td>bar</td>
+                                <td><strong>BrakingForce</strong></td>
+                                <td>Measured braking force.</td>
+                                <td>N</td>
+                            </tr>
+
+                            {/* Separador entre grupos */}
+                            <tr>
+                                <td colSpan={4} className="h-4"></td>
+                            </tr>
+
+                            {/* Location Data */}
+                            <tr>
+                                <td colSpan={4} className="px-4 py-2 text-xl font-bold text-roboto text-yellow-400">Location Data</td>
+                            </tr>
+                            <tr>
+                                <td className="px-4 py-2">Location Data</td>
+                                <td><strong>timestamps</strong></td>
+                                <td>Time stamp for each data sample.</td>
+                                <td>ms</td>
                             </tr>
                             <tr>
                                 <td></td>
-                                <td><strong>Acceleration</strong></td>
-                                <td>Overall acceleration.</td>
-                                <td>m/s²</td>
+                                <td><strong>Latitude</strong></td>
+                                <td>Measured latitude.</td>
+                                <td>°</td>
                             </tr>
-                            {/* Additional Data Groups can be added here */}
+                            <tr>
+                                <td></td>
+                                <td><strong>Longitude</strong></td>
+                                <td>Measured longitude.</td>
+                                <td>°</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><strong>Altitude</strong></td>
+                                <td>Measured altitude.</td>
+                                <td>m</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><strong>SpeedLocation</strong></td>
+                                <td>Location speed.</td>
+                                <td>m/s</td>
+                            </tr>
+
                         </tbody>
                     </table>
                 </div>
