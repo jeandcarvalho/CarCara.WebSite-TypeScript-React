@@ -7,6 +7,7 @@ const customStyles: StylesConfig = {
     ...provided,
     backgroundColor: '#363636',
     color: 'white',
+    padding: '5px', // Adiciona padding ao controle
   }),
   menu: (provided) => ({
     ...provided,
@@ -15,20 +16,19 @@ const customStyles: StylesConfig = {
   }),
   option: (base, { isSelected, isFocused }) => ({
     ...base,
-    backgroundColor: isSelected ? '#4a4a4a' : 'transparent', // Usando 'transparent' quando não selecionado
-    color: 'white', // Cor do texto do item
+    padding: '10px', // Adiciona padding nas opções
+    backgroundColor: isSelected ? '#4a4a4a' : 'transparent',
+    color: 'white',
     '&:hover': {
-      backgroundColor: isFocused ? 'yellow' : '#666666', // Cor de fundo quando o mouse está sobre o item
-      color: 'black' // Cor do texto do item quando o mouse está sobre ele
+      backgroundColor: isFocused ? 'yellow' : '#666666',
+      color: 'black'
     }
   }),
   singleValue: (provided) => ({
     ...provided,
-    color: 'lightgray', // Define a cor do texto para branco
-    fontWeight: 'bold', // Mantém o texto em negrito
+    color: 'lightgray',
+    fontWeight: 'bold',
   }),
-  
-  // Adicione mais estilos conforme necessário
 };
 
 export default customStyles;

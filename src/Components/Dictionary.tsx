@@ -1,4 +1,4 @@
-import{ useEffect } from 'react';
+import { useEffect } from 'react';
 import Header from './Header';
 import Footer from './Footer';
 
@@ -14,88 +14,224 @@ const Dictionary = () => {
                 <div className="mr-7 ml-7 max-w-3xl px-2 text-center text-white py-3">
                     <h2 className="text-5xl font-bold mb-4 text-roboto text-left text-yellow-400 mt-4">Data Dictionary</h2>
 
-                    {/* IMU Data Section */}
-                    <div className="mb-8">
-                        <h3 className="text-3xl font-bold mb-2 text-roboto text-yellow-300">IMU Data</h3>
-                        <ul className="list-disc list-inside text-left">
-                            <li><strong>timestamps:</strong> Time stamp for each data sample.</li>
-                            <li><strong>Aceinna_AccX:</strong> Acceleration in the X-axis measured by the Aceinna sensor.</li>
-                            <li><strong>Aceinna_AccY:</strong> Acceleration in the Y-axis measured by the Aceinna sensor.</li>
-                            <li><strong>Aceinna_AccZ:</strong> Acceleration in the Z-axis measured by the Aceinna sensor.</li>
-                            <li><strong>LongitudinalAccelerationProc:</strong> Processed longitudinal acceleration.</li>
-                            <li><strong>LongitudinalAccelerationExtended:</strong> Extended longitudinal acceleration.</li>
-                            <li><strong>TransversalAcceleration:</strong> Measured transverse acceleration.</li>
-                            <li><strong>Aceinna_Pitch_Angular_Rate:</strong> Pitch angle rate measured by the Aceinna sensor.</li>
-                            <li><strong>Aceinna_Roll_Angular_Rate:</strong> Roll angle rate measured by the Aceinna sensor.</li>
-                            <li><strong>Aceinna_Yaw_Angular_Rate:</strong> Yaw angle rate measured by the Aceinna sensor.</li>
-                        </ul>
-                    </div>
+                    {/* Introdução */}
+                    <p className="text-lg font-medium text-roboto text-white mb-6">
+                        The Data Dictionary provides a comprehensive overview of the various data groups collected by the CarCara system. Each data group includes specific measurements and parameters crucial for analyzing vehicle performance and behavior. Below, you'll find the categories of data we collect, along with detailed descriptions and units of measurement for each parameter.
+                    </p>
 
-                    {/* Battery Voltage Data Section */}
-                    <div className="mb-8">
-                        <h3 className="text-3xl font-bold mb-2 text-roboto text-yellow-300">Battery Voltage Data</h3>
-                        <ul className="list-disc list-inside text-left">
-                            <li><strong>timestamps:</strong> Time stamp for each data sample.</li>
-                            <li><strong>BatteryVoltage_V2:</strong> Battery voltage measured in version 2.</li>
-                            <li><strong>BatteryVoltage:</strong> Measured battery voltage.</li>
-                        </ul>
-                    </div>
+                    {/* Tabela do Dicionário de Dados */}
+                    <table className="min-w-full divide-y divide-gray-600">
+                        <tbody className="divide-y divide-gray-600">
 
-                    {/* Steering Wheel Data Section */}
-                    <div className="mb-8">
-                        <h3 className="text-3xl font-bold mb-2 text-roboto text-yellow-300">Steering Wheel Data</h3>
-                        <ul className="list-disc list-inside text-left">
-                            <li><strong>timestamps:</strong> Time stamp for each data sample.</li>
-                            <li><strong>SteeringWheelAngle:</strong> Measured steering wheel angle.</li>
-                            <li><strong>SteeringWheelAngle_Offset:</strong> Offset of the steering wheel angle.</li>
-                            <li><strong>SteeringWheelRotationSpeed:</strong> Steering wheel rotation speed.</li>
-                        </ul>
-                    </div>
+                            {/* IMU Data */}
+                            <tr>
+                                <td colSpan="4" className="px-4 py-2 text-xl font-bold text-roboto text-yellow-400">IMU Data</td>
+                            </tr>
+                            <tr>
+                                <td className="px-4 py-2">IMU Data</td>
+                                <td><strong>timestamps</strong></td>
+                                <td>Time stamp for each data sample.</td>
+                                <td>ms</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><strong>Aceinna_AccX</strong></td>
+                                <td>Acceleration in the X-axis measured by the Aceinna sensor.</td>
+                                <td>m/s²</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><strong>Aceinna_AccY</strong></td>
+                                <td>Acceleration in the Y-axis measured by the Aceinna sensor.</td>
+                                <td>m/s²</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><strong>Aceinna_AccZ</strong></td>
+                                <td>Acceleration in the Z-axis measured by the Aceinna sensor.</td>
+                                <td>m/s²</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><strong>LongitudinalAccelerationProc</strong></td>
+                                <td>Processed longitudinal acceleration.</td>
+                                <td>m/s²</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><strong>LongitudinalAccelerationExtended</strong></td>
+                                <td>Extended longitudinal acceleration.</td>
+                                <td>m/s²</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><strong>TransversalAcceleration</strong></td>
+                                <td>Measured transverse acceleration.</td>
+                                <td>m/s²</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><strong>Aceinna_Pitch_Angular_Rate</strong></td>
+                                <td>Pitch angle rate measured by the Aceinna sensor.</td>
+                                <td>°/s</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><strong>Aceinna_Roll_Angular_Rate</strong></td>
+                                <td>Roll angle rate measured by the Aceinna sensor.</td>
+                                <td>°/s</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><strong>Aceinna_Yaw_Angular_Rate</strong></td>
+                                <td>Yaw angle rate measured by the Aceinna sensor.</td>
+                                <td>°/s</td>
+                            </tr>
+                            
+                            {/* Separador entre grupos */}
+                            <tr>
+                                <td colSpan="4" className="h-4"></td>
+                            </tr>
 
-                    {/* Fuel Efficiency Data Section */}
-                    <div className="mb-8">
-                        <h3 className="text-3xl font-bold mb-2 text-roboto text-yellow-300">Fuel Efficiency Data</h3>
-                        <ul className="list-disc list-inside text-left">
-                            <li><strong>timestamps:</strong> Time stamp for each data sample.</li>
-                            <li><strong>FuelTemperature:</strong> Measured fuel temperature.</li>
-                            <li><strong>FuelAutonomyInKm:</strong> Fuel autonomy in kilometers.</li>
-                            <li><strong>FuelLevelDisplayed:</strong> Displayed fuel level.</li>
-                            <li><strong>FuelConsumption:</strong> Measured fuel consumption.</li>
-                            <li><strong>NominalFuelConsumption:</strong> Nominal fuel consumption.</li>
-                        </ul>
-                    </div>
+                            {/* Battery Voltage Data */}
+                            <tr>
+                                <td colSpan="4" className="px-4 py-2 text-xl font-bold text-roboto text-yellow-400">Battery Voltage Data</td>
+                            </tr>
+                            <tr>
+                                <td className="px-4 py-2">Battery Voltage Data</td>
+                                <td><strong>timestamps</strong></td>
+                                <td>Time stamp for each data sample.</td>
+                                <td>ms</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><strong>BatteryVoltage_V2</strong></td>
+                                <td>Battery voltage measured in version 2.</td>
+                                <td>V</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><strong>BatteryVoltage</strong></td>
+                                <td>Measured battery voltage.</td>
+                                <td>V</td>
+                            </tr>
 
-                    {/* Speed and Braking Data Section */}
-                    <div className="mb-8">
-                        <h3 className="text-3xl font-bold mb-2 text-roboto text-yellow-300">Speed and Braking Data</h3>
-                        <ul className="list-disc list-inside text-left">
-                            <li><strong>timestamps:</strong> Time stamp for each data sample.</li>
-                            <li><strong>VehicleSpeed:</strong> Measured vehicle speed.</li>
-                            <li><strong>WheelSpeed_F_L:</strong> Speed of the front left wheel.</li>
-                            <li><strong>WheelSpeed_F_R:</strong> Speed of the front right wheel.</li>
-                            <li><strong>WheelSpeed_R_L:</strong> Speed of the rear left wheel.</li>
-                            <li><strong>WheelSpeed_R_R:</strong> Speed of the rear right wheel.</li>
-                            <li><strong>FourWheelReferenceSpeed:</strong> Reference speed for all four wheels.</li>
-                            <li><strong>DisplayedSpeed:</strong> Displayed speed on the dashboard.</li>
-                            <li><strong>BrakingPressure:</strong> Measured braking pressure.</li>
-                            <li><strong>MastervacPressure:</strong> Measured master vacuum pressure.</li>
-                            <li><strong>BrakingPressure_Fast:</strong> Measured fast braking pressure.</li>
-                        </ul>
-                    </div>
+                            {/* Separador entre grupos */}
+                            <tr>
+                                <td colSpan="4" className="h-4"></td>
+                            </tr>
 
-                    {/* Engine and Transmission Data Section */}
-                    <div className="mb-8">
-                        <h3 className="text-3xl font-bold mb-2 text-roboto text-yellow-300">Engine and Transmission Data</h3>
-                        <ul className="list-disc list-inside text-left">
-                            <li><strong>timestamps:</strong> Time stamp for each data sample.</li>
-                            <li><strong>EngineTorque_WithoutTMReq:</strong> Engine torque without transmission requirements.</li>
-                            <li><strong>MaximumInstantTorque:</strong> Maximum instantaneous engine torque.</li>
-                            <li><strong>MinimumInstantTorque:</strong> Minimum instantaneous engine torque.</li>
-                            <li><strong>EngineRPM:</strong> Engine rotation speed in RPM.</li>
-                            <li><strong>MeanEffectiveTorque:</strong> Mean effective engine torque.</li>
-                            <li><strong>RequestedTorqueAfterProc:</strong> Requested torque after processing.</li>
-                        </ul>
-                    </div>
+                            {/* Steering Wheel Data */}
+                            <tr>
+                                <td colSpan="4" className="px-4 py-2 text-xl font-bold text-roboto text-yellow-400">Steering Wheel Data</td>
+                            </tr>
+                            <tr>
+                                <td className="px-4 py-2">Steering Wheel Data</td>
+                                <td><strong>timestamps</strong></td>
+                                <td>Time stamp for each data sample.</td>
+                                <td>ms</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><strong>SteeringWheelAngle</strong></td>
+                                <td>Measured steering wheel angle.</td>
+                                <td>°</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><strong>SteeringWheelAngle_Offset</strong></td>
+                                <td>Offset of the steering wheel angle.</td>
+                                <td>°</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><strong>SteeringWheelRotationSpeed</strong></td>
+                                <td>Steering wheel rotation speed.</td>
+                                <td>°/s</td>
+                            </tr>
+
+                            {/* Separador entre grupos */}
+                            <tr>
+                                <td colSpan="4" className="h-4"></td>
+                            </tr>
+
+                            {/* Fuel Efficiency Data */}
+                            <tr>
+                                <td colSpan="4" className="px-4 py-2 text-xl font-bold text-roboto text-yellow-400">Fuel Efficiency Data</td>
+                            </tr>
+                            <tr>
+                                <td className="px-4 py-2">Fuel Efficiency Data</td>
+                                <td><strong>timestamps</strong></td>
+                                <td>Time stamp for each data sample.</td>
+                                <td>ms</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><strong>FuelTemperature</strong></td>
+                                <td>Measured fuel temperature.</td>
+                                <td>°C</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><strong>FuelAutonomyInKm</strong></td>
+                                <td>Fuel autonomy in kilometers.</td>
+                                <td>km</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><strong>FuelLevelDisplayed</strong></td>
+                                <td>Displayed fuel level.</td>
+                                <td>%</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><strong>FuelConsumption</strong></td>
+                                <td>Measured fuel consumption.</td>
+                                <td>l/100km</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><strong>NominalFuelConsumption</strong></td>
+                                <td>Nominal fuel consumption.</td>
+                                <td>l/100km</td>
+                            </tr>
+
+                            {/* Separador entre grupos */}
+                            <tr>
+                                <td colSpan="4" className="h-4"></td>
+                            </tr>
+
+                            {/* Speed and Braking Data */}
+                            <tr>
+                                <td colSpan="4" className="px-4 py-2 text-xl font-bold text-roboto text-yellow-400">Speed and Braking Data</td>
+                            </tr>
+                            <tr>
+                                <td className="px-4 py-2">Speed and Braking Data</td>
+                                <td><strong>timestamps</strong></td>
+                                <td>Time stamp for each data sample.</td>
+                                <td>ms</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><strong>Speed</strong></td>
+                                <td>Measured speed of the vehicle.</td>
+                                <td>km/h</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><strong>BrakePressure</strong></td>
+                                <td>Measured brake pressure.</td>
+                                <td>bar</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td><strong>Acceleration</strong></td>
+                                <td>Overall acceleration.</td>
+                                <td>m/s²</td>
+                            </tr>
+                            {/* Additional Data Groups can be added here */}
+                        </tbody>
+                    </table>
                 </div>
             </div>
             <Footer />

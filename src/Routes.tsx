@@ -9,6 +9,7 @@ import OurModels from "./Components/OurModels";
 import Intermediary from "./Components/Intermediary";
 import Extractor from "./Components/Extractor";
 import Dictionary from "./Components/Dictionary";
+import HowTo from "./Components/HowTo";
 
 
 export const Routes = createBrowserRouter ([
@@ -25,6 +26,7 @@ export const Routes = createBrowserRouter ([
         {path: "Intermediary", element: <Intermediary/> },
         {path: "Extractor", element: <Extractor/> },
         {path: "Dictionary", element: <Dictionary/> },
+        {path: "HowTo", element: <HowTo/> },
     ]
    }  
 ])

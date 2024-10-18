@@ -20,6 +20,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "src/Components/Intermediary.tsx"],
+  "include": ["src", "src/Components/Intermediary.tsx", "src/Components/HowTo.tsx"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
