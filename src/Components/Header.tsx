@@ -1,6 +1,6 @@
-import React from 'react';
-import Select from 'react-select';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate instead
+import React, { useRef } from 'react';
+import Select, { Props as SelectProps, SelectInstance } from 'react-select';
+import { useNavigate } from 'react-router-dom';
 import carcara from "../Components/img/carcara23.png";
 import customStyles from '../Styles/Header.tsx';
 
@@ -15,14 +15,19 @@ const options = [
 ];
 
 const Header: React.FC = () => {
-  const navigate = useNavigate(); // Use useNavigate to get the navigate function
+  const navigate = useNavigate();
+  const selectRef = useRef<SelectInstance<SelectProps, false>>(null); // Use SelectInstance as type
 
   const handleChange = (newValue: unknown) => {
     const selectedOption = newValue as { value: string; label: string; } | null;
     if (selectedOption !== null && 'value' in selectedOption) {
-      navigate(selectedOption.value); // Use navigate to change routes
+      navigate(selectedOption.value);
       window.dispatchEvent(new PopStateEvent('popstate', { state: null }));
     }
+  };
+
+  const handleMenuOpen = () => {
+    selectRef.current?.blur(); // Desfoca o seletor ao abrir o menu
   };
 
   return (
@@ -36,12 +41,14 @@ const Header: React.FC = () => {
       />
       <div className="flex items-center w-full md:w-auto">
         <Select
+          ref={selectRef}
           options={options}
           styles={customStyles}
           placeholder="Home"
           className="w-full md:w-auto mr-5 font-bold p-2"
           classNamePrefix='Select'
           onChange={handleChange}
+          onMenuOpen={handleMenuOpen} // Chamado para desfocar a entrada quando o menu abre
         />
       </div>
     </header>
