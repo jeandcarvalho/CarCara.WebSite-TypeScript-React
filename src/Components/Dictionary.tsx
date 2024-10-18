@@ -6,6 +6,7 @@ import imuData from "../Components/img/imu.jpg";
 import steeringWheel from "../Components/img/steering.jpg";
 import fuelEfficiency from "../Components/img/fuel.jpg";
 import speedBraking from "../Components/img/speed.jpg";
+import baterry from "../Components/img/voltage.jpg";
 
 const Dictionary = () => {
     useEffect(() => {
@@ -52,14 +53,7 @@ const Dictionary = () => {
                     {/* Data Dictionary Table */}
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-600">
-                            <thead>
-                                <tr>
-                                    <th className="px-4 py-2 text-left text-yellow-400">Data Type</th>
-                                    <th className="px-4 py-2 text-left text-yellow-400">Parameter</th>
-                                    <th className="px-4 py-2 text-left text-yellow-400">Description</th>
-                                    <th className="px-4 py-2 text-left text-yellow-400">Unit</th>
-                                </tr>
-                            </thead>
+                       
                             <tbody className="divide-y divide-gray-600">
                                 {/* GPS Data */}
                                 <tr>
@@ -69,36 +63,6 @@ const Dictionary = () => {
                                     <td colSpan={4} className="px-4 py-2">
                                         <img src={gpsData} alt="GPS Data" className="w-full h-auto mb-4 rounded" />
                                     </td>
-                                </tr>
-                                <tr>
-                                    <td className="px-4 py-2">GPS Data</td>
-                                    <td><strong>timestamps</strong></td>
-                                    <td>Time stamp for each data sample.</td>
-                                    <td>ms</td>
-                                </tr>
-                                <tr>
-                                    <td className="px-4 py-2">GPS Data</td>
-                                    <td><strong>gps</strong></td>
-                                    <td>GPS coordinates.</td>
-                                    <td>degrees</td>
-                                </tr>
-                                <tr>
-                                    <td className="px-4 py-2">GPS Data</td>
-                                    <td><strong>x</strong></td>
-                                    <td>X position in 3D space.</td>
-                                    <td>meters</td>
-                                </tr>
-                                <tr>
-                                    <td className="px-4 py-2">GPS Data</td>
-                                    <td><strong>y</strong></td>
-                                    <td>Y position in 3D space.</td>
-                                    <td>meters</td>
-                                </tr>
-                                <tr>
-                                    <td className="px-4 py-2">GPS Data</td>
-                                    <td><strong>z</strong></td>
-                                    <td>Z position in 3D space.</td>
-                                    <td>meters</td>
                                 </tr>
 
                                 {/* IMU Data */}
@@ -110,60 +74,7 @@ const Dictionary = () => {
                                         <img src={imuData} alt="IMU Data" className="w-full h-auto mb-4 rounded" />
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td className="px-4 py-2">IMU Data</td>
-                                    <td><strong>timestamps</strong></td>
-                                    <td>Time stamp for each data sample.</td>
-                                    <td>ms</td>
-                                </tr>
-                                <tr>
-                                    <td className="px-4 py-2">IMU Data</td>
-                                    <td><strong>Aceinna_AccX</strong></td>
-                                    <td>Acceleration in the X-axis measured by the Aceinna sensor.</td>
-                                    <td>m/s²</td>
-                                </tr>
-                                <tr>
-                                    <td className="px-4 py-2">IMU Data</td>
-                                    <td><strong>Aceinna_AccY</strong></td>
-                                    <td>Acceleration in the Y-axis measured by the Aceinna sensor.</td>
-                                    <td>m/s²</td>
-                                </tr>
-                                <tr>
-                                    <td className="px-4 py-2">IMU Data</td>
-                                    <td><strong>Aceinna_AccZ</strong></td>
-                                    <td>Acceleration in the Z-axis measured by the Aceinna sensor.</td>
-                                    <td>m/s²</td>
-                                </tr>
-                                <tr>
-                                    <td className="px-4 py-2">IMU Data</td>
-                                    <td><strong>LongitudinalAccelerationProc</strong></td>
-                                    <td>Processed longitudinal acceleration.</td>
-                                    <td>m/s²</td>
-                                </tr>
-                                <tr>
-                                    <td className="px-4 py-2">IMU Data</td>
-                                    <td><strong>LongitudinalAccelerationExtended</strong></td>
-                                    <td>Extended longitudinal acceleration.</td>
-                                    <td>m/s²</td>
-                                </tr>
-                                <tr>
-                                    <td className="px-4 py-2">IMU Data</td>
-                                    <td><strong>TransversalAcceleration</strong></td>
-                                    <td>Measured transverse acceleration.</td>
-                                    <td>m/s²</td>
-                                </tr>
-                                <tr>
-                                    <td className="px-4 py-2">IMU Data</td>
-                                    <td><strong>Aceinna_Pitch_Angular_Rate</strong></td>
-                                    <td>Pitch angle rate measured by the Aceinna sensor.</td>
-                                    <td>°/s</td>
-                                </tr>
-                                <tr>
-                                    <td className="px-4 py-2">IMU Data</td>
-                                    <td><strong>Aceinna_Roll_Angular_Rate</strong></td>
-                                    <td>Roll angle rate measured by the Aceinna sensor.</td>
-                                    <td>°/s</td>
-                                </tr>
+                               
 
                                 {/* Steering Wheel Data */}
                                 <tr>
@@ -174,18 +85,7 @@ const Dictionary = () => {
                                         <img src={steeringWheel} alt="Steering Wheel Data" className="w-full h-auto mb-4 rounded" />
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td className="px-4 py-2">Steering Wheel Data</td>
-                                    <td><strong>timestamps</strong></td>
-                                    <td>Time stamp for each data sample.</td>
-                                    <td>ms</td>
-                                </tr>
-                                <tr>
-                                    <td className="px-4 py-2">Steering Wheel Data</td>
-                                    <td><strong>steeringWheelAngle</strong></td>
-                                    <td>Angle of the steering wheel.</td>
-                                    <td>degrees</td>
-                                </tr>
+
 
                                 {/* Fuel Efficiency Data */}
                                 <tr>
@@ -196,19 +96,7 @@ const Dictionary = () => {
                                         <img src={fuelEfficiency} alt="Fuel Efficiency Data" className="w-full h-auto mb-4 rounded" />
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td className="px-4 py-2">Fuel Efficiency Data</td>
-                                    <td><strong>timestamps</strong></td>
-                                    <td>Time stamp for each data sample.</td>
-                                    <td>ms</td>
-                                </tr>
-                                <tr>
-                                    <td className="px-4 py-2">Fuel Efficiency Data</td>
-                                    <td><strong>fuelEfficiency</strong></td>
-                                    <td>Fuel efficiency metric.</td>
-                                    <td>km/l</td>
-                                </tr>
-
+                               
                                 {/* Speed and Braking Data */}
                                 <tr>
                                     <td colSpan={4} className="px-4 py-2 text-xl font-bold text-roboto text-yellow-400">Speed and Braking Data</td>
@@ -218,24 +106,18 @@ const Dictionary = () => {
                                         <img src={speedBraking} alt="Speed and Braking Data" className="w-full h-auto mb-4 rounded" />
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td className="px-4 py-2">Speed and Braking Data</td>
-                                    <td><strong>timestamps</strong></td>
-                                    <td>Time stamp for each data sample.</td>
-                                    <td>ms</td>
+
+
+                                 {/* Voltage Data */}
+                                 <tr>
+                                    <td colSpan={4} className="px-4 py-2 text-xl font-bold text-roboto text-yellow-400">Battery Voltage Data</td>
                                 </tr>
                                 <tr>
-                                    <td className="px-4 py-2">Speed and Braking Data</td>
-                                    <td><strong>speed</strong></td>
-                                    <td>Current speed of the vehicle.</td>
-                                    <td>km/h</td>
+                                    <td colSpan={4} className="px-4 py-2">
+                                        <img src={baterry} alt="Speed and Braking Data" className="w-full h-auto mb-4 rounded" />
+                                    </td>
                                 </tr>
-                                <tr>
-                                    <td className="px-4 py-2">Speed and Braking Data</td>
-                                    <td><strong>braking</strong></td>
-                                    <td>Current braking state of the vehicle.</td>
-                                    <td>boolean</td>
-                                </tr>
+                                
                             </tbody>
                         </table>
                     </div>
