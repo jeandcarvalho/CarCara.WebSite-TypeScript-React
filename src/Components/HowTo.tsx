@@ -12,7 +12,7 @@ const HowTo = () => {
             <div className="flex-grow flex justify-center mt-3">
                 <div className="mr-7 ml-7 max-w-5xl px-4 text-center text-white py-3">
                     <h2 className="text-5xl font-bold mb-6 text-roboto text-yellow-400 text-left">How to Use CarCara</h2>
-                    
+
                     {/* Section 1 - Acquisitions */}
                     <div className="flex flex-col md:flex-row items-center mb-8">
                         <img
@@ -32,7 +32,7 @@ const HowTo = () => {
                                 <li>High-resolution videos</li>
                             </ul>
                             <p className="mt-4">
-                                Learn more about the acquisitions on our <Link to="/acquisitions" className="text-yellow-400 underline">Acquisitions Page</Link>.
+                                Learn more about the acquisitions on our <Link to="/Intermediary" className="text-yellow-400 underline">Acquisitions Page</Link>.
                             </p>
                         </div>
                     </div>
@@ -77,6 +77,11 @@ const HowTo = () => {
                             </ul>
                             <p className="mt-4">
                                 Check the full range of data types available in the <Link to="/dictionary" className="text-yellow-400 underline">Data Dictionary</Link>.
+                            </p>
+                            
+                            {/* New explanatory text */}
+                            <p className="mt-4 text-base font-semi md:text-sm text-roboto text-white">
+                                Note that the following image contains samples and examples of data. For the complete dataset, please refer to the Data Dictionary.
                             </p>
                         </div>
                         <img
