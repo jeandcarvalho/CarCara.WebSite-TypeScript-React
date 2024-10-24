@@ -1,66 +1,18 @@
-import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import api from '../Services/api';
 import loadgif from "../Components/img/gif.gif";
 import Header from '../Components/Header';
 import Footer from '../Components/Footer';
-
-interface VideoFilesProps {
-  id: string;
-  VideoFile: string;
-  Link: string;
-  Date: string;
-  District: string;
-  City: string;
-  State: string;
-  Gps_y: string;
-  Gps_x: string;
-  Area: string;
-  RoadType: string;
-  Traffic: string;
-  Misc: string;
-  Weather: string;
-  Period: string;
-}
+import { formatString, filterCityString } from '../Utils/StringUtilsVideos';
+import useVideoFiles from '../Hooks/VideoFiles'; // Importando o hook
 
 const City: React.FC = () => {
   const { city } = useParams();
-  const [filesdata, setFiles] = useState<VideoFilesProps[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    async function loadFiles() {
-      try {
-        const response = await api.get(`/videofiless?page=1&pageSize=300&searchString=${city}`);
-        setFiles(response.data);
-      } catch (error) {
-        console.error("Error loading files:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    loadFiles();
-  }, [city]);
-
+  const { filesdata, isLoading } = useVideoFiles(city || ""); // Usando o hook
   if (!city) {
     return <div>City is undefined</div>;
   }
-
   window.onload = () => window.scrollTo(0, 0);
-
-  const formatString = (input: string): string => {
-    return input.split(',').map(part => part.trim()).join(', ');
-  };
-
-  const filterCityString = (city: string): string => {
-    const filtros = city.replace(/_/g, " ");
-    const parts = filtros.split('!');
-    const partss = parts.filter(part => part.trim() !== "");
-    return partss.join(' - ');
-  };
-
   const result = filterCityString(city);
-
   return (
     <div className='bg-zinc-950 min-h-screen flex flex-col'>
       <Header />

@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import MapComponent from "../Maps/MapComponent";
 import Header from '../Components/Header';
 import Footer from '../Components/Footer';
-import { loadHomeCounter } from '../Services/CreateCount';
+import { loadHomeCounter } from '../Hooks/CreateCount';
 
 const Home: React.FC = () => {
     const states = ["São Paulo", "Espírito Santo", "Minas Gerais", "Rio de Janeiro", "Paraná"];

@@ -9,7 +9,6 @@ interface FilesProps {
 
 const useFetchFiles = () => {
     const [filesdata, setFiles] = useState<FilesProps[]>([]);
-
     useEffect(() => {
         const loadFiles = async () => {
             try {
@@ -21,8 +20,6 @@ const useFetchFiles = () => {
         };
         loadFiles();
     }, []);
-
     return filesdata;
 };
-
 export default useFetchFiles;

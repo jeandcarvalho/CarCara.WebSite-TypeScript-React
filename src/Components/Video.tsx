@@ -1,133 +1,29 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import Header from '../Components/Header';
 import Footer from '../Components/Footer';
-import api from '../Services/api';
 import { useParams } from "react-router-dom";
 import MapVideo from '../Maps/MapVideo';
 import { Link } from "react-router-dom";
-
-interface VideoFilesProps {
-    id: string;
-    VideoFile: string;
-    Link: string;
-    Date: string;
-    District: string;
-    City: string;
-    State: string;
-    Gps_y: string;
-    Gps_x: string;
-    Area: string;
-    RoadType: string;
-    Traffic: string;
-    Misc: string;
-    Weather: string;
-    Period: string;
-}
-
-interface CsvFileProps {
-    videoname: string;
-    timestamps: string;
-}
+import useVideoData from '../Hooks/VideoData';
+import { extrairIdGoogleDrive, formatString, changeViewToPreview } from '../Utils/VideoUtils';
+import DownloadButton, { downloadVideo } from '../Components/DownloadButtons';
 
 const Video: React.FC = () => {
     const { video } = useParams<{ video?: string }>();
-    const videoclicked = video?.substring(0, 28);
-
-    const [filesdata, setFiles] = useState<VideoFilesProps[]>([]);
-    const [csvdata, setCsv] = useState<CsvFileProps[]>([]);
+    const { filesdata, csvdata } = useVideoData(video);
     const csv = csvdata[0];
-    
+
     useEffect(() => {
         window.scrollTo(0, 0); // Scroll to top on component load
-        loadFiles();
     }, []);
-
-    useEffect(() => {
-        loadCsv();
-    }, []);
-
-    async function loadFiles() {
-        const response = await api.get("/videofiless?page=1&pageSize=300&searchString=!!!!!");
-        setFiles(response.data);
-    }
-
-    async function loadCsv() {
-        const response = await api.get("vehicle?page=1&pageSize=10&searchString="+ videoclicked);
-        setCsv(response.data);
-    }
-
-    function extrairIdGoogleDrive(link: string | undefined): string | null {
-        if (link && link.includes("/file/d/")) {
-            const startIdx = link.indexOf("/file/d/") + "/file/d/".length;
-            const endIdx = link.indexOf("/view", startIdx);
-            return link.substring(startIdx, endIdx);
-        } else if (link && link.includes("id=")) {
-            const startIdx = link.indexOf("id=") + "id=".length;
-            return link.substring(startIdx);
-        } else {
-            return null;
-        }
-    }
-
-    function downloadVideo(fileId: string, fileName: string) {
-        if (!fileId || !fileName) {
-            console.error("Invalid file ID or file name");
-            return;
-        }
-        const url = `https://drive.google.com/uc?export=download&id=${fileId}`;
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
 
     const fileWithLink = filesdata.find(file => file.VideoFile === video);
-
-    function changeViewToPreview(link: string): string {
-        if (link.includes("/view")) {
-            return link.replace("/view", "/preview");
-        } else {
-            return link;
-        }
-    }
-
-    const formatString = (input: string): string => {
-        return input.split(',').map(part => part.trim()).join(', ');
-    };
-
     const modifiedLink = fileWithLink ? changeViewToPreview(fileWithLink.Link) : '';
     const idfile = fileWithLink ? extrairIdGoogleDrive(fileWithLink.Link) : '';
     const idfilecsv = csv ? extrairIdGoogleDrive(csv.timestamps) : '';
 
-    const DownloadButton: React.FC<{ fileId: string | null; fileName: string }> = ({ fileId, fileName }) => {
-        const handleClick = () => {
-            if (fileId !== null) {
-                downloadVideo(fileId, fileName);
-            } else {
-                console.error("File ID is null");
-            }
-        };
-
-        return (
-            <button className="bg-yellow-500 hover:scale-105 duration-200 text-black rounded relative w-full text-center justify-center" onClick={handleClick} title="Video File in .mp4">Video File 1080p</button>
-        );
-    };
-
-    const DownloadButtonCsv: React.FC<{ fileId: string | null; fileName: string }> = ({ fileId, fileName }) => {
-        const handleClick = () => {
-            if (fileId !== null) {
-                downloadVideo(fileId, fileName);
-                window.open(csv.timestamps, '_blank');
-            } else {
-                console.error("File ID is null");
-            }
-        };
-
-        return (
-            <button className="bg-yellow-500 hover:scale-105 duration-200 text-black rounded relative w-full text-center justify-center" onClick={handleClick} title="Video File in .mp4">CSV Dataset</button>
-        );
+    const handleVideoDownload = (fileId: string, fileName: string) => {
+        downloadVideo(fileId, fileName);
     };
 
     return (
@@ -151,16 +47,12 @@ const Video: React.FC = () => {
                                     <article className="bg-zinc-900 rounded p-1 relative">
                                         <p className='text-white mb-2 ml-2'>Download:</p>
                                         <section className="grid grid-cols-2 gap-4 w-full mb-2">
-                                            <button className="bg-yellow-500 rounded p-2 relative w-full text-center justify-center hover:scale-105 duration-200">
-                                                <DownloadButton fileId={idfile} fileName="nome_do_arquivo.mp4" />
-                                            </button>
-                                            <button className="bg-yellow-500 rounded p-2 relative w-full text-center justify-center hover:scale-105 duration-200">
-                                                <DownloadButtonCsv fileId={idfilecsv} fileName="nome_do_arquivo.csv" />
-                                            </button>
+                                            <DownloadButton fileId={idfile} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="Video File 1080p" />
+                                            <DownloadButton fileId={idfilecsv} fileName="nome_do_arquivo.csv" onClick={(id, name) => { downloadVideo(id, name); window.open(csv.timestamps, '_blank'); }} title="CSV Dataset" />
                                         </section>
                                     </article>
                                     <section className="grid grid-cols-2 gap-4 w-full">
-                                        <article className="bg-zinc-900  ml-1 rounded p-2 relative ">
+                                        <article className="bg-zinc-900 ml-1 rounded p-2 relative ">
                                             <span className='font-medium text-yellow-300 text-xl'>{formatString(fileWithLink.District) + ' - '}</span>
                                             <span className="font-medium text-yellow-300 text-xl ">{fileWithLink.City}{' - '}{fileWithLink.State}</span>
                                             <br />
@@ -177,9 +69,9 @@ const Video: React.FC = () => {
                                             </article>
                                         </article>
                                         <article className="bg-zinc-900 rounded p-1 relative">
-                                        <div className='relative z-0'>
-                                            <MapVideo videoName={video} />
-                                        </div>
+                                            <div className='relative z-0'>
+                                                <MapVideo videoName={video} />
+                                            </div>
                                         </article>
                                     </section>
                                 </p>

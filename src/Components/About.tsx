@@ -1,4 +1,4 @@
-import useFetchFiles from '../Services/Counter';
+import useFetchFiles from '../Hooks/Counter';
 import carcaraS from "../Components/img/carcara2.png";
 import Header from '../Components/Header';
 import Footer from '../Components/Footer';
