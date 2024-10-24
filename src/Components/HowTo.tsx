@@ -12,7 +12,6 @@ const HowTo = () => {
             <div className="flex-grow flex justify-center mt-3">
                 <div className="mr-7 ml-7 max-w-5xl px-4 text-center text-white py-3">
                     <h2 className="text-5xl font-bold mb-6 text-roboto text-yellow-400 text-left">How to Use CarCara</h2>
-
                     {/* Section 1 - Acquisitions */}
                     <div className="flex flex-col md:flex-row items-center mb-8">
                         <img
@@ -36,9 +35,7 @@ const HowTo = () => {
                             </p>
                         </div>
                     </div>
-
                     <hr className="my-8 border-yellow-400" /> {/* Divider with yellow color */}
-
                     {/* Section 2 - Extractor */}
                     <div className="flex flex-col md:flex-row items-center mb-8">
                         <img
@@ -60,9 +57,7 @@ const HowTo = () => {
                             </p>
                         </div>
                     </div>
-
                     <hr className="my-8 border-yellow-400" /> {/* Divider with yellow color */}
-
                     {/* Section 3 - Data Analysis */}
                     <div className="flex flex-col items-center ">
                         <div className="text-left md:ml-8 mb-8">
@@ -97,5 +92,4 @@ const HowTo = () => {
         </div>
     );
 };
-
 export default HowTo;

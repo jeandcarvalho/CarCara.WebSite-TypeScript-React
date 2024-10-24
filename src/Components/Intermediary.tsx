@@ -14,7 +14,6 @@ const IntermediaryPage: React.FC = () => {
                 <div className="text-center text-white w-full max-w-5xl px-3"> {/* Defini um max-width */}
                     <h1 className="text-4xl md:text-5xl font-bold mb-3 text-yellow-300 text-roboto">Vehicle Acquisitions</h1> {/* Alterei o tamanho da fonte no mobile */}
                     <p className="text-base md:text-lg mb-5 text-roboto">Choose your next action</p> {/* Fonte ajustada */}
-
                     <div className="flex flex-col items-center space-y-5 md:space-y-7"> {/* Alinhamento centralizado */}
                         <Link to={"/Search"}>
                             <button className="bg-yellow-300 text-zinc-900 hover:bg-yellow-100 text-base md:text-lg font-bold py-3 md:py-3 px-6 md:px-6 rounded-full transition duration-300 text-roboto flex items-center justify-center"> {/* Flex para alinhar ícone e texto */}
@@ -27,15 +26,12 @@ const IntermediaryPage: React.FC = () => {
                                 <img src={viewall} alt="Ícone de Visualizar Todos" className="mr-2  h-6 w-6" />
                                 All Acquisitions
                             </button>
-                        </Link>
-                       
+                        </Link>         
                     </div>
                     <div>
                     <p className='mt-7'>
                     Partners:
-
                     </p>
-
                     <div className="text-center mt-3 flex justify-center">                                      
                         <img
                             src={logoscarcara}

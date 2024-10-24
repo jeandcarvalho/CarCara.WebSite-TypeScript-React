@@ -10,8 +10,7 @@ const OurModels = () => {
             <div className="flex-grow flex justify-center mt-3">
                 <div className="mr-7 ml-7 max-w-3xl px-2 text-center text-white py-3">
                     <div className="">
-                        <h2 className="text-5xl font-bold mb-4 text-roboto text-left text-yellow-400 mt-4">Our Models</h2>
-                        
+                        <h2 className="text-5xl font-bold mb-4 text-roboto text-left text-yellow-400 mt-4">Our Models</h2>                      
                         <div className="flex flex-col md:flex-row items-center mb-8">
                             <img
                                 src={frontCameraImg} // A imagem da câmera frontal
@@ -35,7 +34,6 @@ const OurModels = () => {
                                 </p>
                             </div>
                         </div>
-
                         {/* Seção "Em Breve" */}
                         <div className="flex flex-col items-center mb-8">
                             <div className="text-left md:ml-8">
@@ -58,5 +56,4 @@ const OurModels = () => {
         </div>
     );
 };
-
 export default OurModels;

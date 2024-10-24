@@ -1,5 +1,5 @@
 // Classes/apiService.ts
-import api from '../Services/api';
+import api from './api';
 
 export const loadHomeCounter = async () => {
     try {

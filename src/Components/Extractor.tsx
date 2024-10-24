@@ -46,7 +46,6 @@ const Extractor = () => {
                                 </p>
                             </div>
                         </div>
-
                         {/* Section for What the Extractor Does */}
                         <div className="text-left mb-8">
                             <h3 className="text-2xl font-bold mb-2 text-roboto text-yellow-300">What the CarCara Extractor Does</h3>
@@ -75,7 +74,6 @@ const Extractor = () => {
                                 For more detailed information about the extracted data, visit the <Link to="/dictionary" className="text-yellow-400 underline">Data Dictionary</Link>.
                             </p>
                         </div>
-
                         {/* Section for How to Start */}
                         <div className="text-left mb-8">
                             <h3 className="text-2xl font-bold mb-2 text-roboto text-yellow-300">How to Start</h3>
@@ -91,7 +89,6 @@ const Extractor = () => {
                                 <li>Click "Extract" to begin processing and save the output in a new folder.</li>
                             </ol>
                         </div>
-
                         {/* Section for How to Use */}
                         <div className="text-left mb-8">
                             <h3 className="text-2xl font-bold mb-2 text-roboto text-yellow-300">How to Use</h3>

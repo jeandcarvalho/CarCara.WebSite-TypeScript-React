@@ -16,7 +16,6 @@ const options = [
 
 const Header: React.FC = () => {
   const navigate = useNavigate(); // Use useNavigate to get the navigate function
-
   const handleChange = (newValue: unknown) => {
     const selectedOption = newValue as { value: string; label: string; } | null;
     if (selectedOption !== null && 'value' in selectedOption) {
@@ -24,7 +23,6 @@ const Header: React.FC = () => {
       window.dispatchEvent(new PopStateEvent('popstate', { state: null }));
     }
   };
-
   return (
     <header className="flex flex-col md:flex-row items-center justify-between p-3 bg-black shadow-md">
       <img
@@ -48,5 +46,4 @@ const Header: React.FC = () => {
     </header>
   );
 };
-
 export default Header;
