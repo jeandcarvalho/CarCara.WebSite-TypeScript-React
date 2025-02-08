@@ -8,7 +8,7 @@ interface DownloadButtonProps {
     title: string;
 }
 
-const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName, onClick, title }) => {
+const DownloadButtonVideo: React.FC<DownloadButtonProps> = ({ fileId, fileName, onClick, title }) => {
     const handleClick = () => {
         if (fileId) {
             onClick(fileId, fileName);
@@ -18,7 +18,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName, onCli
     };
 
     return (
-        <button className="bg-sky-500 hover:scale-105 duration-200 text-black rounded relative w-full text-center justify-center" onClick={handleClick} title={title}>
+        <button className="bg-yellow-500 hover:scale-105 duration-200 text-black rounded relative w-full text-center justify-center" onClick={handleClick} title={title}>
             {title}
         </button>
     );
@@ -26,7 +26,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fileId, fileName, onCli
 
 
 
-export const downloadFile = (fileId: string, fileName: string) => {
+export const downloadVideo = (fileId: string, fileName: string) => {
     if (!fileId || !fileName) {
         console.error("Invalid file ID or file name");
         return;
@@ -40,4 +40,4 @@ export const downloadFile = (fileId: string, fileName: string) => {
     document.body.removeChild(link);
 };
 
-export default DownloadButton;
+export default DownloadButtonVideo;

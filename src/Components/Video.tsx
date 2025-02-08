@@ -6,7 +6,7 @@ import MapVideo from '../Maps/MapVideo';
 import { Link } from "react-router-dom";
 import useVideoData from '../Hooks/VideoData';
 import { extrairIdGoogleDrive, formatString, changeViewToPreview } from '../Utils/VideoUtils';
-import DownloadButton, { downloadVideo } from '../Components/DownloadButtons';
+import DownloadButton, { downloadFile } from '../Components/DownloadButtons';
 
 const Video: React.FC = () => {
     const { video } = useParams<{ video?: string }>();
@@ -23,7 +23,7 @@ const Video: React.FC = () => {
     const idfilecsv = csv ? extrairIdGoogleDrive(csv.timestamps) : '';
 
     const handleVideoDownload = (fileId: string, fileName: string) => {
-        downloadVideo(fileId, fileName);
+        downloadFile(fileId, fileName);
     };
 
     return (
@@ -48,7 +48,7 @@ const Video: React.FC = () => {
                                         <p className='text-white mb-2 ml-2'>Download:</p>
                                         <section className="grid grid-cols-2 gap-4 w-full mb-2">
                                             <DownloadButton fileId={idfile} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="Video File 1080p" />
-                                            <DownloadButton fileId={idfilecsv} fileName="nome_do_arquivo.csv" onClick={(id, name) => { downloadVideo(id, name); window.open(csv.timestamps, '_blank'); }} title="CSV Dataset" />
+                                            <DownloadButton fileId={idfilecsv} fileName="nome_do_arquivo.csv" onClick={(id, name) => { downloadFile(id, name); window.open(csv.timestamps, '_blank'); }} title="CSV Dataset" />
                                         </section>
                                     </article>
                                     <section className="grid grid-cols-2 gap-4 w-full">
