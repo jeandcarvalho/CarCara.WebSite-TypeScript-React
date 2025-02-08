@@ -18,13 +18,13 @@ const IntermediaryPage: React.FC = () => {
                         <Link to={"/Search"}>
                             <button className="bg-yellow-300 text-zinc-900 hover:bg-yellow-100 text-base md:text-lg font-bold py-3 md:py-3 px-6 md:px-6 rounded-full transition duration-300 text-roboto flex items-center justify-center"> {/* Flex para alinhar ícone e texto */}
                                 <img src={search} alt="Ícone de Busca" className="mr-2 h-6 w-6" />
-                                Preview Files
+                                v2 Acquisitions
                             </button>
                         </Link>                          
                         <Link to={"/FullFiles"}>
                             <button className="bg-yellow-300 text-zinc-900 hover:bg-yellow-100 text-base md:text-lg font-bold py-3 md:py-3 px-6 md:px-6 rounded-full transition duration-300 text-roboto flex items-center justify-center"> {/* Flex para alinhar ícone e texto */}
                                 <img src={viewall} alt="Ícone de Visualizar Todos" className="mr-2  h-6 w-6" />
-                                Full Acquisitions
+                                v4 Acquisitions
                             </button>
                         </Link>         
                     </div>
