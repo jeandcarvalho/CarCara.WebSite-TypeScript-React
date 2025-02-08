@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import Header from './Header';
 import Footer from './Footer';
 import { useParams } from "react-router-dom";
-import MapVideo from '../Maps/MapVideo';
+
+import MapVideoFull from '../Maps/MapVideoFull';
 import loadgif from "../Components/img/gif.gif";
 import { extrairIdGoogleDrive, formatString, changeViewToPreview } from '../Utils/VideoUtils';
 import DownloadButton, { downloadFile } from './DownloadButtons';
 import DownloadButtonVideo, { downloadVideo } from './DownloadButtonsVideo';
+
 
 interface VideoFile {
     id: string;
@@ -43,6 +45,7 @@ const Video: React.FC = () => {
     const { video } = useParams<{ video?: string }>();
     const [filesData, setFilesData] = useState<VideoFile[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -97,7 +100,7 @@ const Video: React.FC = () => {
                         <section className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mt-1">
                             {fileWithLink && (
                                 <iframe
-                                    className="flex w-full items-center justify-center h-96 md:h-96"
+                                    className="flex w-full items-center justify-center h-96 md:h-96 mt-7"
                                     src={Link360 + '&vq=hd1080'}
                                     width="1040"
                                     height="375"
@@ -131,20 +134,20 @@ const Video: React.FC = () => {
                                                 <span className="font-medium text-yellow-300 text-xl ">{fileWithLink.City}{' - '}{fileWithLink.State}</span>
                                                 <br />
                                                 <article key={fileWithLink.id} className="bg-zinc-700 mt-5 rounded p-1 max-w-fit inline-block">
-                                                    <span className='font-medium text-gray-300 text-xl'>{formatString(' ' + fileWithLink.RoadType) + ' Road'}</span>
+                                                    <span className='font-medium text-gray-300'>{formatString(' ' + fileWithLink.RoadType) + ' Road'}</span>
                                                 </article>
                                                 <br />
                                                 <article key={fileWithLink.id} className="bg-sky-950 rounded p-1 my-2 max-w-fit inline-block">
-                                                    <span className='font-medium text-sky-200 text-xl'>{formatString(' ' + fileWithLink.Weather + ' - ' + fileWithLink.Period)}</span>
+                                                    <span className='font-medium text-sky-200'>{formatString(' ' + fileWithLink.Weather + ' - ' + fileWithLink.Period)}</span>
                                                 </article>
                                                 <br />
                                                 <article key={fileWithLink.id} className="bg-teal-950 rounded mb-2 p-1 max-w-fit inline-block">
-                                                    <span className='font-medium text-teal-200 text-xl'>{formatString(' ' + fileWithLink.Area + ' ')}</span>
+                                                    <span className='font-medium text-teal-200'>{formatString(' ' + fileWithLink.Area + ' ')}</span>
                                                 </article>
                                             </article>
                                             <article className="bg-zinc-900 rounded p-1 relative">
                                                 <div className='relative z-0'>
-                                                    <MapVideo videoName={video} />
+                                                    <MapVideoFull videoName={fileWithLink.FileName} />
                                                 </div>
                                             </article>
                                         </section>
