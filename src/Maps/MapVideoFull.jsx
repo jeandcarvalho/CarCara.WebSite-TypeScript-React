@@ -40,7 +40,7 @@ const MapVideoFull = ({ videoName }) => {
                     // Adicionar marcadores para cada ponto correspondente ao videoName
                     points.forEach((point, index) => {
                         hasCityPoint = true;
-                        if (index % 1 === 0) {
+                        if (index % 5 === 0) {
                             L.marker([point.GPS_y, point.GPS_x], {
                                 icon: L.icon({
                                     iconUrl: yellowicon,
