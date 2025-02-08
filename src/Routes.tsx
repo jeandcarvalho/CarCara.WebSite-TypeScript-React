@@ -10,6 +10,8 @@ import Intermediary from "./Components/Intermediary";
 import Extractor from "./Components/Extractor";
 import Dictionary from "./Components/Dictionary";
 import HowTo from "./Components/HowTo";
+import FullFiles from "./Components/FullFiles";
+import FullVideo from "./Components/FullVideo";
 
 
 export const Routes = createBrowserRouter ([
@@ -27,6 +29,8 @@ export const Routes = createBrowserRouter ([
         {path: "Extractor", element: <Extractor/> },
         {path: "Dictionary", element: <Dictionary/> },
         {path: "HowTo", element: <HowTo/> },
+        {path: "FullFiles", element: <FullFiles/> },
+        {path: "FullVideo/:video", element: <FullVideo/> },
     ]
    }  
 ])
