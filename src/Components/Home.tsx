@@ -92,7 +92,7 @@ const Home: React.FC = () => {
             </div>
 
             {/* Sessão Data Storage and Processing */}
-            <div className="bg-zinc-950 text-white py-12 px-4">
+            <div className="bg-zinc-950 text-white pb-12 px-4">
                 <div className="max-w-5xl mx-auto text-center">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300 text-roboto">Data Storage and Processing – DAQ Captur</h2>
                     <p className="text-lg mb-6">
