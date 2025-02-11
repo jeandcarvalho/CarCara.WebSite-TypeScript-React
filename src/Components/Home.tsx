@@ -59,7 +59,7 @@ const Home: React.FC = () => {
                 <div className="max-w-5xl mx-auto text-center">            
                     <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300 text-roboto">About CarCara-360DAQ</h2>
                     <div className="flex justify-center">
-                <img src={view360} alt="Example 1" className="rounded-lg w-2/3 shadow-lg mb-7 mt-3" />
+                <img src={view360} alt="Example 1" className="rounded-lg w-full shadow-lg mb-7 mt-3" />
                         </div>
                     <p className="text-lg mb-6">
                         CarCara-360DAQ is a comprehensive dataset built for real-time automotive data acquisition, providing insights into vehicle behavior and environmental interactions. 
