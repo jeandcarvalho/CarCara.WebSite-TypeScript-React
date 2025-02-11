@@ -63,7 +63,7 @@ const City: React.FC = () => {
         <main className="my-5 w-full max-w-7xl h-full">
           <div className="text-left">
             <h1 className="text-4xl font-medium mb-4 text-orange-100">
-              <span className='font-medium text-yellow-300'>Video Files</span>
+              <span className='font-medium text-yellow-300'>v4 Acquisitions</span>
             </h1>
           </div>
           {isLoading ? (

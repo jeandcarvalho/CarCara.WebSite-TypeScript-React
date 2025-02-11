@@ -32,7 +32,7 @@ const Home: React.FC = () => {
         <div className="md:w-1/2 text-center md:text-left flex justify-center md:justify-start md:items-center h-full">
             <div className="flex flex-col items-center md:items-start">
                 <h1 className="text-3xl md:text-5xl font-bold mb-4 text-yellow-300 text-roboto">
-                    CarCara-360DAQ: A Multi-Sensor Dataset for Real-Time Automotive Data Acquisition
+                    CarCara-DAQ: A Multi-Sensor Dataset for Real-Time Automotive Data Acquisition
                 </h1>
                 <Link to="/Intermediary">
                     <button className="bg-yellow-300 text-zinc-900 hover:bg-yellow-100 text-base md:text-lg font-bold py-2 px-4 md:px-6 rounded-full transition duration-300 text-roboto mb-6">
@@ -57,12 +57,12 @@ const Home: React.FC = () => {
             {/* Sessão About */}
             <div className="bg-zinc-900 text-white py-12 mt-11 px-4">
                 <div className="max-w-5xl mx-auto text-center">            
-                    <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300 text-roboto">About CarCara-360DAQ</h2>
+                    <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300 text-roboto">About CarCara-DAQ</h2>
                     <div className="flex justify-center">
                 <img src={view360} alt="Example 1" className="rounded-lg w-full shadow-lg mb-7 mt-3" />
                         </div>
                     <p className="text-lg mb-6">
-                        CarCara-360DAQ is a comprehensive dataset built for real-time automotive data acquisition, providing insights into vehicle behavior and environmental interactions. 
+                        CarCara-DAQ is a comprehensive dataset built for real-time automotive data acquisition, providing insights into vehicle behavior and environmental interactions. 
                         With data from multi-sensor setups, including cameras, radar, IMU, and GPS, our platform enables advanced analysis and research in automotive technologies.
                     </p>
                 </div>

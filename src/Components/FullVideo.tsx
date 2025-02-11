@@ -100,7 +100,7 @@ const Video: React.FC = () => {
                         <section className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mt-1">
                             {fileWithLink && (
                                 <iframe
-                                    className="flex w-full items-center justify-center h-96 md:h-96 mt-7"
+                                    className="flex w-full items-center justify-center h-[330px] md:h-[530px] mt-7"
                                     src={Link360 + '&vq=hd1080'}
                                     width="1040"
                                     height="375"
@@ -110,26 +110,25 @@ const Video: React.FC = () => {
                             <article className="bg-zinc-900 rounded p-2 relative">
                                 {fileWithLink && (
                                     <>
-                                        <article className="bg-zinc-900 rounded p-1 relative">
-                                            <p className='text-white mb-2 ml-2'>Download:</p>                                      
-                                            <section className="grid grid-cols-3 gap-4 w-full mb-2">
-                                                
-                                                <DownloadButton fileId={idcsv} fileName="nome_do_arquivo.mp4" onClick={handleFileDownload} title="Mf4 to Csv" />
-                                                <DownloadButtonVideo fileId={id360} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="360 View" />
-                                                <DownloadButton fileId={idmf4} fileName="nome_do_arquivo.mp4" onClick={handleFileDownload} title="Mf4" />       
-                                                <DownloadButtonVideo fileId={idfrontLeft} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="Front Left" />
-                                                <DownloadButtonVideo fileId={idfrontCenter} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="Front Center" />
-                                                <DownloadButtonVideo fileId={idfrontRight} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="Front Right" />        
-                                                <DownloadButtonVideo fileId={idrearLeft} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="Rear Left" /> 
-                                                <DownloadButtonVideo fileId={idrearCenter} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="Rear Center" /> 
-                                                <DownloadButtonVideo fileId={idrearRight} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="Rear Right" />  
-                                                <DownloadButton fileId={idimu} fileName="nome_do_arquivo.mp4" onClick={handleFileDownload} title="IMU.blf" />
-                                                <DownloadButton fileId={idcan} fileName="nome_do_arquivo.mp4" onClick={handleFileDownload} title="CAN.blf" />
-                                                <DownloadButton fileId={idradar} fileName="nome_do_arquivo.mp4" onClick={handleFileDownload} title="Radar.blf" />                                     
-                                            </section>
+                                        <article className="bg-zinc-900 rounded p-1 relative">                                    
+                                          
                                         </article>
                                         <section className="grid grid-cols-2 gap-4 w-full">
+
+
+
+
+
+
+
+
+
+
                                             <article className="bg-zinc-900 ml-1 rounded p-2 relative ">
+
+
+
+                                                
                                                 <span className='font-medium text-yellow-300 text-xl'>{formatString(fileWithLink.District) + ' - '}</span>
                                                 <span className="font-medium text-yellow-300 text-xl ">{fileWithLink.City}{' - '}{fileWithLink.State}</span>
                                                 <br />
@@ -144,11 +143,35 @@ const Video: React.FC = () => {
                                                 <article key={fileWithLink.id} className="bg-teal-950 rounded mb-2 p-1 max-w-fit inline-block">
                                                     <span className='font-medium text-teal-200'>{formatString(' ' + fileWithLink.Area + ' ')}</span>
                                                 </article>
+
+
+                            
+
+<section className="grid grid-cols-3 gap-4 w-full mb-2">
+    <h2 className="col-span-3 text-lg d mt-2 text-white">Video Downloads</h2>
+
+    <DownloadButtonVideo fileId={idfrontLeft} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="Front Left" />
+    <DownloadButtonVideo fileId={idfrontCenter} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="Front Center" />
+    <DownloadButtonVideo fileId={idfrontRight} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="Front Right" />
+    <DownloadButtonVideo fileId={idrearLeft} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="Rear Left" />
+    <DownloadButtonVideo fileId={idrearCenter} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="Rear Center" />
+    <DownloadButtonVideo fileId={idrearRight} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="Rear Right" />
+</section>
+    <DownloadButtonVideo fileId={id360} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="360 View" />
+
                                             </article>
                                             <article className="bg-zinc-900 rounded p-1 relative">
                                                 <div className='relative z-0'>
                                                     <MapVideoFull videoName={fileWithLink.FileName} />
                                                 </div>
+                                                <section className="grid grid-cols-2 gap-4 w-full mb-2">
+    <h2 className="col-span-2 text-lg my-2 text-white">File Downloads</h2>
+    <DownloadButton fileId={idcsv} fileName="nome_do_arquivo.mp4" onClick={handleFileDownload} title="Mf4 to Csv" />
+    <DownloadButton fileId={idmf4} fileName="nome_do_arquivo.mp4" onClick={handleFileDownload} title="Mf4" />
+    <DownloadButton fileId={idimu} fileName="nome_do_arquivo.mp4" onClick={handleFileDownload} title="IMU.blf" />
+    <DownloadButton fileId={idcan} fileName="nome_do_arquivo.mp4" onClick={handleFileDownload} title="CAN.blf" />
+    <DownloadButton fileId={idradar} fileName="nome_do_arquivo.mp4" onClick={handleFileDownload} title="Radar.blf" />
+</section>
                                             </article>
                                         </section>
                                     </>

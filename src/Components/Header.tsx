@@ -5,13 +5,13 @@ import carcara from "../Components/img/carcara23.png";
 import customStyles from '../Styles/Header.tsx';
 
 const options = [
-  { value: '/', label: 'Home' },
-  { value: '/HowTo', label: 'How to Use' },  
-  { value: '/Intermediary', label: 'Acquisitions' },
-  { value: '/Extractor', label: 'Extract' },
-  { value: '/Dictionary', label: 'Dictionary' },
-  { value: '/OurModels', label: 'Our Models' },
-  { value: '/About', label: 'About' },  
+  { value: '/', label: 'Overview' },
+//  { value: '/HowTo', label: 'How to Use' },  
+  { value: '/Intermediary', label: 'Download' },
+ // { value: '/Extractor', label: 'Extract' },
+ // { value: '/Dictionary', label: 'Dictionary' },
+ // { value: '/OurModels', label: 'Our Models' },
+//  { value: '/About', label: 'About' },  
 ];
 
 const Header: React.FC = () => {
@@ -36,7 +36,7 @@ const Header: React.FC = () => {
         <Select
           options={options}
           styles={customStyles}
-          placeholder="Home"
+          placeholder="Overview"
           className="w-full md:w-auto mr-5 font-bold p-2"
           classNamePrefix='Select'
           isSearchable={false}

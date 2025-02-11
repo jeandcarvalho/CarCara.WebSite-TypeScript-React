@@ -20,7 +20,7 @@ const City: React.FC = () => {
         <main className="my-5 w-full max-w-7xl h-full">
           <div className="text-left">
             <h1 className="text-4xl font-medium mb-4 text-orange-100">
-              <span className='font-medium text-yellow-300'>Video Files</span>
+              <span className='font-medium text-yellow-300'>v3 Acquisitions</span>
             </h1>
             <h2 className="text-2xl mb-3 mt-3 w-full text-orange-300">
               <p>
