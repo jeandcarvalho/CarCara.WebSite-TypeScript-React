@@ -76,7 +76,7 @@ const Home: React.FC = () => {
                         Our instrumented vehicle is equipped with five sensors strategically positioned to capture essential data during trips. The acquisition and processing flow follows an optimized pipeline to ensure accuracy and reliability.
                     </p>
                     <div className="flex justify-center">
-                <img src={carsensors} alt="Example 1" className="rounded-lg w-2/3 shadow-lg mb-7 mt-3" />
+                <img src={carsensors} alt="Example 1" className="rounded-lg w-full shadow-lg mb-7 mt-3" />
                         </div>
                     <ul className="list-disc pl-6 text-left space-y-2">
                         <li><strong>Onboard Computer</strong> – Responsible for system control and operator interface.</li>
@@ -99,7 +99,7 @@ const Home: React.FC = () => {
                         The vehicle’s data acquisition system follows a structured flow for efficient storage and processing, ensuring that sensor data is organized and accessible for analysis.
                     </p>
                     <div className="flex justify-center">
-                <img src={carprocess} alt="Example 1" className="rounded-lg w-4/5 shadow-lg mb-7 mt-3" />
+                <img src={carprocess} alt="Example 1" className="rounded-lg w-full shadow-lg mb-7 mt-3" />
                         </div>
                     <ul className="list-disc pl-6 text-left space-y-2">
                         <li><strong>DAQ Sensors</strong> – The vehicle is equipped with multiple real-time data acquisition sensors:</li>
