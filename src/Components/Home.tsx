@@ -23,7 +23,7 @@ const Home: React.FC = () => {
     }, []);
 
     return (
-        <div className="min-h-screen flex flex-col bg-zinc-950">
+        <div className="min-h-screen flex flex-col bg-zinc-900">
             <Header />
           
           {/* Sessão CarCara-360DAQ */}
@@ -31,7 +31,7 @@ const Home: React.FC = () => {
     <div className="w-full max-w-5xl flex flex-col md:flex-row items-center md:items-start px-3 text-white">
         <div className="md:w-1/2 text-center md:text-left flex justify-center md:justify-start md:items-center h-full">
             <div className="flex flex-col items-center md:items-start">
-                <h1 className="text-3xl md:text-5xl font-bold mb-4 text-yellow-300 text-roboto">
+                <h1 className="text-3xl md:text-5xl font-bold mb-4 text-yellow-300 text-roboto mr-3">
                     CarCara-DAQ: A Multi-Sensor Dataset for Real-Time Automotive Data Acquisition
                 </h1>
                 <Link to="/Intermediary">
