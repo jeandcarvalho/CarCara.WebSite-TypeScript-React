@@ -36,7 +36,7 @@ const Home: React.FC = () => {
                 </h1>
                 <Link to="/Intermediary">
                     <button className="bg-yellow-300 text-zinc-900 hover:bg-yellow-100 text-base md:text-lg font-bold py-2 px-4 md:px-6 rounded-full transition duration-300 text-roboto mb-6">
-                        Download
+                        Download Acquisitions
                     </button>
                 </Link>
             </div>
@@ -55,7 +55,7 @@ const Home: React.FC = () => {
 
 
             {/* Sessão About */}
-            <div className="bg-zinc-900 text-white py-12 mt-11 px-4">
+            <div className="bg-zinc-900 text-white py-12 mt-5 px-4">
                 <div className="max-w-5xl mx-auto text-center">            
                     <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300 text-roboto">About CarCara-DAQ</h2>
                     <div className="flex justify-center">
