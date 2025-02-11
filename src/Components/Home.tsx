@@ -36,7 +36,7 @@ const Home: React.FC = () => {
                 </h1>
                 <Link to="/Intermediary">
                     <button className="bg-yellow-300 text-zinc-900 hover:bg-yellow-100 text-base md:text-lg font-bold py-2 px-4 md:px-6 rounded-full transition duration-300 text-roboto mb-6">
-                        Download Dataset
+                        Download
                     </button>
                 </Link>
             </div>
