@@ -55,9 +55,9 @@ const Home: React.FC = () => {
                 </Link>
             </div>
         </div>
-    <div className="md:w-1/2 mb-5 flex justify-center items-center mr-3">
+    <div className="md:w-2/5 mb-5 flex justify-center items-center mr-3">
     <img 
-  className="w-full max-w-md md:max-w-lg h-[300px] md:h-[415px] object-cover"
+  className="w-full max-w-md md:max-w-lg h-[300px] md:h-[215px] object-cover"
   src={heat} 
   alt="Descrição do GIF"
 />
@@ -73,16 +73,18 @@ const Home: React.FC = () => {
    <div className="flex-grow flex justify-center mt-3 px-4">
               <div className="w-full max-w-5xl mb-3 flex flex-col md:flex-row items-center md:items-start px-3 text-white">
 
+             
+                  <div className="md:w-1/3 ml-3 flex justify-center items-center">
+                     <img 
+                      className="w-full max-w-md md:max-w-lg h-[550px] md:h-[400px] object-cover mt-1 px-3"
+                      src={yolo} 
+  
+                      alt="Descrição do GIF"
+/>
+                  </div>      
 
-              <div className="md:w-1/2 ml-7 mr-3 text-center md:text-left flex justify-center md:justify-start md:items-center h-full">
-                      <div className="flex flex-col items-center md:items-start">
-                    
-
-                     
-   
- 
-
-
+                   <div className="md:w-1/2 ml-7 mr-3 text-center md:text-left flex justify-center md:justify-start md:items-center h-full">
+                      <div className="flex flex-col items-center md:items-start">               
                           <h1 className="text-3xl md:text-4xl font-bold mb-4  text-yellow-300 text-roboto mr-3">
                               CarCara-DAQ: Data Acquisition Test with Advanced Technologies
                           </h1>
@@ -90,53 +92,28 @@ const Home: React.FC = () => {
                               This test combines real-time data acquisition with advanced algorithms for lane detection and object identification. 
                               The integration of these technologies enables a detailed analysis of the vehicle's surroundings, contributing to research 
                               in safety and automotive automation.
-                          </p>
-
-                         
+                          </p>   
                       </div>
-                  </div>
-                  <div className="md:w-1/2 ml-3 flex justify-center items-center">
-
-                  
-
-
-
-
-
-
-                  <img 
-  className="w-full max-w-md md:max-w-lg h-[550px] md:h-[620px] object-cover mt-1 px-3"
-  src={yolo} 
-  
-  alt="Descrição do GIF"
-/>
-
-                  </div>
-                  
+                  </div>         
               </div>
           </div>
-
-
-
-
-        
 
             {/* Sessão Examples */}
             <div className="bg-zinc-900 text-white py-1 px-4">
                 <div className="max-w-5xl mx-auto text-center">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300 text-roboto">Examples</h2>
                     <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-  {/* Placeholder for the video thumbnails */}
-  <div className="flex justify-center">
-    <img src={urbano} alt="Example 1" className="rounded-lg shadow-lg h-46 md:h-96" />
-  </div>
-  <div className="flex justify-center">
-    <img src={rural} alt="Example 2" className="rounded-lg shadow-lg h-46 md:h-96" />
-  </div>
-  <div className="flex justify-center">
-    <img src={molhado} alt="Example 3" className="rounded-lg shadow-lg h-46 md:h-96" />
-  </div>
-</div>
+            {/* Placeholder for the video thumbnails */}
+            <div className="flex justify-center">
+              <img src={urbano} alt="Example 1" className="rounded-lg shadow-lg h-46 md:h-96" />
+               </div>
+               <div className="flex justify-center">
+                 <img src={rural} alt="Example 2" className="rounded-lg shadow-lg h-46 md:h-96" />
+               </div>
+               <div className="flex justify-center">
+                 <img src={molhado} alt="Example 3" className="rounded-lg shadow-lg h-46 md:h-96" />
+               </div>
+             </div>
 
                 </div>
             </div>
