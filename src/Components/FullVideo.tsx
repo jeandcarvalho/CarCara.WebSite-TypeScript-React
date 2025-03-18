@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Header from './Header';
 import Footer from './Footer';
 import { useParams } from "react-router-dom";
-
+import { Link } from 'react-router-dom';
 import MapVideoFull from '../Maps/MapVideoFull';
 import loadgif from "../Components/img/gif.gif";
 import { extrairIdGoogleDrive, formatString, changeViewToPreview } from '../Utils/VideoUtils';
@@ -90,6 +90,14 @@ const Video: React.FC = () => {
     return (
         <div className='bg-zinc-950 min-h-screen flex flex-col'>
             <Header />
+
+              <div className="my-3 ml-3">
+                                    <Link to="/FullFiles">
+                                        <button className="bg-gray-700 text-white hover:bg-gray-600 text-base md:text-lg font-bold py-1 px-3 rounded-full transition duration-300 text-roboto">
+                                            ← v4 Acquisitions
+                                        </button>
+                                    </Link>
+                                </div>
             <div className="flex-grow flex justify-center px-4">
                 <main className="my-5 w-full md:w-full">
                     {isLoading ? (

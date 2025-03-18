@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import Header from '../Components/Header';
 import Footer from '../Components/Footer';
-import { useParams } from "react-router-dom";
+import { useParams, } from "react-router-dom";
 import MapVideo from '../Maps/MapVideo';
 import { Link } from "react-router-dom";
 import useVideoData from '../Hooks/VideoData';
@@ -29,6 +29,13 @@ const Video: React.FC = () => {
     return (
         <div className='bg-zinc-950 min-h-screen flex flex-col'>
             <Header />
+            <div className="my-3 ml-3">
+                                          <Link to="/Search">
+                                              <button className="bg-gray-700 text-white hover:bg-gray-600 text-base md:text-lg font-bold py-1 px-3 rounded-full transition duration-300 text-roboto">
+                                                  ← Search & Filters
+                                              </button>
+                                          </Link>
+                                      </div>
             <div className="flex-grow flex justify-center px-4">
                 <main className="my-5 w-full md:w-full">
                     <section className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mt-1">

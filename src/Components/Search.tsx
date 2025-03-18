@@ -134,6 +134,14 @@ export default function Acquisitions() {
   return (
     <div className='min-h-screen flex flex-col bg-zinc-950'>
        <Header/>
+
+       <div className="my-3 ml-3">
+                                          <Link to="/Intermediary">
+                                              <button className="bg-gray-700 text-white hover:bg-gray-600 text-base md:text-lg font-bold py-1 px-3 rounded-full transition duration-300 text-roboto">
+                                                  ← Acquisitions
+                                              </button>
+                                          </Link>
+                                      </div>
        <div className="flex-grow flex justify-center">
         <main className="my-4 mx-3 w-full max-w-6xl ">
           <h2 className="text-4xl font-medium mb-4 text-yellow-100 text-left">
