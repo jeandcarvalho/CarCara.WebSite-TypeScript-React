@@ -11,7 +11,6 @@ import urbano from "../Components/img/urbano.png";
 import molhado from "../Components/img/molhado.png";
 import utfpr from "../Components/img/utfpr.png";
 import yolo from "../Components/img/yolo.gif";
-import heat from "../Components/img/heat.gif";
 import cars from "../Components/img/cars.png";
 import acq from "../Components/img/acq.gif";
 
