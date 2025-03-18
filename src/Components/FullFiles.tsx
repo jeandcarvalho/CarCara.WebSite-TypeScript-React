@@ -71,7 +71,7 @@ const City: React.FC = () => {
               <img src={loadgif} alt="Loading" className='w-32 h-32 mt-11 mb-11' />
             </div>
           ) : (
-            <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 p-2">
+            <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 p-2">
               {filesData
                 .filter(file => file.City !== "Not Found" && file.District !== "Not Found")
                 .map(file => (
