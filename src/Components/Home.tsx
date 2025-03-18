@@ -78,7 +78,7 @@ const Home: React.FC = () => {
 
     <div className="md:w-2/5 mb-5 flex justify-center items-center mr-3 mt-3">
             <img 
-                className="w-full max-w-md md:max-w-lg h-[370px] md:h-[415px] object-cover rounded-lg"
+                className="w-full max-w-md md:max-w-lg h-[330px] md:h-[415px] object-cover rounded-lg"
                 src={cars} 
                 alt="Overview of the 3 Cars"
             />
