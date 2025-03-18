@@ -9,6 +9,7 @@ import logoscarcara from "../Components/img/LOGOSCARCARA2.jpg";
 import rural from "../Components/img/rural.png";
 import urbano from "../Components/img/urbano.png";
 import molhado from "../Components/img/molhado.png";
+import utfpr from "../Components/img/utfpr.png";
 
 const Home: React.FC = () => {
     const states = ["São Paulo", "Espírito Santo", "Minas Gerais", "Rio de Janeiro", "Paraná"];
@@ -28,7 +29,7 @@ const Home: React.FC = () => {
               {/* CarCara-DAQ Test Section */}
           <div className="flex-grow flex justify-center mt-3 px-4">
               <div className="w-full max-w-5xl mb-3 flex flex-col md:flex-row items-center md:items-start px-3 text-white">
-                  <div className="md:w-1/2 flex justify-center items-center">
+                  <div className="md:w-1/2 ml-3 flex justify-center items-center">
                       <iframe
                           className="w-full max-w-md md:max-w-lg h-[400px] md:h-[595px]"
                           src="https://drive.google.com/file/d/1EWeFLxkMsAfrV-WeCJ5ywlgnfeUvw8Rm/preview?usp=sharing&vq=hd1080"
@@ -37,8 +38,22 @@ const Home: React.FC = () => {
                           allowFullScreen
                       ></iframe>
                   </div>
-                  <div className="md:w-1/2 ml-7 text-center md:text-left flex justify-center md:justify-start md:items-center h-full">
+                  <div className="md:w-1/2 ml-7 mr-3 text-center md:text-left flex justify-center md:justify-start md:items-center h-full">
                       <div className="flex flex-col items-center md:items-start">
+                    
+
+                     
+                      <img
+    src={utfpr}
+    alt="Descrição da imagem"
+    width="280"
+    height="60"
+    className="inline-block mt-5 "
+  />
+
+ 
+
+
                           <h1 className="text-3xl md:text-4xl font-bold mb-4 mt-3 text-yellow-300 text-roboto mr-3">
                               CarCara-DAQ: Data Acquisition Test with Advanced Technologies
                           </h1>
@@ -47,6 +62,8 @@ const Home: React.FC = () => {
                               The integration of these technologies enables a detailed analysis of the vehicle's surroundings, contributing to research 
                               in safety and automotive automation.
                           </p>
+
+                         
                       </div>
                   </div>
               </div>
@@ -58,7 +75,7 @@ const Home: React.FC = () => {
     <div className="w-full max-w-5xl flex mt-3  flex-col md:flex-row items-center md:items-start px-3 text-white">
 
         
-    <div className="  md:w-1/2 text-center md:text-left flex justify-center md:justify-start md:items-center h-full">
+    <div className="  md:w-1/2 ml-3 text-center md:text-left flex justify-center md:justify-start md:items-center h-full">
             <div className="flex flex-col items-center md:items-start">
                 <h1 className="text-2xl md:text-3xl font-bold mb-4 text-yellow-300 text-roboto mr-3">
                     CarCara-DAQ: A Multi-Sensor Dataset for Real-Time Automotive Data Acquisition
@@ -70,7 +87,7 @@ const Home: React.FC = () => {
                 </Link>
             </div>
         </div>
-    <div className="md:w-1/2 flex justify-center items-center">
+    <div className="md:w-1/2 flex justify-center items-center mr-3">
             <iframe
                 className="w-4/5 max-w-md mb-3 md:max-w-lg h-[220px] md:h-[365px]" // Definindo a altura para mobile e desktop
                 src="https://drive.google.com/file/d/1GO3NSLDvF5G6WH2LXvVJbksFJRQ2KywA/preview?usp=sharing&vq=hd1080"
@@ -94,22 +111,22 @@ const Home: React.FC = () => {
             <div className="bg-zinc-900 text-white py-5 px-4">
                 <div className="max-w-5xl mx-auto text-center">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300 text-roboto">Examples</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
                         {/* Placeholder for the video thumbnails */}
                         <div className="flex justify-center">
                        
-                                <img src={urbano} alt="Example 1" className="rounded-lg shadow-lg h-36" />
+                                <img src={urbano} alt="Example 1" className="rounded-lg shadow-lg h-96" />
                           
                         </div>
                         <div className="flex justify-center">
   
-        <img src={rural} alt="Example 2" className="rounded-lg shadow-lg h-36" />
+        <img src={rural} alt="Example 2" className="rounded-lg shadow-lg h-96" />
 
 </div>
 
                         <div className="flex justify-center">
                       
-                                <img src={molhado} alt="Example 3" className="rounded-lg shadow-lg h-36" />
+                                <img src={molhado} alt="Example 3" className="rounded-lg shadow-lg h-96" />
                         
                         </div>
                         
