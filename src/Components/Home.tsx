@@ -64,7 +64,7 @@ const Home: React.FC = () => {
                     CarCara-DAQ: A Multi-Sensor Dataset for Real-Time Automotive Data Acquisition
                 </h1>
                 <Link to="/Intermediary">
-                    <button className=" mb-3 bg-yellow-300 text-zinc-900 hover:bg-yellow-100 text-base md:text-lg font-bold py-2 px-4 md:px-6 rounded-full transition duration-300 text-roboto mb-6">
+                    <button className=" bg-yellow-300 text-zinc-900 hover:bg-yellow-100 text-base md:text-lg font-bold py-2 px-4 md:px-6 rounded-full transition duration-300 text-roboto mb-6">
                         Download Here
                     </button>
                 </Link>
