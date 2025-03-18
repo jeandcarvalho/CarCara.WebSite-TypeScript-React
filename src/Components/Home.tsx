@@ -36,14 +36,14 @@ const Home: React.FC = () => {
                 </h1>
                 <Link to="/Intermediary">
                     <button className="bg-yellow-300 text-zinc-900 hover:bg-yellow-100 text-base md:text-lg font-bold py-2 px-4 md:px-6 rounded-full transition duration-300 text-roboto mb-6">
-                        Download Acquisitions
+                        Download Here
                     </button>
                 </Link>
             </div>
         </div>
         <div className="md:w-1/2 flex justify-center items-center">
             <iframe
-                className="w-full max-w-md md:max-w-lg h-[300px] md:h-[505px]" // Definindo a altura para mobile e desktop
+                className="w-4/5 max-w-md md:max-w-lg h-[220px] md:h-[365px]" // Definindo a altura para mobile e desktop
                 src="https://drive.google.com/file/d/1YP9Tu6hxK7wCV1Eu1log8akPNlhTEAo6/preview?usp=sharing&vq=hd1080"
                 frameBorder="0"
                 allow="autoplay; encrypted-media"
@@ -54,63 +54,34 @@ const Home: React.FC = () => {
 </div>
 
 
-            {/* Sessão About */}
-            <div className="bg-zinc-900 text-white py-12 mt-5 px-4">
-                <div className="max-w-5xl mx-auto text-center">            
-                    <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300 text-roboto">About CarCara-DAQ</h2>
-                    <div className="flex justify-center">
-                <img src={view360} alt="Example 1" className="rounded-lg w-full shadow-lg mb-7 mt-3" />
-                        </div>
-                    <p className="text-lg mb-6">
-                        CarCara-DAQ is a comprehensive dataset built for real-time automotive data acquisition, providing insights into vehicle behavior and environmental interactions. 
-                        With data from multi-sensor setups, including cameras, radar, IMU, and GPS, our platform enables advanced analysis and research in automotive technologies.
-                    </p>
-                </div>
-            </div>
 
-            {/* Sessão Data Acquisition System Architecture */}
-            <div className="bg-zinc-950 text-white py-12 px-4">
-                <div className="max-w-5xl mx-auto text-center">
-                    <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300 text-roboto">Data Acquisition System Architecture - DAQ – CAPTUR</h2>
-                    <p className="text-lg mb-6">
-                        Our instrumented vehicle is equipped with five sensors strategically positioned to capture essential data during trips. The acquisition and processing flow follows an optimized pipeline to ensure accuracy and reliability.
-                    </p>
-                    <div className="flex justify-center">
-                <img src={carsensors} alt="Example 1" className="rounded-lg w-full shadow-lg mb-7 mt-3" />
-                        </div>
-                    <ul className="list-disc pl-6 text-left space-y-2">
-                        <li><strong>Onboard Computer</strong> – Responsible for system control and operator interface.</li>
-                        <li><strong>Smart Logger</strong> – Collects, synchronizes, and stores raw sensor data.</li>
-                        <li><strong>Dataset DBA</strong> – Structured database where records are stored for further analysis.</li>
-                        <li><strong>Concentrator</strong> – Module that manages communication between sensors and the Smart Logger.</li>
-                        <li><strong>Sensors</strong> – Radar, CAN, 6 cameras, IMU, and GPS.</li>
-                    </ul>
-                    <p className="text-lg mt-4">
-                        Each stage of the flow undergoes a calibration and configuration process to ensure that the collected data is accurate and usable. The system setup is designed for easy adaptation to different test scenarios, allowing for adjustments as needed.
-                    </p>
-                </div>
-            </div>
+          {/* CarCara-DAQ Test Section */}
+          <div className="flex-grow flex justify-center mt-7 px-4">
+              <div className="w-full max-w-5xl flex flex-col md:flex-row items-center md:items-start px-3 text-white">
+                  <div className="md:w-1/2 flex justify-center items-center">
+                      <iframe
+                          className="w-full max-w-md md:max-w-lg h-[400px] md:h-[595px]"
+                          src="https://drive.google.com/file/d/1EWeFLxkMsAfrV-WeCJ5ywlgnfeUvw8Rm/preview?usp=sharing&vq=hd1080"
+                          frameBorder="0"
+                          allow="autoplay; encrypted-media"
+                          allowFullScreen
+                      ></iframe>
+                  </div>
+                  <div className="md:w-1/2 ml-7 text-center md:text-left flex justify-center md:justify-start md:items-center h-full">
+                      <div className="flex flex-col items-center md:items-start">
+                          <h1 className="text-3xl md:text-4xl font-bold mb-4 mt-3 text-yellow-300 text-roboto mr-3">
+                              CarCara-DAQ: Data Acquisition Test with Advanced Technologies
+                          </h1>
+                          <p className="text-base md:text-lg text-gray-300 mb-4 max-w-lg">
+                              This test combines real-time data acquisition with advanced algorithms for lane detection and object identification. 
+                              The integration of these technologies enables a detailed analysis of the vehicle's surroundings, contributing to research 
+                              in safety and automotive automation.
+                          </p>
+                      </div>
+                  </div>
+              </div>
+          </div>
 
-            {/* Sessão Data Storage and Processing */}
-            <div className="bg-zinc-950 text-white pb-12 px-4">
-                <div className="max-w-5xl mx-auto text-center">
-                    <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300 text-roboto">Data Storage and Processing – DAQ Captur</h2>
-                    <p className="text-lg mb-6">
-                        The vehicle’s data acquisition system follows a structured flow for efficient storage and processing, ensuring that sensor data is organized and accessible for analysis.
-                    </p>
-                    <div className="flex justify-center">
-                <img src={carprocess} alt="Example 1" className="rounded-lg w-full shadow-lg mb-7 mt-3" />
-                        </div>
-                    <ul className="list-disc pl-6 text-left space-y-2">
-                        <li><strong>DAQ Sensors</strong> – The vehicle is equipped with multiple real-time data acquisition sensors:</li>
-                        <li>6 Cameras – Strategically positioned to capture a complete view of the environment.</li>
-                        <li>Radar, CAN, IMU, and GPS – Capture variables such as obstacle detection, vehicle internal data, acceleration, and geographic position.</li>
-                        <li><strong>Smart Logger</strong> – Centralizes and stores collected data, with a 4 to 8 TB capacity for continuous recording.</li>
-                        <li><strong>DAQ Management</strong> – Interface displayed on the onboard computer monitor, allowing real-time management of data acquisition.</li>
-                        <li><strong>DAQ Record</strong> – Sensor recordings are saved in storage and also sent to the Lab Database for DAQ Dataset GSA.</li>
-                    </ul>
-                </div>
-            </div>
 
             {/* Sessão Examples */}
             <div className="bg-zinc-900 text-white py-12 px-4">
