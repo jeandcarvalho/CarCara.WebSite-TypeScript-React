@@ -12,6 +12,7 @@ import molhado from "../Components/img/molhado.png";
 import utfpr from "../Components/img/utfpr.png";
 import yolo from "../Components/img/yolo.gif";
 import heat from "../Components/img/heat.gif";
+import cars from "../Components/img/cars.png";
 
 const Home: React.FC = () => {
     const states = ["São Paulo", "Espírito Santo", "Minas Gerais", "Rio de Janeiro", "Paraná"];
@@ -32,7 +33,7 @@ const Home: React.FC = () => {
           
           {/* Sessão CarCara-360DAQ */}
 <div className="bg-zinc-950 flex-grow flex justify-center px-4">
-    <div className="w-full max-w-5xl flex mt-3  flex-col md:flex-row items-center md:items-start px-3 text-white">
+    <div className="w-full max-w-5xl flex mt-3 mb-3  flex-col md:flex-row items-center md:items-start px-3 text-white">
 
         
     <div className="  md:w-1/2 ml-3  text-center md:text-left flex justify-center md:justify-start md:items-center h-full">
@@ -57,7 +58,7 @@ const Home: React.FC = () => {
         </div>
     <div className="md:w-2/5 mb-5 flex justify-center items-center mr-3">
     <img 
-  className="w-full max-w-md md:max-w-lg h-[300px] md:h-[215px] object-cover"
+  className="w-full max-w-md md:max-w-lg h-[300px] md:h-[215px] object-cover rounded-lg"
   src={heat} 
   alt="Descrição do GIF"
 />
@@ -69,21 +70,50 @@ const Home: React.FC = () => {
     </div>
 </div>
 
+
+
+{/* Section - Architecture of the 3 Cars */}
+<div className="bg-zinc-900 flex-grow flex justify-center px-4">
+    <div className="w-full max-w-5xl flex mt-5 mb-5 flex-col md:flex-row items-center md:items-start px-3 text-white">
+
+    <div className="md:w-2/5 mb-5 flex justify-center items-center mr-3 mt-3">
+            <img 
+                className="w-full max-w-md md:max-w-lg h-[300px] md:h-[405px] object-cover rounded-lg"
+                src={cars} 
+                alt="Overview of the 3 Cars"
+            />
+        </div>
+        
+        <div className="md:w-1/2 ml-3 text-center md:text-left flex justify-center md:justify-start md:items-center h-full">
+            <div className="flex flex-col items-center md:items-start ">
+                <h1 className="text-2xl md:text-3xl font-bold mb-4 mt-4 text-yellow-300 text-roboto mr-3">
+                    Introduction to the DAQ Architecture
+                </h1>
+                <p className="text-base md:text-lg mb-6 text-zinc-300">
+                    This section provides an overview of the vehicles and data structures used in the Data Acquisition (DAQ) architecture. Learn more about the Renault CAPTUR, DAF CF 410, and Jeep Renegade, and explore their respective data formats.
+                </p>
+                <Link to="/About">
+                    <button className="bg-yellow-300 text-zinc-900 hover:bg-yellow-100 text-base mb-5 md:text-lg font-bold py-2 px-4 md:px-6 rounded-full transition duration-300">
+                        Explore Our Architecture
+                    </button>
+                </Link>
+            </div>
+        </div>
+
+       
+    </div>
+</div>
+
+
    {/* CarCara-DAQ Test Section */}
-   <div className="flex-grow flex justify-center mt-3 px-4">
-              <div className="w-full max-w-5xl mb-3 flex flex-col md:flex-row items-center md:items-start px-3 text-white">
+   <div className="bg-zinc-950 flex-grow flex justify-center px-4">
 
-             
-                  <div className="md:w-1/3 ml-3 flex justify-center items-center">
-                     <img 
-                      className="w-full max-w-md md:max-w-lg h-[550px] md:h-[400px] object-cover mt-1 px-3"
-                      src={yolo} 
-  
-                      alt="Descrição do GIF"
-/>
-                  </div>      
 
-                   <div className="md:w-1/2 ml-7 mr-3 text-center md:text-left flex justify-center md:justify-start md:items-center h-full">
+    
+              <div className="w-full max-w-5xl mb-3 mt-3 flex flex-col md:flex-row items-center md:items-start px-3 text-white">
+
+
+              <div className="md:w-1/2 ml-7 mr-3 text-center md:text-left flex justify-center md:justify-start md:items-center h-full">
                       <div className="flex flex-col items-center md:items-start">               
                           <h1 className="text-3xl md:text-4xl font-bold mb-4  text-yellow-300 text-roboto mr-3">
                               CarCara-DAQ: Data Acquisition Test with Advanced Technologies
@@ -94,14 +124,26 @@ const Home: React.FC = () => {
                               in safety and automotive automation.
                           </p>   
                       </div>
-                  </div>         
+                  </div> 
+
+             
+                  <div className="md:w-1/3 ml-3 flex justify-center items-center ">
+                     <img 
+                      className="w-full max-w-md md:max-w-lg h-[550px] md:h-[400px] object-cover mt-1 px-3 rounded-lg"
+                      src={yolo} 
+  
+                      alt="Descrição do GIF"
+/>
+                  </div>      
+
+                         
               </div>
           </div>
 
             {/* Sessão Examples */}
-            <div className="bg-zinc-900 text-white py-1 px-4">
+            <div className="bg-zinc-900 text-white py-3 px-4">
                 <div className="max-w-5xl mx-auto text-center">
-                    <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300 text-roboto">Examples</h2>
+                    <h2 className="text-3xl md:text-4xl font-bold mb-5 text-yellow-300 text-roboto">Examples</h2>
                     <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
             {/* Placeholder for the video thumbnails */}
             <div className="flex justify-center">

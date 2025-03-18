@@ -1,125 +1,99 @@
-import useFetchFiles from '../Hooks/Counter';
-import carcaraS from "../Components/img/carcara2.png";
 import Header from '../Components/Header';
 import Footer from '../Components/Footer';
-import view360 from "../Components/img/tela 360.png";
-import carprocess from "../Components/img/car process.png";
-import carsensors from "../Components/img/car sensors.png";
-
-const totalDistance = 2773; // em quilômetros
-const totalHours = 35;
-const totalGigabytes = 25;
+import captur from "../Components/img/captur.png";
+import jeep from "../Components/img/jeep.png";
+import daf from "../Components/img/daf.png";
 
 const About = () => {
-    const filesdata = useFetchFiles();
-
-    const visitors = Array.isArray(filesdata) 
-        ? filesdata.map(item => item.visitantes) 
-        : [];
-
-
-
     return (
         <div className="min-h-screen flex flex-col bg-zinc-900">
             <Header />
+{/* Index */}
+<div className="bg-zinc-900 text-white py-12 px-4">
+    <div className="max-w-5xl mx-auto text-center">
+        {/* Título Principal */}
+        <h2 className="text-5xl md:text-5xl font-bold mb-4 text-yellow-300">DAQ Architecture</h2>
         
-                
+        {/* Introdução ao Sumário */}
+        <p className="text-lg text-gray-300 mb-6">
+            This section provides an overview of the vehicles and data structures used in the DAQ (Data Acquisition) architecture. Click on a topic below to learn more.
+        </p>
 
+        {/* Sumário */}
+        <ul className="text-lg list-disc pl-6 text-left">
+            <li><a href="#introduction" className="text-yellow-300">Introduction</a></li>
+            <li><a href="#captur" className="text-yellow-300">Renault CAPTUR</a></li>
+            <li><a href="#daf" className="text-yellow-300">DAF CF 410</a></li>
+            <li><a href="#renegade" className="text-yellow-300">Jeep Renegade</a></li>
+            <li><a href="#dbc" className="text-yellow-300">Data Dictionary – DBC or DBF</a></li>
+            <li><a href="#a2l" className="text-yellow-300">Data Dictionary – A2L</a></li>
+        </ul>
 
-                
-            {/* Sessão About */}
-            <div className="bg-zinc-900 text-white py-12 mt-5 px-4">
-                <div className="max-w-5xl mx-auto text-center">            
-                    <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300 text-roboto">About CarCara-DAQ</h2>
-                    <div className="flex justify-center">
-                <img src={view360} alt="Example 1" className="rounded-lg w-full shadow-lg mb-7 mt-3" />
-                        </div>
-                    <p className="text-lg mb-6">
-                        CarCara-DAQ is a comprehensive dataset built for real-time automotive data acquisition, providing insights into vehicle behavior and environmental interactions. 
-                        With data from multi-sensor setups, including cameras, radar, IMU, and GPS, our platform enables advanced analysis and research in automotive technologies.
-                    </p>
-                </div>
+        {/* Título para os veículos */}
+        <h3 className="text-2xl md:text-3xl font-bold mt-7 mb-6 text-yellow-300">Vehicles in DAQ Architecture</h3>
+
+        {/* Imagens lado a lado */}
+        <div className="flex flex-wrap sm:flex-nowrap justify-center gap-6 mt-4">
+            {/* Renault Captur */}
+            <div className="text-center">
+                <img src={captur} alt="Renault Captur" className="w-32 h-32 md:w-60 md:h-60 object-cover rounded-lg shadow-lg" />
+                <p className="mt-2 text-yellow-300 text-lg font-semibold">Renault Captur</p>
             </div>
 
-            {/* Sessão Data Acquisition System Architecture */}
-            <div className="bg-zinc-950 text-white py-12 px-4">
+            {/* DAF CF 410 */}
+            <div className="text-center">
+                <img src={daf} alt="DAF CF 410" className="w-32 h-32 md:w-60 md:h-60 object-cover rounded-lg shadow-lg" />
+                <p className="mt-2 text-yellow-300 text-lg font-semibold">DAF CF 410</p>
+            </div>
+
+            {/* Jeep Renegade */}
+            <div className="text-center">
+                <img src={jeep} alt="Jeep Renegade" className="w-32 h-32 md:w-60 md:h-60 object-cover rounded-lg shadow-lg" />
+                <p className="mt-2 text-yellow-300 text-lg font-semibold">Jeep Renegade</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+            {/* Sections */}
+            <div className="bg-zinc-950 text-white py-12 px-4" id="introduction">
                 <div className="max-w-5xl mx-auto text-center">
-                    <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300 text-roboto">Data Acquisition System Architecture - DAQ – CAPTUR</h2>
-                    <p className="text-lg mb-6">
-                        Our instrumented vehicle is equipped with five sensors strategically positioned to capture essential data during trips. The acquisition and processing flow follows an optimized pipeline to ensure accuracy and reliability.
-                    </p>
-                    <div className="flex justify-center">
-                <img src={carsensors} alt="Example 1" className="rounded-lg w-full shadow-lg mb-7 mt-3" />
-                        </div>
-                    <ul className="list-disc pl-6 text-left space-y-2">
-                        <li><strong>Onboard Computer</strong> – Responsible for system control and operator interface.</li>
-                        <li><strong>Smart Logger</strong> – Collects, synchronizes, and stores raw sensor data.</li>
-                        <li><strong>Dataset DBA</strong> – Structured database where records are stored for further analysis.</li>
-                        <li><strong>Concentrator</strong> – Module that manages communication between sensors and the Smart Logger.</li>
-                        <li><strong>Sensors</strong> – Radar, CAN, 6 cameras, IMU, and GPS.</li>
-                    </ul>
-                    <p className="text-lg mt-4">
-                        Each stage of the flow undergoes a calibration and configuration process to ensure that the collected data is accurate and usable. The system setup is designed for easy adaptation to different test scenarios, allowing for adjustments as needed.
-                    </p>
+                    <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300">Introduction</h2>
                 </div>
             </div>
 
-            {/* Sessão Data Storage and Processing */}
-            <div className="bg-zinc-950 text-white pb-12 px-4">
+            <div className="bg-zinc-900 text-white py-12 px-4" id="captur">
                 <div className="max-w-5xl mx-auto text-center">
-                    <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300 text-roboto">Data Storage and Processing – DAQ Captur</h2>
-                    <p className="text-lg mb-6">
-                        The vehicle’s data acquisition system follows a structured flow for efficient storage and processing, ensuring that sensor data is organized and accessible for analysis.
-                    </p>
-                    <div className="flex justify-center">
-                <img src={carprocess} alt="Example 1" className="rounded-lg w-full shadow-lg mb-7 mt-3" />
-                        </div>
-                    <ul className="list-disc pl-6 text-left space-y-2">
-                        <li><strong>DAQ Sensors</strong> – The vehicle is equipped with multiple real-time data acquisition sensors:</li>
-                        <li>6 Cameras – Strategically positioned to capture a complete view of the environment.</li>
-                        <li>Radar, CAN, IMU, and GPS – Capture variables such as obstacle detection, vehicle internal data, acceleration, and geographic position.</li>
-                        <li><strong>Smart Logger</strong> – Centralizes and stores collected data, with a 4 to 8 TB capacity for continuous recording.</li>
-                        <li><strong>DAQ Management</strong> – Interface displayed on the onboard computer monitor, allowing real-time management of data acquisition.</li>
-                        <li><strong>DAQ Record</strong> – Sensor recordings are saved in storage and also sent to the Lab Database for DAQ Dataset GSA.</li>
-                    </ul>
-
-
-
-                    
-                <div className="mr-7 ml-7 max-w-3xl px-2 text-center text-white mt-7">
-                    <img
-                        src={carcaraS}
-                        alt="Descrição da imagem"
-                        className="mr-2 mt-1"
-                        width="70"
-                        style={{ height: "70px", display: "inline-block" }}
-                    />
-                    <h1 className="text-5xl font-bold mb-4 text-roboto text-yellow-400">
-                        About us
-                    </h1>
-                    <p className="text-2xl mb-3 font-bold text-roboto">
-                        Welcome to <span className="italic text-yellow-300">CarCara</span>, a platform specializing in vehicle data acquisition with precise classifications.
-                    </p>
-                   
-                    <p className="text-base font-semi md:text-sm text-roboto text-yellow-100">
-                        Our website provides researchers with comprehensive data, including videos, measurements, and classifications. Additionally, it facilitates data visualization and extraction for research in computer vision, map creation, and the calibration of sensors and radar systems.
-                    </p>
-                    <p className="text-yellow-400 mt-3">Visitors: {visitors}</p>
-                    <p className="text-gray-400 mt-1">Total Distance: {totalDistance} km</p>
-                    <p className="text-gray-400">Total Hours Recorded: {totalHours} hours</p>
-                    <p className="text-gray-400">Total Terabytes Used: {totalGigabytes} TB</p>
+                    <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300">Renault CAPTUR</h2>
                 </div>
-           
             </div>
 
-
-
-
-
-
-
-
+            <div className="bg-zinc-950 text-white py-12 px-4" id="daf">
+                <div className="max-w-5xl mx-auto text-center">
+                    <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300">DAF CF 410</h2>
+                </div>
             </div>
+
+            <div className="bg-zinc-900 text-white py-12 px-4" id="renegade">
+                <div className="max-w-5xl mx-auto text-center">
+                    <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300">Jeep Renegade</h2>
+                </div>
+            </div>
+
+            <div className="bg-zinc-950 text-white py-12 px-4" id="dbc">
+                <div className="max-w-5xl mx-auto text-center">
+                    <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300">Data Dictionary – DBC or DBF</h2>
+                </div>
+            </div>
+
+            <div className="bg-zinc-900 text-white py-12 px-4" id="a2l">
+                <div className="max-w-5xl mx-auto text-center">
+                    <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300">Data Dictionary – A2L</h2>
+                </div>
+            </div>
+
             <Footer />
         </div>
     );
