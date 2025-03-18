@@ -17,10 +17,7 @@ const About = () => {
         ? filesdata.map(item => item.visitantes) 
         : [];
 
-    const handleButtonClick = () => {
-        history.pushState(null, '', '/OurModels');
-        window.dispatchEvent(new PopStateEvent('popstate', { state: null }));
-    };
+
 
     return (
         <div className="min-h-screen flex flex-col bg-zinc-900">
