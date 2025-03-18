@@ -10,6 +10,8 @@ import rural from "../Components/img/rural.png";
 import urbano from "../Components/img/urbano.png";
 import molhado from "../Components/img/molhado.png";
 import utfpr from "../Components/img/utfpr.png";
+import yolo from "../Components/img/yolo.gif";
+import heat from "../Components/img/heat.gif";
 
 const Home: React.FC = () => {
     const states = ["São Paulo", "Espírito Santo", "Minas Gerais", "Rio de Janeiro", "Paraná"];
@@ -29,16 +31,9 @@ const Home: React.FC = () => {
               {/* CarCara-DAQ Test Section */}
           <div className="flex-grow flex justify-center mt-3 px-4">
               <div className="w-full max-w-5xl mb-3 flex flex-col md:flex-row items-center md:items-start px-3 text-white">
-                  <div className="md:w-1/2 ml-3 flex justify-center items-center">
-                      <iframe
-                          className="w-full max-w-md md:max-w-lg h-[400px] md:h-[595px]"
-                          src="https://drive.google.com/file/d/1EWeFLxkMsAfrV-WeCJ5ywlgnfeUvw8Rm/preview?usp=sharing&vq=hd1080"
-                          frameBorder="0"
-                          allow="autoplay; encrypted-media"
-                          allowFullScreen
-                      ></iframe>
-                  </div>
-                  <div className="md:w-1/2 ml-7 mr-3 text-center md:text-left flex justify-center md:justify-start md:items-center h-full">
+
+
+              <div className="md:w-1/2 ml-7 mr-3 text-center md:text-left flex justify-center md:justify-start md:items-center h-full">
                       <div className="flex flex-col items-center md:items-start">
                     
 
@@ -66,6 +61,24 @@ const Home: React.FC = () => {
                          
                       </div>
                   </div>
+                  <div className="md:w-1/2 ml-3 flex justify-center items-center">
+
+                  
+
+
+
+
+
+
+                  <img 
+  className="w-full max-w-md md:max-w-lg h-[550px] md:h-[620px] object-cover px-3"
+  src={yolo} 
+  
+  alt="Descrição do GIF"
+/>
+
+                  </div>
+                  
               </div>
           </div>
 
@@ -88,13 +101,11 @@ const Home: React.FC = () => {
             </div>
         </div>
     <div className="md:w-1/2 flex justify-center items-center mr-3">
-            <iframe
-                className="w-4/5 max-w-md mb-3 md:max-w-lg h-[220px] md:h-[365px]" // Definindo a altura para mobile e desktop
-                src="https://drive.google.com/file/d/1GO3NSLDvF5G6WH2LXvVJbksFJRQ2KywA/preview?usp=sharing&vq=hd1080"
-                frameBorder="0"
-                allow="autoplay; encrypted-media"
-                allowFullScreen
-            ></iframe>
+    <img 
+  className="w-full max-w-md md:max-w-lg h-[300px] md:h-[415px] object-cover"
+  src={heat} 
+  alt="Descrição do GIF"
+/>
         </div>
 
 
