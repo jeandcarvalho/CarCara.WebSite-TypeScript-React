@@ -22,39 +22,12 @@ const Home: React.FC = () => {
     return (
         <div className="min-h-screen flex flex-col bg-zinc-900">
             <Header />
-          
-          {/* Sessão CarCara-360DAQ */}
-<div className="flex-grow flex justify-center mt-7 px-4">
-    <div className="w-full max-w-5xl flex flex-col md:flex-row items-center md:items-start px-3 text-white">
-        <div className="md:w-1/2 text-center md:text-left flex justify-center md:justify-start md:items-center h-full">
-            <div className="flex flex-col items-center md:items-start">
-                <h1 className="text-3xl md:text-5xl font-bold mb-4 text-yellow-300 text-roboto mr-3">
-                    CarCara-DAQ: A Multi-Sensor Dataset for Real-Time Automotive Data Acquisition
-                </h1>
-                <Link to="/Intermediary">
-                    <button className="bg-yellow-300 text-zinc-900 hover:bg-yellow-100 text-base md:text-lg font-bold py-2 px-4 md:px-6 rounded-full transition duration-300 text-roboto mb-6">
-                        Download Here
-                    </button>
-                </Link>
-            </div>
-        </div>
-        <div className="md:w-1/2 flex justify-center items-center">
-            <iframe
-                className="w-4/5 max-w-md md:max-w-lg h-[220px] md:h-[365px]" // Definindo a altura para mobile e desktop
-                src="https://drive.google.com/file/d/1YP9Tu6hxK7wCV1Eu1log8akPNlhTEAo6/preview?usp=sharing&vq=hd1080"
-                frameBorder="0"
-                allow="autoplay; encrypted-media"
-                allowFullScreen
-            ></iframe>
-        </div>
-    </div>
-</div>
 
 
 
-          {/* CarCara-DAQ Test Section */}
-          <div className="flex-grow flex justify-center mt-7 px-4">
-              <div className="w-full max-w-5xl flex flex-col md:flex-row items-center md:items-start px-3 text-white">
+              {/* CarCara-DAQ Test Section */}
+          <div className="flex-grow flex justify-center mt-3 px-4">
+              <div className="w-full max-w-5xl mb-3 flex flex-col md:flex-row items-center md:items-start px-3 text-white">
                   <div className="md:w-1/2 flex justify-center items-center">
                       <iframe
                           className="w-full max-w-md md:max-w-lg h-[400px] md:h-[595px]"
@@ -69,7 +42,7 @@ const Home: React.FC = () => {
                           <h1 className="text-3xl md:text-4xl font-bold mb-4 mt-3 text-yellow-300 text-roboto mr-3">
                               CarCara-DAQ: Data Acquisition Test with Advanced Technologies
                           </h1>
-                          <p className="text-base md:text-lg text-gray-300 mb-4 max-w-lg">
+                          <p className="text-base md:text-lg text-gray mb-4 max-w-lg">
                               This test combines real-time data acquisition with advanced algorithms for lane detection and object identification. 
                               The integration of these technologies enables a detailed analysis of the vehicle's surroundings, contributing to research 
                               in safety and automotive automation.
@@ -79,9 +52,46 @@ const Home: React.FC = () => {
               </div>
           </div>
 
+          
+          {/* Sessão CarCara-360DAQ */}
+<div className="bg-zinc-950 flex-grow flex justify-center px-4">
+    <div className="w-full max-w-5xl flex mt-3  flex-col md:flex-row items-center md:items-start px-3 text-white">
+
+        
+    <div className="  md:w-1/2 text-center md:text-left flex justify-center md:justify-start md:items-center h-full">
+            <div className="flex flex-col items-center md:items-start">
+                <h1 className="text-2xl md:text-3xl font-bold mb-4 text-yellow-300 text-roboto mr-3">
+                    CarCara-DAQ: A Multi-Sensor Dataset for Real-Time Automotive Data Acquisition
+                </h1>
+                <Link to="/Intermediary">
+                    <button className=" mb-3 bg-yellow-300 text-zinc-900 hover:bg-yellow-100 text-base md:text-lg font-bold py-2 px-4 md:px-6 rounded-full transition duration-300 text-roboto mb-6">
+                        Download Here
+                    </button>
+                </Link>
+            </div>
+        </div>
+    <div className="md:w-1/2 flex justify-center items-center">
+            <iframe
+                className="w-4/5 max-w-md mb-3 md:max-w-lg h-[220px] md:h-[365px]" // Definindo a altura para mobile e desktop
+                src="https://drive.google.com/file/d/1GO3NSLDvF5G6WH2LXvVJbksFJRQ2KywA/preview?usp=sharing&vq=hd1080"
+                frameBorder="0"
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+            ></iframe>
+        </div>
+
+
+
+      
+    </div>
+</div>
+
+
+
+        
 
             {/* Sessão Examples */}
-            <div className="bg-zinc-900 text-white py-12 px-4">
+            <div className="bg-zinc-900 text-white py-5 px-4">
                 <div className="max-w-5xl mx-auto text-center">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300 text-roboto">Examples</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -108,7 +118,7 @@ const Home: React.FC = () => {
             </div>
 
             {/* Sessão Tools */}
-<div className="bg-zinc-950 text-white py-12 px-4">
+<div className="bg-zinc-950 text-white py-7 px-4">
     <div className="max-w-5xl mx-auto text-center">
         <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300 text-roboto">Tools</h2>
         <p className="text-lg mb-6">
@@ -130,7 +140,7 @@ const Home: React.FC = () => {
 
 
             {/* Sessão Announcements */}
-<div className="bg-zinc-900 text-white py-12 px-4">
+<div className="bg-zinc-900 text-white py-7 px-4">
     <div className="max-w-5xl mx-auto text-center">
         <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300 text-roboto">Announcements</h2>
         <ul className="text-lg space-y-4">
@@ -143,7 +153,7 @@ const Home: React.FC = () => {
 
 
             {/* Sessão Collaborators */}
-            <div className="bg-zinc-950 text-white pt-12 px-4">
+            <div className="bg-zinc-950 text-white pt-7 px-4">
                 <div className="max-w-5xl mx-auto text-center">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300 text-roboto">Collaborators</h2>
                     <div className="flex justify-center space-x-6">
