@@ -59,7 +59,7 @@ const Home: React.FC = () => {
   
         <div className="md:w-2/3 mb-5 flex justify-center items-center mr-3">
     <img 
-  className="w-full max-w-md md:max-w-lg h-[250px] md:h-[300px] object-cover rounded-lg"
+  className="w-full max-w-md md:max-w-lg h-[220px] md:h-[300px] object-cover rounded-lg"
   src={acq} 
   alt="Descrição do GIF"
 />
