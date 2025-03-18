@@ -13,6 +13,7 @@ import utfpr from "../Components/img/utfpr.png";
 import yolo from "../Components/img/yolo.gif";
 import heat from "../Components/img/heat.gif";
 import cars from "../Components/img/cars.png";
+import acq from "../Components/img/acq.gif";
 
 const Home: React.FC = () => {
     const states = ["São Paulo", "Espírito Santo", "Minas Gerais", "Rio de Janeiro", "Paraná"];
@@ -56,14 +57,14 @@ const Home: React.FC = () => {
                 </Link>
             </div>
         </div>
-    <div className="md:w-2/5 mb-5 flex justify-center items-center mr-3">
+  
+        <div className="md:w-2/3 mb-5 flex justify-center items-center mr-3">
     <img 
-  className="w-full max-w-md md:max-w-lg h-[300px] md:h-[215px] object-cover rounded-lg"
-  src={heat} 
+  className="w-full max-w-md md:max-w-lg h-[300px] md:h-[300px] object-cover rounded-lg"
+  src={acq} 
   alt="Descrição do GIF"
 />
         </div>
-
 
 
       
@@ -100,8 +101,11 @@ const Home: React.FC = () => {
             </div>
         </div>
 
+
+
        
     </div>
+    
 </div>
 
 
