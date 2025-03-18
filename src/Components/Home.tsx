@@ -112,25 +112,18 @@ const Home: React.FC = () => {
                 <div className="max-w-5xl mx-auto text-center">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300 text-roboto">Examples</h2>
                     <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-                        {/* Placeholder for the video thumbnails */}
-                        <div className="flex justify-center">
-                       
-                                <img src={urbano} alt="Example 1" className="rounded-lg shadow-lg h-96" />
-                          
-                        </div>
-                        <div className="flex justify-center">
-  
-        <img src={rural} alt="Example 2" className="rounded-lg shadow-lg h-96" />
-
+  {/* Placeholder for the video thumbnails */}
+  <div className="flex justify-center">
+    <img src={urbano} alt="Example 1" className="rounded-lg shadow-lg h-46 md:h-96" />
+  </div>
+  <div className="flex justify-center">
+    <img src={rural} alt="Example 2" className="rounded-lg shadow-lg h-46 md:h-96" />
+  </div>
+  <div className="flex justify-center">
+    <img src={molhado} alt="Example 3" className="rounded-lg shadow-lg h-46 md:h-96" />
+  </div>
 </div>
 
-                        <div className="flex justify-center">
-                      
-                                <img src={molhado} alt="Example 3" className="rounded-lg shadow-lg h-96" />
-                        
-                        </div>
-                        
-                    </div>
                 </div>
             </div>
 
