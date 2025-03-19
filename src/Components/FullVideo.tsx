@@ -99,16 +99,16 @@ const Video: React.FC = () => {
                                     </Link>
                                 </div>
             <div className="flex-grow flex justify-center px-4">
-                <main className="my-5 w-full md:w-full">
+                <main className="my-1 w-full md:w-full">
                     {isLoading ? (
                         <div className="w-full mt-11 flex justify-center items-center">
                             <img src={loadgif} alt="Loading" className='w-32 h-32 mt-11 mb-11' />
                         </div>
                     ) : (
-                        <section className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mt-1">
+                        <section className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full ">
                             {fileWithLink && (
                                 <iframe
-                                    className="flex w-full items-center justify-center h-[330px] md:h-[530px] mt-7"
+                                    className="flex w-full items-center justify-center h-[200px] md:h-[530px]"
                                     src={Link360 + '&vq=hd1080'}
                                     width="1040"
                                     height="375"
@@ -155,15 +155,15 @@ const Video: React.FC = () => {
 
                             
 
-<section className="grid grid-cols-3 gap-4 w-full mb-2">
+<section className="grid grid-cols-3 gap-2 w-full mb-2">
     <h2 className="col-span-3 text-lg d mt-2 text-white">Video Downloads</h2>
 
-    <DownloadButtonVideo fileId={idfrontLeft} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="Front Left" />
-    <DownloadButtonVideo fileId={idfrontCenter} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="Front Center" />
-    <DownloadButtonVideo fileId={idfrontRight} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="Front Right" />
-    <DownloadButtonVideo fileId={idrearLeft} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="Rear Left" />
-    <DownloadButtonVideo fileId={idrearCenter} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="Rear Center" />
-    <DownloadButtonVideo fileId={idrearRight} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="Rear Right" />
+    <DownloadButtonVideo fileId={idfrontLeft} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="⇖ Front  Left" />
+    <DownloadButtonVideo fileId={idfrontCenter} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="⇑ Front Center" />
+    <DownloadButtonVideo fileId={idfrontRight} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="⇗ Front Right" />
+    <DownloadButtonVideo fileId={idrearLeft} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="⇙ Rear  Left" />
+    <DownloadButtonVideo fileId={idrearCenter} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="⇓ Rear Center" />
+    <DownloadButtonVideo fileId={idrearRight} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="⇘ Rear Right" />
 </section>
     <DownloadButtonVideo fileId={id360} fileName="nome_do_arquivo.mp4" onClick={handleVideoDownload} title="360 View" />
 
@@ -172,7 +172,7 @@ const Video: React.FC = () => {
                                                 <div className='relative z-0'>
                                                     <MapVideoFull videoName={fileWithLink.FileName} />
                                                 </div>
-                                                <section className="grid grid-cols-2 gap-4 w-full mb-2">
+                                                <section className="grid grid-cols-2 gap-3 w-full mb-2">
     <h2 className="col-span-2 text-lg my-2 text-white">File Downloads</h2>
     <DownloadButton fileId={idcsv} fileName="nome_do_arquivo.mp4" onClick={handleFileDownload} title="Mf4 to Csv" />
     <DownloadButton fileId={idmf4} fileName="nome_do_arquivo.mp4" onClick={handleFileDownload} title="Mf4" />

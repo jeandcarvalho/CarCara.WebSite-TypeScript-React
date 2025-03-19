@@ -67,7 +67,7 @@ const City: React.FC = () => {
                                           </Link>
                                       </div>
       <div className="flex-grow flex justify-center px-4">
-        <main className="my-5 w-full max-w-7xl h-full">
+        <main className=" w-full max-w-7xl h-full">
           <div className="text-left">
             <h1 className="text-4xl font-medium mb-4 text-orange-100">
               <span className='font-medium text-yellow-300'>v4 Acquisitions</span>

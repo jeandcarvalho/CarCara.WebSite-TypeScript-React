@@ -24,12 +24,12 @@ const City: React.FC = () => {
                                           </Link>
                                       </div>
       <div className="flex-grow flex justify-center px-4">
-        <main className="my-5 w-full max-w-7xl h-full">
+        <main className=" w-full max-w-7xl h-full">
           <div className="text-left">
             <h1 className="text-4xl font-medium mb-4 text-orange-100">
               <span className='font-medium text-yellow-300'>v3 Acquisitions</span>
             </h1>
-            <h2 className="text-2xl mb-3 mt-3 w-full text-orange-300">
+            <h2 className="text-2xl mb-3  w-full text-orange-300">
               <p>
                 <span className='text-zinc-500 font-normal'>Filters:</span>
                 <span className='text-zinc-400 font-semibold ml-2'>{result}</span>

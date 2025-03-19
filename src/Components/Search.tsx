@@ -143,7 +143,7 @@ export default function Acquisitions() {
                                           </Link>
                                       </div>
        <div className="flex-grow flex justify-center">
-        <main className="my-4 mx-3 w-full max-w-6xl ">
+        <main className=" mx-3 w-full max-w-6xl ">
           <h2 className="text-4xl font-medium mb-4 text-yellow-100 text-left">
              Search Acquisitions<span className='font-medium text-yellow-300'></span>
           </h2>

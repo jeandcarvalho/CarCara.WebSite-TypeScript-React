@@ -34,7 +34,7 @@ const About = () => {
                                     </Link>
                                 </div>
 {/* Index */}
-<div className="bg-zinc-900 text-white py-12 px-4">
+<div className="bg-zinc-900 text-white  px-4">
     <div className="max-w-5xl mx-auto text-center">
         {/* Título Principal */}
         <h2 className="text-5xl md:text-5xl font-bold mb-4 text-yellow-300">DAQ Architecture</h2>
@@ -55,35 +55,42 @@ const About = () => {
         </ul>
 
         {/* Título para os veículos */}
-        <h3 className="text-2xl md:text-3xl font-bold mt-7 mb-6 text-yellow-300">Vehicles in DAQ Architecture</h3>
+        <h3 className="text-2xl md:text-3xl font-bold mt-2 mb-6 text-yellow-300">Vehicles in DAQ Architecture</h3>
 
-        {/* Imagens lado a lado */}
-        <div className="flex flex-wrap sm:flex-nowrap justify-center gap-6 mt-4">
-            {/* Renault Captur */}
-            <div className="text-center" >
-                <img  src={captur} alt="Renault Captur" className="w-32 h-32 md:w-60 md:h-60 object-cover rounded-lg shadow-lg" />
-                <p className="mt-2 text-yellow-300 text-lg font-semibold">Renault Captur</p>
-            </div>
+     {/* Imagens lado a lado */}
+<div className="flex flex-wrap sm:flex-nowrap justify-center mx-2 mb-2 gap-6 mt-4">
+    {/* Renault Captur */}
+    <div className="text-center">
+        <a href="#captur">
+            <img src={captur} alt="Renault Captur" className="w-32 h-32 md:w-60 md:h-60 object-cover rounded-lg shadow-lg transition-transform hover:scale-105" />
+        </a>
+        <p className="mt-2 text-yellow-300 text-lg font-semibold">Renault Captur</p>
+    </div>
 
-            {/* DAF CF 410 */}
-            <div className="text-center">
-                <img src={daf} alt="DAF CF 410" className="w-32 h-32 md:w-60 md:h-60 object-cover rounded-lg shadow-lg" />
-                <p className="mt-2 text-yellow-300 text-lg font-semibold">DAF CF 410</p>
-            </div>
+    {/* DAF CF 410 */}
+    <div className="text-center">
+        <a href="#daf">
+            <img src={daf} alt="DAF CF 410" className="w-32 h-32 md:w-60 md:h-60 object-cover rounded-lg shadow-lg transition-transform hover:scale-105" />
+        </a>
+        <p className="mt-2 text-yellow-300 text-lg font-semibold">DAF CF 410</p>
+    </div>
 
-            {/* Jeep Renegade */}
-            <div className="text-center">
-                <img src={jeep} alt="Jeep Renegade" className="w-32 h-32 md:w-60 md:h-60 object-cover rounded-lg shadow-lg" />
-                <p className="mt-2 text-yellow-300 text-lg font-semibold">Jeep Renegade</p>
-            </div>
-        </div>
+    {/* Jeep Renegade */}
+    <div className="text-center">
+        <a href="#renegade">
+            <img src={jeep} alt="Jeep Renegade" className="w-32 h-32 md:w-60 md:h-60 object-cover rounded-lg shadow-lg transition-transform hover:scale-105" />
+        </a>
+        <p className="mt-2 text-yellow-300 text-lg font-semibold">Jeep Renegade</p>
+    </div>
+</div>
+
     </div>
 </div>
 
 
 
             {/* Sections */}
-            <div className="bg-zinc-950 text-white py-12 px-4" id="introduction">
+            <div className="bg-zinc-950 text-white py-5 px-4" id="introduction">
   <div className="max-w-5xl mx-auto text-center">
     <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300">
       Introduction
@@ -97,7 +104,7 @@ const About = () => {
 </div>
 
 
-            <div className="bg-zinc-900 text-white py-12 px-4" id="captur">
+            <div className="bg-zinc-900 text-white py-5 px-4" id="captur">
                 <div className="max-w-5xl mx-auto text-center ">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300">Renault CAPTUR</h2>
                     <img
@@ -128,7 +135,16 @@ const About = () => {
                 </div>
             </div>
 
-            <div className="bg-zinc-950 text-white py-12 px-4" id="daf">
+            <div className="flex justify-center items-center mb-5">
+  <button
+    onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+    className="bg-gray-700 text-white hover:bg-gray-600 text-base md:text-lg font-bold py-3 px-5 rounded-full transition duration-300 text-roboto"
+  >
+    ↑ Back to Top
+  </button>
+</div>
+
+            <div className="bg-zinc-950 text-white py-5 px-4" id="daf">
                 <div className="max-w-5xl mx-auto text-center">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300">DAF CF 410</h2>
 
@@ -159,9 +175,20 @@ const About = () => {
 
     
                 </div>
+
+                <div className="flex justify-center items-center mt-5">
+  <button
+    onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+    className="bg-gray-700 text-white hover:bg-gray-600 text-base md:text-lg font-bold py-3 px-5 rounded-full transition duration-300 text-roboto"
+  >
+    ↑ Back to Top
+  </button>
+</div>
             </div>
 
-            <div className="bg-zinc-900 text-white py-12 px-4" id="renegade">
+            
+
+            <div className="bg-zinc-900 text-white py-5 px-4" id="renegade">
                 <div className="max-w-5xl mx-auto text-center">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300">Jeep Renegade</h2>
 
@@ -191,7 +218,16 @@ const About = () => {
                 </div>
             </div>
 
-            <div className="bg-zinc-950 text-white py-12 px-4" id="dbc">
+            <div className="flex justify-center items-center mb-5">
+  <button
+    onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+    className="bg-gray-700 text-white hover:bg-gray-600 text-base md:text-lg font-bold py-3 px-5 rounded-full transition duration-300 text-roboto"
+  >
+    ↑ Back to Top
+  </button>
+</div>
+
+            <div className="bg-zinc-950 text-white py-5 px-4" id="dbc">
                 <div className="max-w-5xl mx-auto text-center">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300">Data Dictionary – DBC or DBF</h2>
 
@@ -209,7 +245,7 @@ const About = () => {
                 </div>
             </div>
 
-            <div className="bg-zinc-900 text-white py-12 px-4" id="a2l">
+            <div className="bg-zinc-950 text-white py-5 px-4" id="a2l">
                 <div className="max-w-5xl mx-auto text-center">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300">Data Dictionary – A2L</h2>
 
@@ -221,7 +257,7 @@ const About = () => {
 
 
                 </div>
-                <div className="flex justify-center items-center h-32 my-3">
+                <div className="flex justify-center items-center mt-5 ">
   <button
     onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
     className="bg-gray-700 text-white hover:bg-gray-600 text-base md:text-lg font-bold py-1 px-3 rounded-full transition duration-300 text-roboto"
