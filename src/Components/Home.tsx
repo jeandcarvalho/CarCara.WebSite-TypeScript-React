@@ -41,7 +41,7 @@ const Home: React.FC = () => {
             <img
     src={utfpr}
     alt="Descrição da imagem"
-    width="150"
+    width="250"
     height="60"
     className="inline-block mt-5 mb-2"
   />
