@@ -41,10 +41,12 @@ const Home: React.FC = () => {
             <img
     src={utfpr}
     alt="Descrição da imagem"
-    width="280"
+    width="150"
     height="60"
     className="inline-block mt-5 mb-2"
   />
+
+  
 
                 <h1 className="text-2xl md:text-3xl font-bold mb-4 text-yellow-300 text-roboto mr-3">
                     CarCara-DAQ: A Multi-Sensor Dataset for Real-Time Automotive Data Acquisition
