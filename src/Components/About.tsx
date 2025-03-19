@@ -132,11 +132,6 @@ const About = () => {
                 <div className="max-w-5xl mx-auto text-center">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300">DAF CF 410</h2>
 
-                    <img
-      src={captur5}
-      alt="Jeep Renegade"
-      className="mx-auto block rounded-lg shadow-lg mt-3"
-    />
 
 <img
       src={daf1}
