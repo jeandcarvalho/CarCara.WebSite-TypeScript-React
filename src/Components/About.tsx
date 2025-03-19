@@ -7,6 +7,7 @@ import captur3 from "../Components/img/captur3.png";
 import captur4 from "../Components/img/captur4.png";
 import captur5 from "../Components/img/captur5.png";
 import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
 import jeep from "../Components/img/jeep.png";
 import jeep1 from "../Components/img/jeep1.png";
 import jeep2 from "../Components/img/jeep2.png";
@@ -22,7 +23,13 @@ import dic2 from "../Components/img/dic2.png";
 import dic3 from "../Components/img/dic3.png";
 
 const About = () => {
+  useEffect(() => {
+    // Garante que a página será rolada até o topo quando for carregada
+    window.scrollTo(0, 0);
+  }, []);
+
     return (
+      
         <div className="min-h-screen flex flex-col bg-zinc-900">
             <Header />
 
