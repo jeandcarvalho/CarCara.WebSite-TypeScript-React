@@ -11,7 +11,7 @@ const options = [
  // { value: '/Extractor', label: 'Extract' },
  // { value: '/Dictionary', label: 'Dictionary' },
  // { value: '/OurModels', label: 'Our Models' },
-  { value: '/About', label: 'About' },  
+  { value: '/About', label: 'Architecture' },  
 ];
 
 const Header: React.FC = () => {
