@@ -187,17 +187,18 @@ const Home: React.FC = () => {
 </div>
 
 
-            {/* Sessão Announcements */}
+{/* Sessão Announcements */}
 <div className="bg-zinc-900 text-white py-7 px-4">
     <div className="max-w-5xl mx-auto text-center">
         <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-300 text-roboto">Announcements</h2>
         <ul className="text-lg space-y-4">
             <li>Website Updates: July 2024 - CarCara was officially launched, featuring the v3 datasets and dynamic filtering by classifications.</li>
             <li>Website Updates: February 2025 - New acquisitions v4 are now available, including complete 360-degree camera data and all associated measurements.</li>
-
+            <li>Website Updates: March 2025 - Improved website fluidity, new "Architecture" page covering the three instrumented vehicles, and a redesigned homepage for a better experience.</li>
         </ul>
     </div>
 </div>
+
 
 
             {/* Sessão Collaborators */}
