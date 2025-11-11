@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import "./MapComponentAll.css";
+import "./MapVideoFull.css";
 import api from '../Services/api';
 import yellowicon from "../Components/img/mapicon.png";
 
