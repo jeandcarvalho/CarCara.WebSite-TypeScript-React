@@ -1,16 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
 
 /**
  * CarCará · Search (vertical accordion + collapsed summaries + animations)
- * - Panels stacked vertically with smooth open/close animations (height + opacity).
- * - Expanded has bg-zinc-800; collapsed has bg-zinc-950/60; animated via transition-colors.
- * - Collapsed shows yellow summary chips; expanded hides them.
- * - Road Context Maxspeed: BR presets only (chips).
- * - Environment (SemSeg) & YOLO Confidence: multi-select (union of ranges).
- * - Pure front-end: builds /api/search URL.
+ * HashRouter-ready:
+ *  - Query string lives inside the hash (e.g., https://site/#/search?y.class=car)
+ *  - navigate({ search }) keeps URL in the hash so it can be shared/copied.
  */
 
 // ===================== CONFIG (somente URL) =====================
@@ -175,16 +172,13 @@ function Section({
   useEffect(() => {
     if (!contentRef.current) return;
     if (collapsed) {
-      // collapse to 0
       requestAnimationFrame(() => setHeight(0));
     } else {
-      // expand to scrollHeight
       const h = contentRef.current.scrollHeight;
       requestAnimationFrame(() => setHeight(h));
     }
   }, [collapsed, children]);
 
-  // Recompute height when content might change size (e.g., chip toggles)
   useEffect(() => {
     if (!collapsed && contentRef.current) {
       const h = contentRef.current.scrollHeight;
@@ -275,6 +269,9 @@ function RangePair({
 
 // ===================== PAGE =====================
 const SearchVerticalAnimated: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   // Collapsed states (all start CLOSED except URL)
   const [colURL, setColURL] = useState(false);
   const [colVehicle, setColVehicle] = useState(true);
@@ -320,7 +317,6 @@ const SearchVerticalAnimated: React.FC = () => {
   const [distMin, setDistMin] = useState<number | "">("");
   const [distMax, setDistMax] = useState<number | "">("");
 
-  // Helpers
   const toggleArr = <T,>(arr: T[], v: T) =>
     arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
 
@@ -365,19 +361,13 @@ const SearchVerticalAnimated: React.FC = () => {
       .join(",");
   }, [swaChips]);
 
-  // URL params
   const urlParams = useMemo(() => {
     const p: Record<string, string | undefined> = {
-      // blocks_5min
       ...(bVehicle ? { "b.vehicle": bVehicle } : {}),
       ...(bPeriod ? { "b.period": bPeriod } : {}),
       ...(bCondition ? { "b.condition": bCondition } : {}),
-
-      // laneego_1hz
       ...(laneLeft.length ? { "l.left_disp": laneLeft.join(",") } : {}),
       ...(laneRight.length ? { "l.right_disp": laneRight.join(",") } : {}),
-
-      // can_1hz
       ...(toRangeParam(vMin, vMax) ? { "c.VehicleSpeed": toRangeParam(vMin, vMax) } : {}),
       ...(swaRanges
         ? { "c.SteeringWheelAngle": swaRanges }
@@ -385,8 +375,6 @@ const SearchVerticalAnimated: React.FC = () => {
         ? { "c.SteeringWheelAngle": toRangeParam(swaMin, swaMax) }
         : {}),
       ...(brakes.length ? { "c.BrakeInfoStatus": brakes.join(",") } : {}),
-
-      // overpass_1hz
       ...(highwayGroups.length ? { "o.highway": highwayGroups.join(",") } : {}),
       ...(landuseGroups.length ? { "o.landuse": landuseGroups.join(",") } : {}),
       ...(lanes.length ? { "o.lanes": lanes.join(",") } : {}),
@@ -395,11 +383,7 @@ const SearchVerticalAnimated: React.FC = () => {
       ...(surface.length ? { "o.surface": surface.join(",") } : {}),
       ...(sidewalk.length ? { "o.sidewalk": sidewalk.join(",") } : {}),
       ...(cycleway.length ? { "o.cycleway": cycleway.join(",") } : {}),
-
-      // semseg_1hz
       ...semsegRanges,
-
-      // yolo_1hz
       ...(yClasses.length ? { "y.class": yClasses.join(",") } : {}),
       ...(relEgo.length ? { "y.rel_to_ego": relEgo.join(",") } : {}),
       ...(confRange ? { "y.conf": confRange } : {}),
@@ -407,44 +391,31 @@ const SearchVerticalAnimated: React.FC = () => {
     };
     return p;
   }, [
-    bVehicle,
-    bPeriod,
-    bCondition,
-    laneLeft,
-    laneRight,
-    vMin,
-    vMax,
-    swaMin,
-    swaMax,
-    brakes,
-    swaRanges,
-    highwayGroups,
-    landuseGroups,
-    lanes,
-    maxSpeedPreset,
-    oneway,
-    surface,
-    sidewalk,
-    cycleway,
-    semsegRanges,
-    yClasses,
-    relEgo,
-    confRange,
-    distMin,
-    distMax,
+    bVehicle,bPeriod,bCondition,laneLeft,laneRight,
+    vMin,vMax,swaMin,swaMax,brakes,swaRanges,
+    highwayGroups,landuseGroups,lanes,maxSpeedPreset,oneway,surface,sidewalk,cycleway,
+    semsegRanges,yClasses,relEgo,confRange,distMin,distMax
   ]);
 
   const url = useMemo(() => buildURL(`${API_BASE}${SEARCH_PATH}`, urlParams), [urlParams]);
 
+  // === Mantém a query na URL do HashRouter ===
   useEffect(() => {
     const q = url.split("?")[1] ?? "";
-    const next = q ? `${window.location.pathname}?${q}` : window.location.pathname;
-    window.history.replaceState({}, "", next);
+    // Em HashRouter, o search deve ficar dentro do hash.
+    // Usando navigate com { replace: true } para não poluir o histórico.
+    navigate({ pathname: "/search", search: q ? `?${q}` : "" }, { replace: true });
+  }, [url, navigate]);
+
+  // URL compartilhável (frontend): origin + path + "#/search?..." 
+  const shareURL = useMemo(() => {
+    const q = url.split("?")[1] ?? "";
+    return `${window.location.origin}${window.location.pathname}#/search${q ? `?${q}` : ""}`;
   }, [url]);
 
   const copyURL = async () => {
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(shareURL);
       alert("URL copiada!");
     } catch {
       alert("Não foi possível copiar. Selecione e copie manualmente.");
@@ -533,7 +504,7 @@ const SearchVerticalAnimated: React.FC = () => {
                     onClick={copyURL}
                     className="bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 px-3 py-2 rounded-md text-sm"
                   >
-                    Copiar
+                    Copiar URL da busca
                   </button>
                   <a
                     href={url}
@@ -541,13 +512,17 @@ const SearchVerticalAnimated: React.FC = () => {
                     rel="noreferrer"
                     className="bg-yellow-500 hover:bg-yellow-400 text-zinc-900 px-3 py-2 rounded-md text-sm font-semibold"
                   >
-                    Abrir
+                    Abrir na API
                   </a>
                 </div>
               </div>
               <p className="text-xs text-zinc-400 mt-2">
-                Sem chamadas de rede — somente geração de URL.
+                A URL acima é a da <strong>API</strong>. O link compartilhável da página fica no seu navegador (hash).
               </p>
+              <div className="mt-2 text-xs text-zinc-400">
+                URL da página para compartilhar:&nbsp;
+                <code className="break-all">{shareURL}</code>
+              </div>
             </div>
           </Section>
 
@@ -1053,17 +1028,15 @@ const SearchVerticalAnimated: React.FC = () => {
 
           {/* Actions */}
           <div className="flex items-center justify-between py-2">
-            <div className="text-zinc-500 text-xs">Gere a URL e use onde quiser.</div>
+            <div className="text-zinc-500 text-xs">Gere a URL da busca e compartilhe o link desta página.</div>
             <div className="flex gap-2">
               <button
                 onClick={() => {
-                  // Collapse back
                   setColVehicle(true);
                   setColCAN(true);
                   setColYOLO(true);
                   setColRoad(true);
                   setColSemSeg(true);
-                  // Reset filters
                   setBVehicle("");
                   setBPeriod("");
                   setBCondition("");
@@ -1102,7 +1075,7 @@ const SearchVerticalAnimated: React.FC = () => {
                 rel="noreferrer"
                 className="bg-yellow-500 hover:bg-yellow-400 text-zinc-900 px-4 py-2 rounded-md text-sm font-semibold"
               >
-                Open URL
+                Open API
               </a>
             </div>
           </div>

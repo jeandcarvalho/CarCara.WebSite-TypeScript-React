@@ -7,7 +7,7 @@ import customStyles from '../Styles/Header.tsx';
 const options = [
   { value: '/', label: 'Overview' },
 //  { value: '/HowTo', label: 'How to Use' },  
-  { value: '/Intermediary', label: 'Download' },
+  { value: '/FullFiles', label: 'Download' },
  // { value: '/Extractor', label: 'Extract' },
  // { value: '/Dictionary', label: 'Dictionary' },
  // { value: '/OurModels', label: 'Our Models' },
