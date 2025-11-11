@@ -5,9 +5,10 @@ import Footer from "./Footer";
 
 /**
  * CarCará · Search (vertical accordion + collapsed summaries + animations)
- * HashRouter-ready:
+ * HashRouter-ready + URL hydration:
  *  - Query string lives inside the hash (e.g., https://site/#/search?y.class=car)
  *  - navigate({ search }) keeps URL in the hash so it can be shared/copied.
+ *  - On first mount, parse location.search and hydrate the UI state from the URL.
  */
 
 // ===================== CONFIG (somente URL) =====================
@@ -147,6 +148,29 @@ function SummaryChips({ items }: { items: string[] }) {
       ))}
     </div>
   );
+}
+
+function parseNumber(v?: string | null): number | "" {
+  if (!v && v !== "0") return "";
+  const n = Number(v);
+  return Number.isFinite(n) ? n : "";
+}
+
+function splitList(v?: string | null): string[] {
+  if (!v) return [];
+  return v.split(",").map(s => s.trim()).filter(Boolean);
+}
+
+function parseRangeToken(tok: string): [number | "", number | ""] {
+  // "a..b" where a or b may be empty
+  const [a, b] = tok.split("..");
+  const min = a === "" || a === undefined ? "" : parseNumber(a);
+  const max = b === "" || b === undefined ? "" : parseNumber(b);
+  return [min, max];
+}
+
+function approxEq(a: number, b: number, eps = 1e-2) {
+  return Math.abs(a - b) <= eps;
 }
 
 // Animated collapsible section
@@ -317,6 +341,123 @@ const SearchVerticalAnimated: React.FC = () => {
   const [distMin, setDistMin] = useState<number | "">("");
   const [distMax, setDistMax] = useState<number | "">("");
 
+  // ---- Hydration from URL (run once on first mount) ----
+  const hydratedRef = useRef(false);
+  useEffect(() => {
+    if (hydratedRef.current) return;
+    hydratedRef.current = true;
+    const usp = new URLSearchParams(location.search || "");
+    // blocks_5min
+    const bv = usp.get("b.vehicle"); if (bv) setBVehicle(bv);
+    const bp = usp.get("b.period"); if (bp) setBPeriod(bp);
+    const bc = usp.get("b.condition"); if (bc) setBCondition(bc);
+    const lleft = splitList(usp.get("l.left_disp")).filter(v => (["DISP","INDISP"] as const).includes(v as any));
+    if (lleft.length) setLaneLeft(lleft as any);
+    const lright = splitList(usp.get("l.right_disp")).filter(v => (["DISP","INDISP"] as const).includes(v as any));
+    if (lright.length) setLaneRight(lright as any);
+    // CAN
+    const vRange = usp.get("c.VehicleSpeed");
+    if (vRange) {
+      const [mn, mx] = parseRangeToken(vRange);
+      if (mn !== "") setVMin(mn);
+      if (mx !== "") setVMax(mx);
+    }
+    const swaR = usp.get("c.SteeringWheelAngle");
+    if (swaR) {
+      const parts = swaR.split(",");
+      // map to chips if matches known ranges
+      const chipKeys: string[] = [];
+      parts.forEach(p => {
+        const match = SWA_CHIPS.find(ch => ch.range === p);
+        if (match) chipKeys.push(match.key);
+      });
+      if (chipKeys.length === parts.length && chipKeys.length > 0) {
+        setSwaChips(chipKeys);
+      } else if (parts.length === 1) {
+        const [mn, mx] = parseRangeToken(parts[0]);
+        if (mn !== "" || mx !== "") {
+          setShowSwaAdvanced(true);
+          if (mn !== "") setSwaMin(mn);
+          if (mx !== "") setSwaMax(mx);
+        }
+      }
+    }
+    const br = splitList(usp.get("c.BrakeInfoStatus")).filter(v => (BRAKE_KEYS as readonly string[]).includes(v));
+    if (br.length) setBrakes(br as any);
+    // Overpass
+    const hg = splitList(usp.get("o.highway"));
+    if (hg.length) setHighwayGroups(hg);
+    const lu = splitList(usp.get("o.landuse"));
+    if (lu.length) setLanduseGroups(lu);
+    const ln = splitList(usp.get("o.lanes"));
+    if (ln.length) setLanes(ln);
+    const ms = splitList(usp.get("o.maxspeed")).map(s => Number(s)).filter(n => Number.isFinite(n));
+    if (ms.length) setMaxSpeedPreset(ms);
+    const ow = splitList(usp.get("o.oneway")).filter(v => (ONEWAY as readonly string[]).includes(v));
+    if (ow.length) setOneway(ow as any);
+    const sf = splitList(usp.get("o.surface")).filter(v => (SURFACE_GROUPS as readonly string[]).includes(v));
+    if (sf.length) setSurface(sf as any);
+    const sw = splitList(usp.get("o.sidewalk")).filter(v => (SIDEWALK as readonly string[]).includes(v));
+    if (sw.length) setSidewalk(sw as any);
+    const cy = splitList(usp.get("o.cycleway")).filter(v => (CYCLEWAY as readonly string[]).includes(v));
+    if (cy.length) setCycleway(cy as any);
+    // semseg
+    const sBld = usp.get("s.building");
+    if (sBld) {
+      const parts = sBld.split(",");
+      const chips: Array<"low"|"mid"|"high"> = [];
+      parts.forEach(tok => {
+        const [mn, mx] = parseRangeToken(tok);
+        if (mx !== "" && mn === "" && (mx as number) <= SEMSEG_THRESH.building.p25 + 1e-2) chips.push("low");
+        if (mn !== "" && mx !== "" && approxEq(mn as number, SEMSEG_THRESH.building.p25) && approxEq(mx as number, SEMSEG_THRESH.building.p75)) chips.push("mid");
+        if (mn !== "" && (mn as number) >= SEMSEG_THRESH.building.p75 - 1e-2 && mx === "") chips.push("high");
+      });
+      if (chips.length) setBldChips(Array.from(new Set(chips)));
+    }
+    const sVeg = usp.get("s.vegetation");
+    if (sVeg) {
+      const parts = sVeg.split(",");
+      const chips: Array<"low"|"mid"|"high"> = [];
+      parts.forEach(tok => {
+        const [mn, mx] = parseRangeToken(tok);
+        if (mx !== "" && mn === "" && (mx as number) <= SEMSEG_THRESH.vegetation.p25 + 1e-2) chips.push("low");
+        if (mn !== "" && mx !== "" && approxEq(mn as number, SEMSEG_THRESH.vegetation.p25) && approxEq(mx as number, SEMSEG_THRESH.vegetation.p75)) chips.push("mid");
+        if (mn !== "" && (mn as number) >= SEMSEG_THRESH.vegetation.p75 - 1e-2 && mx === "") chips.push("high");
+      });
+      if (chips.length) setVegChips(Array.from(new Set(chips)));
+    }
+    // yolo
+    const yc = splitList(usp.get("y.class"));
+    if (yc.length) setYClasses(yc);
+    const re = splitList(usp.get("y.rel_to_ego"));
+    if (re.length) setRelEgo(re);
+    const yconf = usp.get("y.conf");
+    if (yconf) {
+      const parts = yconf.split(",");
+      const chips: Array<"low"|"mid"|"high"> = [];
+      parts.forEach(tok => {
+        const [mn2, mx2] = parseRangeToken(tok);
+        const lo = (mn2 === "" && mx2 !== "" && (mx2 as number) <= 0.34);
+        const mi = (mn2 !== "" && mx2 !== "" && approxEq(mn2 as number, 0.33) && approxEq(mx2 as number, 0.66));
+        const hi = (mn2 !== "" && mx2 === "" && (mn2 as number) >= 0.66 - 1e-2);
+        if (lo) chips.push("low");
+        if (mi) chips.push("mid");
+        if (hi) chips.push("high");
+      });
+      if (chips.length) setConfChips(Array.from(new Set(chips)));
+    }
+    const ydist = usp.get("y.dist_m");
+    if (ydist) {
+      const parts = ydist.split(",");
+      if (parts.length === 1) {
+        const [mn, mx] = parseRangeToken(parts[0]);
+        if (mn !== "") setDistMin(mn);
+        if (mx !== "") setDistMax(mx);
+      }
+    }
+  }, [location.search]);
+
+  // Helpers
   const toggleArr = <T,>(arr: T[], v: T) =>
     arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
 
@@ -402,12 +543,9 @@ const SearchVerticalAnimated: React.FC = () => {
   // === Mantém a query na URL do HashRouter ===
   useEffect(() => {
     const q = url.split("?")[1] ?? "";
-    // Em HashRouter, o search deve ficar dentro do hash.
-    // Usando navigate com { replace: true } para não poluir o histórico.
     navigate({ pathname: "/search", search: q ? `?${q}` : "" }, { replace: true });
   }, [url, navigate]);
 
-  // URL compartilhável (frontend): origin + path + "#/search?..." 
   const shareURL = useMemo(() => {
     const q = url.split("?")[1] ?? "";
     return `${window.location.origin}${window.location.pathname}#/search${q ? `?${q}` : ""}`;
@@ -504,7 +642,7 @@ const SearchVerticalAnimated: React.FC = () => {
                     onClick={copyURL}
                     className="bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 px-3 py-2 rounded-md text-sm"
                   >
-                    Copiar URL da busca
+                    Copiar link desta página
                   </button>
                   <a
                     href={url}
@@ -520,7 +658,7 @@ const SearchVerticalAnimated: React.FC = () => {
                 A URL acima é a da <strong>API</strong>. O link compartilhável da página fica no seu navegador (hash).
               </p>
               <div className="mt-2 text-xs text-zinc-400">
-                URL da página para compartilhar:&nbsp;
+                URL desta página:&nbsp;
                 <code className="break-all">{shareURL}</code>
               </div>
             </div>
@@ -580,7 +718,7 @@ const SearchVerticalAnimated: React.FC = () => {
                       <button
                         key={v}
                         type="button"
-                        onClick={() => setLaneLeft((curr) => toggleArr(curr, v))}
+                        onClick={() => setLaneLeft((curr) => curr.includes(v) ? curr.filter(x=>x!==v) : [...curr, v])}
                         className={cls(
                           "px-4 py-2 rounded-full text-sm border transition",
                           laneLeft.includes(v)
@@ -601,7 +739,7 @@ const SearchVerticalAnimated: React.FC = () => {
                       <button
                         key={v}
                         type="button"
-                        onClick={() => setLaneRight((curr) => toggleArr(curr, v))}
+                        onClick={() => setLaneRight((curr) => curr.includes(v) ? curr.filter(x=>x!==v) : [...curr, v])}
                         className={cls(
                           "px-4 py-2 rounded-full text-sm border transition",
                           laneRight.includes(v)
@@ -646,7 +784,7 @@ const SearchVerticalAnimated: React.FC = () => {
                     <button
                       key={ch.key}
                       type="button"
-                      onClick={() => setSwaChips((curr) => toggleArr(curr, ch.key))}
+                      onClick={() => setSwaChips((curr) => curr.includes(ch.key) ? curr.filter(x=>x!==ch.key) : [...curr, ch.key])}
                       className={cls(
                         "px-3 py-1 rounded-full text-sm border transition",
                         swaChips.includes(ch.key)
@@ -688,7 +826,7 @@ const SearchVerticalAnimated: React.FC = () => {
                     <button
                       key={k}
                       type="button"
-                      onClick={() => setBrakes((curr) => toggleArr(curr, k))}
+                      onClick={() => setBrakes((curr) => curr.includes(k) ? curr.filter(x=>x!==k) : [...curr, k])}
                       className={cls(
                         "px-4 py-2 rounded-full text-sm border transition",
                         brakes.includes(k)
@@ -719,7 +857,7 @@ const SearchVerticalAnimated: React.FC = () => {
                     <button
                       key={c}
                       type="button"
-                      onClick={() => setYClasses((curr) => toggleArr(curr, c))}
+                      onClick={() => setYClasses((curr) => curr.includes(c) ? curr.filter(x=>x!==c) : [...curr, c])}
                       className={cls(
                         "px-3 py-1 rounded-full text-sm border transition",
                         yClasses.includes(c)
@@ -740,7 +878,7 @@ const SearchVerticalAnimated: React.FC = () => {
                     <button
                       key={opt.value}
                       type="button"
-                      onClick={() => setRelEgo((curr) => toggleArr(curr, opt.value))}
+                      onClick={() => setRelEgo((curr) => curr.includes(opt.value) ? curr.filter(x=>x!==opt.value) : [...curr, opt.value])}
                       className={cls(
                         "px-3 py-1 rounded-full text-sm border transition",
                         relEgo.includes(opt.value)
@@ -761,7 +899,7 @@ const SearchVerticalAnimated: React.FC = () => {
                     <button
                       key={k}
                       type="button"
-                      onClick={() => setConfChips((curr) => toggleArr(curr, k))}
+                      onClick={() => setConfChips((curr) => curr.includes(k) ? curr.filter(x=>x!==k) : [...curr, k])}
                       className={cls(
                         "px-3 py-1 rounded-full text-sm border transition",
                         confChips.includes(k)
@@ -806,7 +944,7 @@ const SearchVerticalAnimated: React.FC = () => {
                     <button
                       key={g}
                       type="button"
-                      onClick={() => setHighwayGroups((curr) => toggleArr(curr, g))}
+                      onClick={() => setHighwayGroups((curr) => curr.includes(g) ? curr.filter(x=>x!==g) : [...curr, g])}
                       className={cls(
                         "px-3 py-1 rounded-full text-sm border transition",
                         highwayGroups.includes(g)
@@ -827,7 +965,7 @@ const SearchVerticalAnimated: React.FC = () => {
                     <button
                       key={g}
                       type="button"
-                      onClick={() => setLanduseGroups((curr) => toggleArr(curr, g))}
+                      onClick={() => setLanduseGroups((curr) => curr.includes(g) ? curr.filter(x=>x!==g) : [...curr, g])}
                       className={cls(
                         "px-3 py-1 rounded-full text-sm border transition",
                         landuseGroups.includes(g)
@@ -848,7 +986,7 @@ const SearchVerticalAnimated: React.FC = () => {
                     <button
                       key={g}
                       type="button"
-                      onClick={() => setLanes((curr) => toggleArr(curr, g))}
+                      onClick={() => setLanes((curr) => curr.includes(g) ? curr.filter(x=>x!==g) : [...curr, g])}
                       className={cls(
                         "px-3 py-1 rounded-full text-sm border transition",
                         lanes.includes(g)
@@ -870,7 +1008,7 @@ const SearchVerticalAnimated: React.FC = () => {
                       <button
                         key={s}
                         type="button"
-                        onClick={() => setMaxSpeedPreset((curr) => toggleArr(curr, s))}
+                        onClick={() => setMaxSpeedPreset((curr) => curr.includes(s) ? curr.filter(x=>x!==s) : [...curr, s])}
                         className={cls(
                           "px-3 py-1 rounded-full text-sm border transition",
                           maxSpeedPreset.includes(s)
@@ -891,7 +1029,7 @@ const SearchVerticalAnimated: React.FC = () => {
                       <button
                         key={v}
                         type="button"
-                        onClick={() => setOneway((curr) => toggleArr(curr, v))}
+                        onClick={() => setOneway((curr) => curr.includes(v) ? curr.filter(x=>x!==v) : [...curr, v])}
                         className={cls(
                           "px-3 py-1 rounded-full text-sm border transition",
                           oneway.includes(v)
@@ -912,7 +1050,7 @@ const SearchVerticalAnimated: React.FC = () => {
                       <button
                         key={v}
                         type="button"
-                        onClick={() => setSurface((curr) => toggleArr(curr, v))}
+                        onClick={() => setSurface((curr) => curr.includes(v) ? curr.filter(x=>x!==v) : [...curr, v])}
                         className={cls(
                           "px-3 py-1 rounded-full text-sm border transition",
                           surface.includes(v)
@@ -933,7 +1071,7 @@ const SearchVerticalAnimated: React.FC = () => {
                       <button
                         key={v}
                         type="button"
-                        onClick={() => setSidewalk((curr) => toggleArr(curr, v))}
+                        onClick={() => setSidewalk((curr) => curr.includes(v) ? curr.filter(x=>x!==v) : [...curr, v])}
                         className={cls(
                           "px-3 py-1 rounded-full text-sm border transition",
                           sidewalk.includes(v)
@@ -954,7 +1092,7 @@ const SearchVerticalAnimated: React.FC = () => {
                       <button
                         key={v}
                         type="button"
-                        onClick={() => setCycleway((curr) => toggleArr(curr, v))}
+                        onClick={() => setCycleway((curr) => curr.includes(v) ? curr.filter(x=>x!==v) : [...curr, v])}
                         className={cls(
                           "px-3 py-1 rounded-full text-sm border transition",
                           cycleway.includes(v)
@@ -990,7 +1128,7 @@ const SearchVerticalAnimated: React.FC = () => {
                     <button
                       key={`bld-${k}`}
                       type="button"
-                      onClick={() => setBldChips((curr) => toggleArr(curr, k))}
+                      onClick={() => setBldChips((curr) => curr.includes(k) ? curr.filter(x=>x!==k) : [...curr, k])}
                       className={cls(
                         "px-3 py-1 rounded-full text-sm border transition",
                         bldChips.includes(k)
@@ -1010,7 +1148,7 @@ const SearchVerticalAnimated: React.FC = () => {
                     <button
                       key={`veg-${k}`}
                       type="button"
-                      onClick={() => setVegChips((curr) => toggleArr(curr, k))}
+                      onClick={() => setVegChips((curr) => curr.includes(k) ? curr.filter(x=>x!==k) : [...curr, k])}
                       className={cls(
                         "px-3 py-1 rounded-full text-sm border transition",
                         vegChips.includes(k)
