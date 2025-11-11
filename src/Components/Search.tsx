@@ -458,8 +458,6 @@ const SearchVerticalAnimated: React.FC = () => {
   }, [location.search]);
 
   // Helpers
-  const toggleArr = <T,>(arr: T[], v: T) =>
-    arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
 
   // SemSeg chips → ranges (UNION via comma-join)
   const semsegRanges = useMemo(() => {
