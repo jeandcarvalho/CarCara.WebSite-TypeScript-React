@@ -23,7 +23,7 @@ type Counts = { matched_acq_ids: number; matched_seconds?: number; total_links: 
 type Group = { acq_id: string; photos: LinkDoc[] };
 
 /* ===================== Config ===================== */
-const API_DEFAULT_BASE = "http://localhost:8080";
+const API_DEFAULT_BASE = "https://carcara-web-api.onrender.com";
 const API_SEARCH_PATH = "/api/search";
 
 /* ===================== Helpers ===================== */
