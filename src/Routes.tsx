@@ -9,6 +9,7 @@ import About from "./Components/About";
 import FullFiles from "./Components/FullFiles";
 import FullVideo from "./Components/FullVideo";
 import Search from "./Components/Search";
+import View from "./Components/View";
 
 export const Routes = createHashRouter([
   {
@@ -20,6 +21,7 @@ export const Routes = createHashRouter([
       { path: "fullfiles", element: <FullFiles /> },
       { path: "fullvideo/:video", element: <FullVideo /> },
       { path: "search", element: <Search /> },
+      { path: "View", element: <View/> },
     ],
   },
 ]);

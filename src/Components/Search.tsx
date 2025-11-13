@@ -4,11 +4,13 @@ import Header from "./Header";
 import Footer from "./Footer";
 
 /**
- * CarCará · Search (vertical accordion + collapsed summaries + animations)
- * HashRouter-ready + URL hydration:
- *  - Query string lives inside the hash (e.g., https://site/#/search?y.class=car)
- *  - navigate({ search }) keeps URL in the hash so it can be shared/copied.
- *  - On first mount, parse location.search and hydrate the UI state from the URL.
+ * CarCará · Search (accordion + responsive layout + animations)
+ * - URL hydration via HashRouter
+ * - "Generated URL" full-width on top
+ * - After URL: a WIDE "Road Context" band (full-width). Inside it, split content in 2 columns (md+).
+ * - Below Road Context: the other 4 panels arranged horizontally in a responsive grid (expand vertically).
+ * - Mobile: everything stacks vertically.
+ * - Vehicle/Period/Condition: multi-select chips (comma-joined in URL)
  */
 
 // ===================== CONFIG (somente URL) =====================
@@ -98,8 +100,8 @@ const LANE_EGO_RIGHT = ["DISP", "INDISP"] as const;
 
 // SemSeg thresholds (0..100)
 const SEMSEG_THRESH = {
-  building: { p25: 0.0, median: 0.68, p75: 8.72 },
-  vegetation: { p25: 23.99, median: 40.14, p75: 59.41 },
+  building: { p25: 0.0, median: 14.68, p75: 28.72 },
+  vegetation: { p25: 7.99, median: 25.14, p75: 50.41 },
 } as const;
 
 // Steering chips (deg)
@@ -304,10 +306,10 @@ const SearchVerticalAnimated: React.FC = () => {
   const [colRoad, setColRoad] = useState(true);
   const [colSemSeg, setColSemSeg] = useState(true);
 
-  // Geral (blocks + laneego visual)
-  const [bVehicle, setBVehicle] = useState<string>("");
-  const [bPeriod, setBPeriod] = useState<string>("");
-  const [bCondition, setBCondition] = useState<string>("");
+  // Geral (blocks + laneego visual) — MULTI for vehicle/period/condition
+  const [bVehicles, setBVehicles] = useState<string[]>([]);
+  const [bPeriods, setBPeriods] = useState<string[]>([]);
+  const [bConditions, setBConditions] = useState<string[]>([]);
   const [laneLeft, setLaneLeft] = useState<(typeof LANE_EGO_LEFT[number])[]>([]);
   const [laneRight, setLaneRight] = useState<(typeof LANE_EGO_RIGHT[number])[]>([]);
 
@@ -347,10 +349,13 @@ const SearchVerticalAnimated: React.FC = () => {
     if (hydratedRef.current) return;
     hydratedRef.current = true;
     const usp = new URLSearchParams(location.search || "");
-    // blocks_5min
-    const bv = usp.get("b.vehicle"); if (bv) setBVehicle(bv);
-    const bp = usp.get("b.period"); if (bp) setBPeriod(bp);
-    const bc = usp.get("b.condition"); if (bc) setBCondition(bc);
+    // blocks_5min MULTI
+    const bvs = splitList(usp.get("b.vehicle"));
+    if (bvs.length) setBVehicles(bvs);
+    const bps = splitList(usp.get("b.period"));
+    if (bps.length) setBPeriods(bps);
+    const bcs = splitList(usp.get("b.condition"));
+    if (bcs.length) setBConditions(bcs);
     const lleft = splitList(usp.get("l.left_disp")).filter(v => (["DISP","INDISP"] as const).includes(v as any));
     if (lleft.length) setLaneLeft(lleft as any);
     const lright = splitList(usp.get("l.right_disp")).filter(v => (["DISP","INDISP"] as const).includes(v as any));
@@ -502,9 +507,9 @@ const SearchVerticalAnimated: React.FC = () => {
 
   const urlParams = useMemo(() => {
     const p: Record<string, string | undefined> = {
-      ...(bVehicle ? { "b.vehicle": bVehicle } : {}),
-      ...(bPeriod ? { "b.period": bPeriod } : {}),
-      ...(bCondition ? { "b.condition": bCondition } : {}),
+      ...(bVehicles.length ? { "b.vehicle": bVehicles.join(",") } : {}),
+      ...(bPeriods.length ? { "b.period": bPeriods.join(",") } : {}),
+      ...(bConditions.length ? { "b.condition": bConditions.join(",") } : {}),
       ...(laneLeft.length ? { "l.left_disp": laneLeft.join(",") } : {}),
       ...(laneRight.length ? { "l.right_disp": laneRight.join(",") } : {}),
       ...(toRangeParam(vMin, vMax) ? { "c.VehicleSpeed": toRangeParam(vMin, vMax) } : {}),
@@ -530,7 +535,7 @@ const SearchVerticalAnimated: React.FC = () => {
     };
     return p;
   }, [
-    bVehicle,bPeriod,bCondition,laneLeft,laneRight,
+    bVehicles,bPeriods,bConditions,laneLeft,laneRight,
     vMin,vMax,swaMin,swaMax,brakes,swaRanges,
     highwayGroups,landuseGroups,lanes,maxSpeedPreset,oneway,surface,sidewalk,cycleway,
     semsegRanges,yClasses,relEgo,confRange,distMin,distMax
@@ -561,13 +566,13 @@ const SearchVerticalAnimated: React.FC = () => {
   // ===== Collapsed Summaries =====
   const vehicleSummary = useMemo(() => {
     const tags:string[] = [];
-    if (bVehicle) tags.push(`vehicle:${bVehicle}`);
-    if (bPeriod) tags.push(`period:${bPeriod}`);
-    if (bCondition) tags.push(`condition:${bCondition}`);
+    bVehicles.forEach(v => tags.push(`vehicle:${v}`));
+    bPeriods.forEach(v => tags.push(`period:${v}`));
+    bConditions.forEach(v => tags.push(`condition:${v}`));
     laneLeft.forEach(v => tags.push(`left:${v}`));
     laneRight.forEach(v => tags.push(`right:${v}`));
     return tags;
-  }, [bVehicle,bPeriod,bCondition,laneLeft,laneRight]);
+  }, [bVehicles,bPeriods,bConditions,laneLeft,laneRight]);
 
   const canSummary = useMemo(() => {
     const tags:string[] = [];
@@ -612,611 +617,672 @@ const SearchVerticalAnimated: React.FC = () => {
     return tags;
   }, [bldChips,vegChips]);
 
+  // Small helper for toggle in chips
+  const toggle = (arr: string[], value: string, setter: (v: string[]) => void) => {
+    setter(arr.includes(value) ? arr.filter(x => x !== value) : [...arr, value]);
+  };
+
   return (
-    <div className="bg-zinc-950 min-h-screen flex flex-col overflow-x-hidden">
+    <div className="bg-zinc-950 min-h-dvh flex flex-col overflow-x-hidden">
       <Header />
 
-      <div className="my-3 ml-3">
-        <Link to="/">
-          <button className="bg-gray-700 text-white hover:bg-gray-600 text-base md:text-lg font-bold py-1 px-3 rounded-full transition duration-300 text-roboto">
-            ← Home
-          </button>
-        </Link>
-      </div>
+      <main className="flex-1">
+        <div className="my-3 ml-3">
+          <Link to="/">
+            <button className="bg-gray-700 text-white hover:bg-gray-600 text-base md:text-lg font-bold py-1 px-3 rounded-full transition duration-300 text-roboto">
+              ← Home
+            </button>
+          </Link>
+        </div>
 
-      <div className="px-4">
-        <div className="max-w-3xl mx-auto space-y-4">
-          {/* URL */}
-          <Section title="Generated URL" collapsed={colURL} onToggle={() => setColURL(v=>!v)}>
-            <div className="mt-1 bg-zinc-900/70 border border-zinc-800 rounded-xl p-3 md:p-4">
-              <div className="flex flex-col md:flex-row md:items-center gap-2">
-                <input
-                  readOnly
-                  value={url}
-                  className="flex-1 bg-zinc-800 border border-zinc-700 rounded-md px-3 py-2 text-xs md:text-sm text-zinc-100"
-                />
-                <div className="flex gap-2">
-                  <button
-                    onClick={copyURL}
-                    className="bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 px-3 py-2 rounded-md text-sm"
-                  >
-                    Copiar link desta página
-                  </button>
-                  <a
-                    href={url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="bg-yellow-500 hover:bg-yellow-400 text-zinc-900 px-3 py-2 rounded-md text-sm font-semibold"
-                  >
-                    Abrir na API
-                  </a>
-                </div>
-              </div>
-              <p className="text-xs text-zinc-400 mt-2">
-                A URL acima é a da <strong>API</strong>. O link compartilhável da página fica no seu navegador (hash).
-              </p>
-              <div className="mt-2 text-xs text-zinc-400">
-                URL desta página:&nbsp;
-                <code className="break-all">{shareURL}</code>
-              </div>
-            </div>
-          </Section>
-
-          {/* Vehicle & Scene */}
-          <Section
-            title="Vehicle & Scene"
-            collapsed={colVehicle}
-            onToggle={()=>setColVehicle(v=>!v)}
-            summaryItems={vehicleSummary}
-          >
-            <div className="grid gap-3">
-              <select
-                className="bg-zinc-800 border border-zinc-700 rounded-md px-2 py-2 text-zinc-100"
-                value={bVehicle}
-                onChange={(e) => setBVehicle(e.target.value)}
-              >
-                <option value="">Vehicle</option>
-                {VEHICLES.map((v) => (
-                  <option key={v} value={v}>
-                    {v}
-                  </option>
-                ))}
-              </select>
-              <select
-                className="bg-zinc-800 border border-zinc-700 rounded-md px-2 py-2 text-zinc-100"
-                value={bPeriod}
-                onChange={(e) => setBPeriod(e.target.value)}
-              >
-                <option value="">Period</option>
-                {PERIODS.map((p) => (
-                  <option key={p} value={p}>
-                    {p}
-                  </option>
-                ))}
-              </select>
-              <select
-                className="bg-zinc-800 border border-zinc-700 rounded-md px-2 py-2 text-zinc-100"
-                value={bCondition}
-                onChange={(e) => setBCondition(e.target.value)}
-              >
-                <option value="">Condition</option>
-                {CONDITIONS.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-
-              {/* LaneEgo */}
-              <div className="border-t border-zinc-800 pt-2 grid gap-3">
-                <div>
-                  <div className="text-sm text-zinc-400 mb-1">Left lane availability</div>
-                  <div className="flex flex-wrap gap-2">
-                    {LANE_EGO_LEFT.map((v) => (
-                      <button
-                        key={v}
-                        type="button"
-                        onClick={() => setLaneLeft((curr) => curr.includes(v) ? curr.filter(x=>x!==v) : [...curr, v])}
-                        className={cls(
-                          "px-4 py-2 rounded-full text-sm border transition",
-                          laneLeft.includes(v)
-                            ? "bg-yellow-500 text-zinc-900 border-yellow-400"
-                            : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
-                        )}
-                      >
-                        {v === "DISP" ? "Left available" : "Left unavailable"}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-sm text-zinc-400 mb-1">Right lane availability</div>
-                  <div className="flex flex-wrap gap-2">
-                    {LANE_EGO_RIGHT.map((v) => (
-                      <button
-                        key={v}
-                        type="button"
-                        onClick={() => setLaneRight((curr) => curr.includes(v) ? curr.filter(x=>x!==v) : [...curr, v])}
-                        className={cls(
-                          "px-4 py-2 rounded-full text-sm border transition",
-                          laneRight.includes(v)
-                            ? "bg-yellow-500 text-zinc-900 border-yellow-400"
-                            : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
-                        )}
-                      >
-                        {v === "DISP" ? "Right available" : "Right unavailable"}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Section>
-
-          {/* Vehicle Dynamics */}
-          <Section
-            title="Vehicle Dynamics"
-            collapsed={colCAN}
-            onToggle={()=>setColCAN(v=>!v)}
-            summaryItems={canSummary}
-          >
-            <div className="grid gap-3">
-              <div className="grid gap-2">
-                <span className="text-sm text-zinc-300">VehicleSpeed (km/h)</span>
-                <RangePair
-                  compact
-                  min={vMin}
-                  max={vMax}
-                  onChange={(mn, mx) => {
-                    setVMin(mn);
-                    setVMax(mx);
-                  }}
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <div className="text-sm text-zinc-400">SteeringWheelAngle</div>
-                <div className="flex flex-wrap gap-2">
-                  {SWA_CHIPS.map((ch) => (
+        <div className="px-4">
+          <div className="max-w-7xl mx-auto space-y-4">
+            {/* URL (full-width, always on top) */}
+            <Section title="Generated URL" collapsed={colURL} onToggle={() => setColURL(v=>!v)}>
+              <div className="mt-1 bg-zinc-900/70 border border-zinc-800 rounded-xl p-3 md:p-4">
+                <div className="flex flex-col md:flex-row md:items-center gap-2">
+                  <input
+                    readOnly
+                    value={url}
+                    className="flex-1 bg-zinc-800 border border-zinc-700 rounded-md px-3 py-2 text-xs md:text-sm text-zinc-100"
+                  />
+                  <div className="flex gap-2">
                     <button
-                      key={ch.key}
-                      type="button"
-                      onClick={() => setSwaChips((curr) => curr.includes(ch.key) ? curr.filter(x=>x!==ch.key) : [...curr, ch.key])}
-                      className={cls(
-                        "px-3 py-1 rounded-full text-sm border transition",
-                        swaChips.includes(ch.key)
-                          ? "bg-yellow-500 text-zinc-900 border-yellow-400"
-                          : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
-                      )}
+                      onClick={copyURL}
+                      className="bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 px-3 py-2 rounded-md text-sm"
                     >
-                      {ch.label}
+                      Copiar link desta página
                     </button>
-                  ))}
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="bg-yellow-500 hover:bg-yellow-400 text-zinc-900 px-3 py-2 rounded-md text-sm font-semibold"
+                    >
+                      Abrir na API
+                    </a>
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  className="text-xs text-zinc-400 underline w-fit"
-                  onClick={() => setShowSwaAdvanced((v) => !v)}
-                >
-                  {showSwaAdvanced ? "Hide advanced range" : "Advanced range"}
-                </button>
-                {showSwaAdvanced && (
+                <p className="text-xs text-zinc-400 mt-2">
+                  A URL acima é a da <strong>API</strong>. O link compartilhável da página fica no seu navegador (hash).
+                </p>
+                <div className="mt-2 text-xs text-zinc-400">
+                  URL desta página:&nbsp;
+                  <code className="break-all">{shareURL}</code>
+                </div>
+              </div>
+            </Section>
+
+           
+            {/* BELOW: the other 4 panels arranged horizontally; each expands vertically */}
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
+              {/* Vehicle & Scene (multi-select chips) */}
+              <Section
+                title="Vehicle & Scene"
+                collapsed={colVehicle}
+                onToggle={()=>setColVehicle(v=>!v)}
+                summaryItems={vehicleSummary}
+              >
+                <div className="grid gap-3">
+                  {/* Vehicles */}
+                  <div>
+                    <div className="text-sm text-zinc-400 mb-1">Vehicle</div>
+                    <div className="flex flex-wrap gap-2">
+                      {VEHICLES.map((v) => (
+                        <button
+                          key={v}
+                          type="button"
+                          onClick={() => toggle(bVehicles, v, setBVehicles)}
+                          className={cls(
+                            "px-3 py-1 rounded-full text-sm border transition",
+                            bVehicles.includes(v)
+                              ? "bg-yellow-500 text-zinc-900 border-yellow-400"
+                              : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
+                          )}
+                        >
+                          {v}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Period */}
+                  <div>
+                    <div className="text-sm text-zinc-400 mb-1">Period</div>
+                    <div className="flex flex-wrap gap-2">
+                      {PERIODS.map((p) => (
+                        <button
+                          key={p}
+                          type="button"
+                          onClick={() => toggle(bPeriods, p, setBPeriods)}
+                          className={cls(
+                            "px-3 py-1 rounded-full text-sm border transition",
+                            bPeriods.includes(p)
+                              ? "bg-yellow-500 text-zinc-900 border-yellow-400"
+                              : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
+                          )}
+                        >
+                          {p}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Condition */}
+                  <div>
+                    <div className="text-sm text-zinc-400 mb-1">Condition</div>
+                    <div className="flex flex-wrap gap-2">
+                      {CONDITIONS.map((c) => (
+                        <button
+                          key={c.value}
+                          type="button"
+                          onClick={() => toggle(bConditions, c.value, setBConditions)}
+                          className={cls(
+                            "px-3 py-1 rounded-full text-sm border transition",
+                            bConditions.includes(c.value)
+                              ? "bg-yellow-500 text-zinc-900 border-yellow-400"
+                              : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
+                          )}
+                        >
+                          {c.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* LaneEgo */}
+                  <div className="border-t border-zinc-800 pt-2 grid gap-3">
+                    <div>
+                      <div className="text-sm text-zinc-400 mb-1">Left lane availability</div>
+                      <div className="flex flex-wrap gap-2">
+                        {LANE_EGO_LEFT.map((v) => (
+                          <button
+                            key={v}
+                            type="button"
+                            onClick={() =>
+                              setLaneLeft((curr) =>
+                                curr.includes(v) ? curr.filter(x=>x!==v) : [...curr, v]
+                              )
+                            }
+                            className={cls(
+                              "px-4 py-2 rounded-full text-sm border transition",
+                              laneLeft.includes(v)
+                                ? "bg-yellow-500 text-zinc-900 border-yellow-400"
+                                : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
+                            )}
+                          >
+                            {v === "DISP" ? "Left available" : "Left unavailable"}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="text-sm text-zinc-400 mb-1">Right lane availability</div>
+                      <div className="flex flex-wrap gap-2">
+                        {LANE_EGO_RIGHT.map((v) => (
+                          <button
+                            key={v}
+                            type="button"
+                            onClick={() =>
+                              setLaneRight((curr) =>
+                                curr.includes(v) ? curr.filter(x=>x!==v) : [...curr, v]
+                              )
+                            }
+                            className={cls(
+                              "px-4 py-2 rounded-full text-sm border transition",
+                              laneRight.includes(v)
+                                ? "bg-yellow-500 text-zinc-900 border-yellow-400"
+                                : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
+                            )}
+                          >
+                            {v === "DISP" ? "Right available" : "Right unavailable"}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Section>
+
+              {/* Vehicle Dynamics */}
+              <Section
+                title="Vehicle Dynamics"
+                collapsed={colCAN}
+                onToggle={()=>setColCAN(v=>!v)}
+                summaryItems={canSummary}
+              >
+                <div className="grid gap-3">
                   <div className="grid gap-2">
-                    <span className="text-sm text-zinc-300">Angle (°)</span>
+                    <span className="text-sm text-zinc-300">VehicleSpeed (km/h)</span>
                     <RangePair
                       compact
-                      min={swaMin}
-                      max={swaMax}
+                      min={vMin}
+                      max={vMax}
                       onChange={(mn, mx) => {
-                        setSwaMin(mn);
-                        setSwaMax(mx);
+                        setVMin(mn);
+                        setVMax(mx);
                       }}
                     />
                   </div>
-                )}
-              </div>
 
-              <div>
-                <div className="text-sm text-zinc-400 mb-2">BrakeInfoStatus</div>
-                <div className="flex flex-wrap gap-2">
-                  {BRAKE_KEYS.map((k) => (
+                  <div className="grid gap-2">
+                    <div className="text-sm text-zinc-400">SteeringWheelAngle</div>
+                    <div className="flex flex-wrap gap-2">
+                      {SWA_CHIPS.map((ch) => (
+                        <button
+                          key={ch.key}
+                          type="button"
+                          onClick={() => setSwaChips((curr) => curr.includes(ch.key) ? curr.filter(x=>x!==ch.key) : [...curr, ch.key])}
+                          className={cls(
+                            "px-3 py-1 rounded-full text-sm border transition",
+                            swaChips.includes(ch.key)
+                              ? "bg-yellow-500 text-zinc-900 border-yellow-400"
+                              : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
+                          )}
+                        >
+                          {ch.label}
+                        </button>
+                      ))}
+                    </div>
                     <button
-                      key={k}
                       type="button"
-                      onClick={() => setBrakes((curr) => curr.includes(k) ? curr.filter(x=>x!==k) : [...curr, k])}
-                      className={cls(
-                        "px-4 py-2 rounded-full text-sm border transition",
-                        brakes.includes(k)
-                          ? "bg-yellow-500 text-zinc-900 border-yellow-400"
-                          : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
-                      )}
+                      className="text-xs text-zinc-400 underline w-fit"
+                      onClick={() => setShowSwaAdvanced((v) => !v)}
                     >
-                      {k}
+                      {showSwaAdvanced ? "Hide advanced range" : "Advanced range"}
                     </button>
-                  ))}
+                    {showSwaAdvanced && (
+                      <div className="grid gap-2">
+                        <span className="text-sm text-zinc-300">Angle (°)</span>
+                        <RangePair
+                          compact
+                          min={swaMin}
+                          max={swaMax}
+                          onChange={(mn, mx) => {
+                            setSwaMin(mn);
+                            setSwaMax(mx);
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <div className="text-sm text-zinc-400 mb-2">BrakeInfoStatus</div>
+                    <div className="flex flex-wrap gap-2">
+                      {BRAKE_KEYS.map((k) => (
+                        <button
+                          key={k}
+                          type="button"
+                          onClick={() => setBrakes((curr) => curr.includes(k) ? curr.filter(x=>x!==k) : [...curr, k])}
+                          className={cls(
+                            "px-4 py-2 rounded-full text-sm border transition",
+                            brakes.includes(k)
+                              ? "bg-yellow-500 text-zinc-900 border-yellow-400"
+                              : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
+                          )}
+                        >
+                          {k}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </Section>
+
+              {/* Perception */}
+              <Section
+                title="Perception"
+                collapsed={colYOLO}
+                onToggle={()=>setColYOLO(v=>!v)}
+                summaryItems={yoloSummary}
+              >
+                <div className="grid gap-4">
+                  <div>
+                    <div className="text-sm text-zinc-400 mb-1">Classes</div>
+                    <div className="flex flex-wrap gap-2">
+                      {YOLO_CLASSES_COMMON.map((c) => (
+                        <button
+                          key={c}
+                          type="button"
+                          onClick={() => toggle(yClasses, c, setYClasses)}
+                          className={cls(
+                            "px-3 py-1 rounded-full text-sm border transition",
+                            yClasses.includes(c)
+                              ? "bg-yellow-500 text-zinc-900 border-yellow-400"
+                              : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
+                          )}
+                        >
+                          {c}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-sm text-zinc-400 mb-1">Position vs Ego</div>
+                    <div className="flex flex-wrap gap-2">
+                      {REL_TO_EGO.map((opt) => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => toggle(relEgo, opt.value, setRelEgo)}
+                          className={cls(
+                            "px-3 py-1 rounded-full text-sm border transition",
+                            relEgo.includes(opt.value)
+                              ? "bg-yellow-500 text-zinc-900 border-yellow-400"
+                              : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
+                          )}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-sm text-zinc-400 mb-1">Confidence</div>
+                    <div className="flex flex-wrap gap-2">
+                      {(["low", "mid", "high"] as const).map((k) => (
+                        <button
+                          key={k}
+                          type="button"
+                          onClick={() => toggle(confChips, k, (x)=>setConfChips(x as any))}
+                          className={cls(
+                            "px-3 py-1 rounded-full text-sm border transition",
+                            confChips.includes(k)
+                              ? "bg-yellow-500 text-zinc-900 border-yellow-400"
+                              : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
+                          )}
+                        >
+                          {k === "low" ? "Low %" : k === "mid" ? "Medium %" : "High %"}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <span className="text-sm text-zinc-300">Distance (m)</span>
+                    <RangePair
+                      compact
+                      min={distMin}
+                      max={distMax}
+                      step={0.5}
+                      onChange={(mn, mx) => {
+                        setDistMin(mn);
+                        setDistMax(mx);
+                      }}
+                    />
+                  </div>
+                </div>
+              </Section>
+
+              {/* Environment */}
+              <Section
+                title="Environment"
+                collapsed={colSemSeg}
+                onToggle={()=>setColSemSeg(v=>!v)}
+                summaryItems={semsegSummary}
+              >
+                <div className="grid gap-4">
+                  <div>
+                    <div className="text-sm text-zinc-400 mb-1">Building</div>
+                    <div className="flex flex-wrap gap-2">
+                      {(["low", "mid", "high"] as const).map((k) => (
+                        <button
+                          key={`bld-${k}`}
+                          type="button"
+                          onClick={() => toggle(bldChips, k, (x)=>setBldChips(x as any))}
+                          className={cls(
+                            "px-3 py-1 rounded-full text-sm border transition",
+                            bldChips.includes(k)
+                              ? "bg-yellow-500 text-zinc-900 border-yellow-400"
+                              : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
+                          )}
+                        >
+                          {k === "low" ? "Low %" : k === "mid" ? "Medium %" : "High %"}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-zinc-400 mb-1">Vegetation</div>
+                    <div className="flex flex-wrap gap-2">
+                      {(["low", "mid", "high"] as const).map((k) => (
+                        <button
+                          key={`veg-${k}`}
+                          type="button"
+                          onClick={() => toggle(vegChips, k, (x)=>setVegChips(x as any))}
+                          className={cls(
+                            "px-3 py-1 rounded-full text-sm border transition",
+                            vegChips.includes(k)
+                              ? "bg-yellow-500 text-zinc-900 border-yellow-400"
+                              : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
+                          )}
+                        >
+                          {k === "low" ? "Low %" : k === "mid" ? "Medium %" : "High %"}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Section>
             </div>
-          </Section>
 
-          {/* Perception */}
-          <Section
-            title="Perception"
-            collapsed={colYOLO}
-            onToggle={()=>setColYOLO(v=>!v)}
-            summaryItems={yoloSummary}
-          >
-            <div className="grid gap-4">
-              <div>
-                <div className="text-sm text-zinc-400 mb-1">Classes</div>
-                <div className="flex flex-wrap gap-2">
-                  {YOLO_CLASSES_COMMON.map((c) => (
-                    <button
-                      key={c}
-                      type="button"
-                      onClick={() => setYClasses((curr) => curr.includes(c) ? curr.filter(x=>x!==c) : [...curr, c])}
-                      className={cls(
-                        "px-3 py-1 rounded-full text-sm border transition",
-                        yClasses.includes(c)
-                          ? "bg-yellow-500 text-zinc-900 border-yellow-400"
-                          : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
-                      )}
-                    >
-                      {c}
-                    </button>
-                  ))}
+             {/* 4 panels grid will be above now */}
+            <Section
+              title="Road Context"
+              collapsed={colRoad}
+              onToggle={()=>setColRoad(v=>!v)}
+              summaryItems={roadSummary}
+            >
+              {/* two columns internally on md+ */}
+              <div className="grid gap-6 md:grid-cols-2">
+                {/* Column A */}
+                <div className="grid gap-4">
+                  <div>
+                    <div className="text-sm text-zinc-400 mb-1">Highway (groups)</div>
+                    <div className="flex flex-wrap gap-2">
+                      {Object.keys(GROUPS.highway).map((g) => (
+                        <button
+                          key={g}
+                          type="button"
+                          onClick={() => toggle(highwayGroups, g, setHighwayGroups)}
+                          className={cls(
+                            "px-3 py-1 rounded-full text-sm border transition",
+                            highwayGroups.includes(g)
+                              ? "bg-yellow-500 text-zinc-900 border-yellow-400"
+                              : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
+                          )}
+                        >
+                          {g}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-sm text-zinc-400 mb-1">Landuse (groups)</div>
+                    <div className="flex flex-wrap gap-2">
+                      {Object.keys(GROUPS.landuse).map((g) => (
+                        <button
+                          key={g}
+                          type="button"
+                          onClick={() => toggle(landuseGroups, g, setLanduseGroups)}
+                          className={cls(
+                            "px-3 py-1 rounded-full text-sm border transition",
+                            landuseGroups.includes(g)
+                              ? "bg-yellow-500 text-zinc-900 border-yellow-400"
+                              : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
+                          )}
+                        >
+                          {g}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-sm text-zinc-400 mb-1">Lanes (1..8)</div>
+                    <div className="flex flex-wrap gap-2">
+                      {LANES_DIRECT.map((g) => (
+                        <button
+                          key={g}
+                          type="button"
+                          onClick={() => toggle(lanes, g, setLanes)}
+                          className={cls(
+                            "px-3 py-1 rounded-full text-sm border transition",
+                            lanes.includes(g)
+                              ? "bg-yellow-500 text-zinc-900 border-yellow-400"
+                              : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
+                          )}
+                        >
+                          {g}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Column B */}
+                <div className="grid gap-4">
+                  <div className="grid gap-4">
+                    <div className="grid gap-2">
+                      <span className="text-sm text-zinc-300">Maxspeed (BR presets)</span>
+                      <div className="flex flex-wrap gap-2">
+                        {BR_MAXSPEEDS.map((s) => (
+                          <button
+                            key={s}
+                            type="button"
+                            onClick={() =>
+                              setMaxSpeedPreset((curr) =>
+                                curr.includes(s) ? curr.filter(x=>x!==s) : [...curr, s]
+                              )
+                            }
+                            className={cls(
+                              "px-3 py-1 rounded-full text-sm border transition",
+                              maxSpeedPreset.includes(s)
+                                ? "bg-yellow-500 text-zinc-900 border-yellow-400"
+                                : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
+                            )}
+                          >
+                            {s}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="text-sm text-zinc-400 mb-1">Oneway</div>
+                      <div className="flex flex-wrap gap-2">
+                        {ONEWAY.map((v) => (
+                          <button
+                            key={v}
+                            type="button"
+                            onClick={() => toggle(oneway, v, (x)=>setOneway(x as any))}
+                            className={cls(
+                              "px-3 py-1 rounded-full text-sm border transition",
+                              oneway.includes(v)
+                                ? "bg-yellow-500 text-zinc-900 border-yellow-400"
+                                : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
+                            )}
+                          >
+                            {v}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="text-sm text-zinc-400 mb-1">Surface</div>
+                      <div className="flex flex-wrap gap-2">
+                        {SURFACE_GROUPS.map((v) => (
+                          <button
+                            key={v}
+                            type="button"
+                            onClick={() => toggle(surface, v, (x)=>setSurface(x as any))}
+                            className={cls(
+                              "px-3 py-1 rounded-full text-sm border transition",
+                              surface.includes(v)
+                                ? "bg-yellow-500 text-zinc-900 border-yellow-400"
+                                : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
+                            )}
+                          >
+                            {v}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="text-sm text-zinc-400 mb-1">Sidewalk</div>
+                      <div className="flex flex-wrap gap-2">
+                        {SIDEWALK.map((v) => (
+                          <button
+                            key={v}
+                            type="button"
+                            onClick={() => toggle(sidewalk, v, (x)=>setSidewalk(x as any))}
+                            className={cls(
+                              "px-3 py-1 rounded-full text-sm border transition",
+                              sidewalk.includes(v)
+                                ? "bg-yellow-500 text-zinc-900 border-yellow-400"
+                                : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
+                            )}
+                          >
+                            {v}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="text-sm text-zinc-400 mb-1">Cycleway</div>
+                      <div className="flex flex-wrap gap-2">
+                        {CYCLEWAY.map((v) => (
+                          <button
+                            key={v}
+                            type="button"
+                            onClick={() => toggle(cycleway, v, (x)=>setCycleway(x as any))}
+                            className={cls(
+                              "px-3 py-1 rounded-full text-sm border transition",
+                              cycleway.includes(v)
+                                ? "bg-yellow-500 text-zinc-900 border-yellow-400"
+                                : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
+                            )}
+                          >
+                            {v}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div>
-                <div className="text-sm text-zinc-400 mb-1">Position vs Ego</div>
-                <div className="flex flex-wrap gap-2">
-                  {REL_TO_EGO.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => setRelEgo((curr) => curr.includes(opt.value) ? curr.filter(x=>x!==opt.value) : [...curr, opt.value])}
-                      className={cls(
-                        "px-3 py-1 rounded-full text-sm border transition",
-                        relEgo.includes(opt.value)
-                          ? "bg-yellow-500 text-zinc-900 border-yellow-400"
-                          : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
-                      )}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
+            </Section>
 
-              <div>
-                <div className="text-sm text-zinc-400 mb-1">Confidence</div>
-                <div className="flex flex-wrap gap-2">
-                  {(["low", "mid", "high"] as const).map((k) => (
-                    <button
-                      key={k}
-                      type="button"
-                      onClick={() => setConfChips((curr) => curr.includes(k) ? curr.filter(x=>x!==k) : [...curr, k])}
-                      className={cls(
-                        "px-3 py-1 rounded-full text-sm border transition",
-                        confChips.includes(k)
-                          ? "bg-yellow-500 text-zinc-900 border-yellow-400"
-                          : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
-                      )}
-                    >
-                      {k === "low" ? "Low %" : k === "mid" ? "Medium %" : "High %"}
-                    </button>
-                  ))}
-                </div>
-              </div>
 
-              <div className="grid gap-2">
-                <span className="text-sm text-zinc-300">Distance (m)</span>
-                <RangePair
-                  compact
-                  min={distMin}
-                  max={distMax}
-                  step={0.5}
-                  onChange={(mn, mx) => {
-                    setDistMin(mn);
-                    setDistMax(mx);
+            {/* Actions */}
+            <div className="flex items-center justify-between py-2">
+              <div className="text-zinc-500 text-xs">Gere a URL da busca e compartilhe o link desta página.</div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    setColVehicle(true);
+                    setColCAN(true);
+                    setColYOLO(true);
+                    setColRoad(true);
+                    setColSemSeg(true);
+                    setBVehicles([]);
+                    setBPeriods([]);
+                    setBConditions([]);
+                    setLaneLeft([]);
+                    setLaneRight([]);
+                    setVMin("");
+                    setVMax("");
+                    setSwaMin("");
+                    setSwaMax("");
+                    setBrakes([]);
+                    setSwaChips([]);
+                    setShowSwaAdvanced(false);
+                    setHighwayGroups([]);
+                    setLanduseGroups([]);
+                    setLanes([]);
+                    setMaxSpeedPreset([]);
+                    setOneway([]);
+                    setSurface([]);
+                    setSidewalk([]);
+                    setCycleway([]);
+                    setBldChips([]);
+                    setVegChips([]);
+                    setYClasses([]);
+                    setRelEgo([]);
+                    setConfChips([]);
+                    setDistMin("");
+                    setDistMax("");
                   }}
-                />
+                  className="bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 px-3 py-2 rounded-md text-sm"
+                >
+                  Clear
+                </button>
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="bg-yellow-500 hover:bg-yellow-400 text-zinc-900 px-4 py-2 rounded-md text-sm font-semibold"
+                >
+                 <Link to="/View">
+                
+                        View Here
+                  
+                </Link>
+                </a>
               </div>
-            </div>
-          </Section>
-
-          {/* Road Context */}
-          <Section
-            title="Road Context"
-            collapsed={colRoad}
-            onToggle={()=>setColRoad(v=>!v)}
-            summaryItems={roadSummary}
-          >
-            <div className="grid gap-4">
-              <div>
-                <div className="text-sm text-zinc-400 mb-1">Highway (groups)</div>
-                <div className="flex flex-wrap gap-2">
-                  {Object.keys(GROUPS.highway).map((g) => (
-                    <button
-                      key={g}
-                      type="button"
-                      onClick={() => setHighwayGroups((curr) => curr.includes(g) ? curr.filter(x=>x!==g) : [...curr, g])}
-                      className={cls(
-                        "px-3 py-1 rounded-full text-sm border transition",
-                        highwayGroups.includes(g)
-                          ? "bg-yellow-500 text-zinc-900 border-yellow-400"
-                          : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
-                      )}
-                    >
-                      {g}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <div className="text-sm text-zinc-400 mb-1">Landuse (groups)</div>
-                <div className="flex flex-wrap gap-2">
-                  {Object.keys(GROUPS.landuse).map((g) => (
-                    <button
-                      key={g}
-                      type="button"
-                      onClick={() => setLanduseGroups((curr) => curr.includes(g) ? curr.filter(x=>x!==g) : [...curr, g])}
-                      className={cls(
-                        "px-3 py-1 rounded-full text-sm border transition",
-                        landuseGroups.includes(g)
-                          ? "bg-yellow-500 text-zinc-900 border-yellow-400"
-                          : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
-                      )}
-                    >
-                      {g}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <div className="text-sm text-zinc-400 mb-1">Lanes (1..8)</div>
-                <div className="flex flex-wrap gap-2">
-                  {LANES_DIRECT.map((g) => (
-                    <button
-                      key={g}
-                      type="button"
-                      onClick={() => setLanes((curr) => curr.includes(g) ? curr.filter(x=>x!==g) : [...curr, g])}
-                      className={cls(
-                        "px-3 py-1 rounded-full text-sm border transition",
-                        lanes.includes(g)
-                          ? "bg-yellow-500 text-zinc-900 border-yellow-400"
-                          : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
-                      )}
-                    >
-                      {g}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="grid gap-4">
-                <div className="grid gap-2">
-                  <span className="text-sm text-zinc-300">Maxspeed (BR presets)</span>
-                  <div className="flex flex-wrap gap-2">
-                    {BR_MAXSPEEDS.map((s) => (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => setMaxSpeedPreset((curr) => curr.includes(s) ? curr.filter(x=>x!==s) : [...curr, s])}
-                        className={cls(
-                          "px-3 py-1 rounded-full text-sm border transition",
-                          maxSpeedPreset.includes(s)
-                            ? "bg-yellow-500 text-zinc-900 border-yellow-400"
-                            : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
-                        )}
-                      >
-                        {s}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-sm text-zinc-400 mb-1">Oneway</div>
-                  <div className="flex flex-wrap gap-2">
-                    {ONEWAY.map((v) => (
-                      <button
-                        key={v}
-                        type="button"
-                        onClick={() => setOneway((curr) => curr.includes(v) ? curr.filter(x=>x!==v) : [...curr, v])}
-                        className={cls(
-                          "px-3 py-1 rounded-full text-sm border transition",
-                          oneway.includes(v)
-                            ? "bg-yellow-500 text-zinc-900 border-yellow-400"
-                            : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
-                        )}
-                      >
-                        {v}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-sm text-zinc-400 mb-1">Surface</div>
-                  <div className="flex flex-wrap gap-2">
-                    {SURFACE_GROUPS.map((v) => (
-                      <button
-                        key={v}
-                        type="button"
-                        onClick={() => setSurface((curr) => curr.includes(v) ? curr.filter(x=>x!==v) : [...curr, v])}
-                        className={cls(
-                          "px-3 py-1 rounded-full text-sm border transition",
-                          surface.includes(v)
-                            ? "bg-yellow-500 text-zinc-900 border-yellow-400"
-                            : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
-                        )}
-                      >
-                        {v}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-sm text-zinc-400 mb-1">Sidewalk</div>
-                  <div className="flex flex-wrap gap-2">
-                    {SIDEWALK.map((v) => (
-                      <button
-                        key={v}
-                        type="button"
-                        onClick={() => setSidewalk((curr) => curr.includes(v) ? curr.filter(x=>x!==v) : [...curr, v])}
-                        className={cls(
-                          "px-3 py-1 rounded-full text-sm border transition",
-                          sidewalk.includes(v)
-                            ? "bg-yellow-500 text-zinc-900 border-yellow-400"
-                            : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
-                        )}
-                      >
-                        {v}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-sm text-zinc-400 mb-1">Cycleway</div>
-                  <div className="flex flex-wrap gap-2">
-                    {CYCLEWAY.map((v) => (
-                      <button
-                        key={v}
-                        type="button"
-                        onClick={() => setCycleway((curr) => curr.includes(v) ? curr.filter(x=>x!==v) : [...curr, v])}
-                        className={cls(
-                          "px-3 py-1 rounded-full text-sm border transition",
-                          cycleway.includes(v)
-                            ? "bg-yellow-500 text-zinc-900 border-yellow-400"
-                            : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
-                        )}
-                      >
-                        {v}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <p className="mt-1 text-xs text-zinc-400">
-                Note: not all acquisitions achieved 100% success in extracting road metadata. Prefer these filters when prioritizing quality over quantity.
-              </p>
-            </div>
-          </Section>
-
-          {/* Environment */}
-          <Section
-            title="Environment"
-            collapsed={colSemSeg}
-            onToggle={()=>setColSemSeg(v=>!v)}
-            summaryItems={semsegSummary}
-          >
-            <div className="grid gap-4">
-              <div>
-                <div className="text-sm text-zinc-400 mb-1">Building</div>
-                <div className="flex flex-wrap gap-2">
-                  {(["low", "mid", "high"] as const).map((k) => (
-                    <button
-                      key={`bld-${k}`}
-                      type="button"
-                      onClick={() => setBldChips((curr) => curr.includes(k) ? curr.filter(x=>x!==k) : [...curr, k])}
-                      className={cls(
-                        "px-3 py-1 rounded-full text-sm border transition",
-                        bldChips.includes(k)
-                          ? "bg-yellow-500 text-zinc-900 border-yellow-400"
-                          : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
-                      )}
-                    >
-                      {k === "low" ? "Low %" : k === "mid" ? "Medium %" : "High %"}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <div className="text-sm text-zinc-400 mb-1">Vegetation</div>
-                <div className="flex flex-wrap gap-2">
-                  {(["low", "mid", "high"] as const).map((k) => (
-                    <button
-                      key={`veg-${k}`}
-                      type="button"
-                      onClick={() => setVegChips((curr) => curr.includes(k) ? curr.filter(x=>x!==k) : [...curr, k])}
-                      className={cls(
-                        "px-3 py-1 rounded-full text-sm border transition",
-                        vegChips.includes(k)
-                          ? "bg-yellow-500 text-zinc-900 border-yellow-400"
-                          : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
-                      )}
-                    >
-                      {k === "low" ? "Low %" : k === "mid" ? "Medium %" : "High %"}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </Section>
-
-          {/* Actions */}
-          <div className="flex items-center justify-between py-2">
-            <div className="text-zinc-500 text-xs">Gere a URL da busca e compartilhe o link desta página.</div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => {
-                  setColVehicle(true);
-                  setColCAN(true);
-                  setColYOLO(true);
-                  setColRoad(true);
-                  setColSemSeg(true);
-                  setBVehicle("");
-                  setBPeriod("");
-                  setBCondition("");
-                  setLaneLeft([]);
-                  setLaneRight([]);
-                  setVMin("");
-                  setVMax("");
-                  setSwaMin("");
-                  setSwaMax("");
-                  setBrakes([]);
-                  setSwaChips([]);
-                  setShowSwaAdvanced(false);
-                  setHighwayGroups([]);
-                  setLanduseGroups([]);
-                  setLanes([]);
-                  setMaxSpeedPreset([]);
-                  setOneway([]);
-                  setSurface([]);
-                  setSidewalk([]);
-                  setCycleway([]);
-                  setBldChips([]);
-                  setVegChips([]);
-                  setYClasses([]);
-                  setRelEgo([]);
-                  setConfChips([]);
-                  setDistMin("");
-                  setDistMax("");
-                }}
-                className="bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 px-3 py-2 rounded-md text-sm"
-              >
-                Clear
-              </button>
-              <a
-                href={url}
-                target="_blank"
-                rel="noreferrer"
-                className="bg-yellow-500 hover:bg-yellow-400 text-zinc-900 px-4 py-2 rounded-md text-sm font-semibold"
-              >
-                Open API
-              </a>
             </div>
           </div>
         </div>
-      </div>
+      </main>
 
       <Footer />
     </div>
