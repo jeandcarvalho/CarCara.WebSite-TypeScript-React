@@ -44,24 +44,21 @@ const GROUPS = {
     residential: ["residential", "village_green"],
     commercial: ["commercial", "retail"],
     industrial: ["industrial", "garages", "storage", "landfill"],
-    agro: ["farmland", "farmyard", "orchard", "meadow"],
-    green: [
-      "forest",
-      "grass",
-      "scrub",
-      "recreation",
-      "recreation_ground",
-      "cemetery",
-      "flowerbed",
-      "greenfield",
-    ],
+    agro: ["farmland", "farmyard", "orchard", "meadow"]
   },
 } as const;
 
 const BRAKE_KEYS = ["not_pressed", "pressed"] as const;
-const ONEWAY = ["yes", "no"] as const;
+
+// mapeia os chips para o valor REAL salvo no banco
+const BRAKE_DB_MAP: Record<(typeof BRAKE_KEYS)[number], string> = {
+  not_pressed: "b'Brake pedal not pressed'",
+  pressed: "b'Brake pedal confirmed pressed'",
+};
+
+const ONEWAY = ["yes"] as const;
 const SURFACE_GROUPS = ["paved", "unpaved"] as const;
-const SIDEWALK = ["both", "left", "right", "no", "unpaved"] as const;
+const SIDEWALK = ["both", "left", "right", "no"] as const;
 const CYCLEWAY = ["shared_lane", "no"] as const;
 const LANES_DIRECT = ["1", "2", "3", "4", "5", "6", "7", "8"] as const;
 
@@ -116,7 +113,7 @@ const SWA_CHIPS = [
 ] as const;
 
 // BR speed-limit defaults (km/h) — typical signage options.
-const BR_MAXSPEEDS = [10,20,30,40,50,60,70,80,90,100,110,120] as const;
+const BR_MAXSPEEDS = [20,30,40,50,60,70,80,90,100,110,120] as const;
 
 // ===================== UTILS / UI helpers =====================
 const cls = (...xs: (Array<string | false | null | undefined>)) =>
@@ -356,18 +353,23 @@ const SearchVerticalAnimated: React.FC = () => {
     if (bps.length) setBPeriods(bps);
     const bcs = splitList(usp.get("b.condition"));
     if (bcs.length) setBConditions(bcs);
-    const lleft = splitList(usp.get("l.left_disp")).filter(v => (["DISP","INDISP"] as const).includes(v as any));
+
+    // laneego (ajuste para l.left / l.right)
+    const lleft = splitList(usp.get("l.left")).filter(v => (["DISP","INDISP"] as const).includes(v as any));
     if (lleft.length) setLaneLeft(lleft as any);
-    const lright = splitList(usp.get("l.right_disp")).filter(v => (["DISP","INDISP"] as const).includes(v as any));
+    const lright = splitList(usp.get("l.right")).filter(v => (["DISP","INDISP"] as const).includes(v as any));
     if (lright.length) setLaneRight(lright as any);
-    // CAN
-    const vRange = usp.get("c.VehicleSpeed");
+
+    // CAN - velocidade do veículo (c.v)
+    const vRange = usp.get("c.v");
     if (vRange) {
       const [mn, mx] = parseRangeToken(vRange);
       if (mn !== "") setVMin(mn);
       if (mx !== "") setVMax(mx);
     }
-    const swaR = usp.get("c.SteeringWheelAngle");
+
+    // CAN - SteeringWheelAngle (c.swa)
+    const swaR = usp.get("c.swa");
     if (swaR) {
       const parts = swaR.split(",");
       // map to chips if matches known ranges
@@ -387,8 +389,18 @@ const SearchVerticalAnimated: React.FC = () => {
         }
       }
     }
-    const br = splitList(usp.get("c.BrakeInfoStatus")).filter(v => (BRAKE_KEYS as readonly string[]).includes(v));
-    if (br.length) setBrakes(br as any);
+
+    // CAN - freio (c.brakes) → converte valores do banco para chips
+    const brRaw = splitList(usp.get("c.brakes"));
+    if (brRaw.length) {
+      const keys: ("not_pressed" | "pressed")[] = [];
+      brRaw.forEach(v => {
+        if (v === BRAKE_DB_MAP.not_pressed) keys.push("not_pressed");
+        if (v === BRAKE_DB_MAP.pressed) keys.push("pressed");
+      });
+      if (keys.length) setBrakes(keys);
+    }
+
     // Overpass
     const hg = splitList(usp.get("o.highway"));
     if (hg.length) setHighwayGroups(hg);
@@ -406,6 +418,7 @@ const SearchVerticalAnimated: React.FC = () => {
     if (sw.length) setSidewalk(sw as any);
     const cy = splitList(usp.get("o.cycleway")).filter(v => (CYCLEWAY as readonly string[]).includes(v));
     if (cy.length) setCycleway(cy as any);
+
     // semseg
     const sBld = usp.get("s.building");
     if (sBld) {
@@ -431,11 +444,15 @@ const SearchVerticalAnimated: React.FC = () => {
       });
       if (chips.length) setVegChips(Array.from(new Set(chips)));
     }
+
     // yolo
     const yc = splitList(usp.get("y.class"));
     if (yc.length) setYClasses(yc);
-    const re = splitList(usp.get("y.rel_to_ego"));
+
+    // y.rel (antes estava y.rel_to_ego)
+    const re = splitList(usp.get("y.rel"));
     if (re.length) setRelEgo(re);
+
     const yconf = usp.get("y.conf");
     if (yconf) {
       const parts = yconf.split(",");
@@ -510,15 +527,22 @@ const SearchVerticalAnimated: React.FC = () => {
       ...(bVehicles.length ? { "b.vehicle": bVehicles.join(",") } : {}),
       ...(bPeriods.length ? { "b.period": bPeriods.join(",") } : {}),
       ...(bConditions.length ? { "b.condition": bConditions.join(",") } : {}),
-      ...(laneLeft.length ? { "l.left_disp": laneLeft.join(",") } : {}),
-      ...(laneRight.length ? { "l.right_disp": laneRight.join(",") } : {}),
-      ...(toRangeParam(vMin, vMax) ? { "c.VehicleSpeed": toRangeParam(vMin, vMax) } : {}),
+      // laneego (ajuste para l.left / l.right)
+      ...(laneLeft.length ? { "l.left": laneLeft.join(",") } : {}),
+      ...(laneRight.length ? { "l.right": laneRight.join(",") } : {}),
+      // CAN: velocidade (c.v)
+      ...(toRangeParam(vMin, vMax) ? { "c.v": toRangeParam(vMin, vMax) } : {}),
+      // CAN: SWA (c.swa)
       ...(swaRanges
-        ? { "c.SteeringWheelAngle": swaRanges }
+        ? { "c.swa": swaRanges }
         : toRangeParam(swaMin, swaMax)
-        ? { "c.SteeringWheelAngle": toRangeParam(swaMin, swaMax) }
+        ? { "c.swa": toRangeParam(swaMin, swaMax) }
         : {}),
-      ...(brakes.length ? { "c.BrakeInfoStatus": brakes.join(",") } : {}),
+      // CAN: freio (c.brakes) -> envia valores do banco
+      ...(brakes.length
+        ? { "c.brakes": brakes.map((k) => BRAKE_DB_MAP[k]).join(",") }
+        : {}),
+      // Overpass
       ...(highwayGroups.length ? { "o.highway": highwayGroups.join(",") } : {}),
       ...(landuseGroups.length ? { "o.landuse": landuseGroups.join(",") } : {}),
       ...(lanes.length ? { "o.lanes": lanes.join(",") } : {}),
@@ -529,7 +553,8 @@ const SearchVerticalAnimated: React.FC = () => {
       ...(cycleway.length ? { "o.cycleway": cycleway.join(",") } : {}),
       ...semsegRanges,
       ...(yClasses.length ? { "y.class": yClasses.join(",") } : {}),
-      ...(relEgo.length ? { "y.rel_to_ego": relEgo.join(",") } : {}),
+      // YOLO rel_to_ego → y.rel
+      ...(relEgo.length ? { "y.rel": relEgo.join(",") } : {}),
       ...(confRange ? { "y.conf": confRange } : {}),
       ...(toRangeParam(distMin, distMax) ? { "y.dist_m": toRangeParam(distMin, distMax) } : {}),
     };
@@ -1196,26 +1221,7 @@ const SearchVerticalAnimated: React.FC = () => {
                       </div>
                     </div>
 
-                    <div>
-                      <div className="text-sm text-zinc-400 mb-1">Cycleway</div>
-                      <div className="flex flex-wrap gap-2">
-                        {CYCLEWAY.map((v) => (
-                          <button
-                            key={v}
-                            type="button"
-                            onClick={() => toggle(cycleway, v, (x)=>setCycleway(x as any))}
-                            className={cls(
-                              "px-3 py-1 rounded-full text-sm border transition",
-                              cycleway.includes(v)
-                                ? "bg-yellow-500 text-zinc-900 border-yellow-400"
-                                : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
-                            )}
-                          >
-                            {v}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                
                   </div>
                 </div>
               </div>
