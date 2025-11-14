@@ -60,7 +60,7 @@ const ONEWAY = ["yes"] as const;
 const SURFACE_GROUPS = ["paved", "unpaved"] as const;
 const SIDEWALK = ["both", "left", "right", "no"] as const;
 const CYCLEWAY = ["shared_lane", "no"] as const;
-const LANES_DIRECT = ["1", "2", "3", "4", "5", "6", "7", "8"] as const;
+const LANES_DIRECT = ["1", "2", "3", "4", "5", "6"] as const;
 
 const VEHICLES = ["Captur", "DAF CF 410", "Renegade"] as const;
 const PERIODS = ["day", "night", "dusk", "dawn"] as const;
