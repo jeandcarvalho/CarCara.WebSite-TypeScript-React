@@ -8,8 +8,8 @@ import loadgif from "../Components/img/gif.gif";
 type LinkDoc = {
   acq_id: string;
   sec: number | null;
-  ext?: string;
   link: string;
+  ext?: string;
 };
 
 type PageInfo = {
@@ -107,12 +107,14 @@ function coerceResponse(json: any): { counts: Counts; page_info: PageInfo; image
 
   // caso antigo: documents
   if (json && Array.isArray(json.documents)) {
-    images = json.documents.filter((d: any) => d?.link).map((d: any) => ({
-      acq_id: String(d.acq_id ?? d.acq_id_raw ?? ""),
-      sec: d.sec ?? null,
-      link: d.link,
-      ext: d.ext,
-    }));
+    images = json.documents
+      .filter((d: any) => d?.link)
+      .map((d: any) => ({
+        acq_id: String(d.acq_id ?? d.acq_id_raw ?? ""),
+        sec: d.sec ?? null,
+        link: d.link,
+        ext: d.ext,
+      }));
 
     return {
       counts: json.counts || {
@@ -132,11 +134,12 @@ function coerceResponse(json: any): { counts: Counts; page_info: PageInfo; image
   if (json && Array.isArray(json.items)) {
     for (const it of json.items) {
       const acq_id = String(it.acq_id ?? it.acq_id_raw ?? "");
+      const sec = it.sec ?? null;
 
-      // formato BIG: { acq_id, sec, links:[...] }
+      // formato BIG antigo: { acq_id, sec, links:[{ext,link}, ...] }
       if (Array.isArray(it.links)) {
-        const sec = it.sec ?? null;
         for (const l of it.links) {
+          if (!l?.link) continue;
           images.push({
             acq_id,
             sec,
@@ -146,9 +149,19 @@ function coerceResponse(json: any): { counts: Counts; page_info: PageInfo; image
         }
       }
 
+      // novo formato BIG enxuto: { acq_id, sec, link }
+      if (typeof it.link === "string" && it.link) {
+        images.push({
+          acq_id,
+          sec,
+          link: it.link,
+        });
+      }
+
       // formato antigo: links.per_second.photo[..]
       if (it.links?.per_second?.photo) {
         for (const ph of it.links.per_second.photo) {
+          if (!ph?.url) continue;
           images.push({
             acq_id,
             sec: ph.sec ?? null,
@@ -159,18 +172,20 @@ function coerceResponse(json: any): { counts: Counts; page_info: PageInfo; image
     }
 
     const counts: Counts =
-      json.counts || ({
+      json.counts ||
+      ({
         matched_acq_ids: json.matched_acq_ids ?? new Set(images.map((i) => i.acq_id)).size,
         total_links: json.total_hits ?? images.length,
       } as Counts);
 
-    const page_info: PageInfo = json.page_info || {
-      page: json.page ?? 1,
-      per_page: json.per_page ?? 100,
-      has_more: json.has_more ?? false,
-      total: counts.matched_acq_ids,
-      total_pages: json.total_pages,
-    };
+    const page_info: PageInfo =
+      json.page_info || {
+        page: json.page ?? 1,
+        per_page: json.per_page ?? 100,
+        has_more: json.has_more ?? false,
+        total: counts.matched_acq_ids,
+        total_pages: json.total_pages,
+      };
 
     return { counts, page_info, images };
   }
@@ -178,25 +193,29 @@ function coerceResponse(json: any): { counts: Counts; page_info: PageInfo; image
   // fallback genérico
   const docs = json?.documents || json?.results || json?.images || [];
   images = Array.isArray(docs)
-    ? docs.filter((d: any) => d?.link).map((d: any) => ({
-        acq_id: String(d.acq_id ?? d.acq_id_raw ?? ""),
-        sec: d.sec ?? null,
-        link: d.link,
-        ext: d.ext,
-      }))
+    ? docs
+        .filter((d: any) => d?.link)
+        .map((d: any) => ({
+          acq_id: String(d.acq_id ?? d.acq_id_raw ?? ""),
+          sec: d.sec ?? null,
+          link: d.link,
+          ext: d.ext,
+        }))
     : [];
 
   const counts: Counts =
-    json.counts || ({
+    json.counts ||
+    ({
       matched_acq_ids: json.matched_acq_ids ?? new Set(images.map((i) => i.acq_id)).size,
       total_links: images.length,
     } as Counts);
 
-  const page_info: PageInfo = json.page_info || {
-    page: json.page ?? 1,
-    per_page: json.per_page ?? 100,
-    has_more: json.has_more ?? false,
-  };
+  const page_info: PageInfo =
+    json.page_info || {
+      page: json.page ?? 1,
+      per_page: json.per_page ?? 100,
+      has_more: json.has_more ?? false,
+    };
 
   return { counts, page_info, images };
 }
