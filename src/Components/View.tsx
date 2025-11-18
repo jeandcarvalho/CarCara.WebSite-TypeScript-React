@@ -89,6 +89,15 @@ function formatAcqIdLabel(acq_id: string): string {
   return `${day}/${month}/${year} ${hour}:${minute}`;
 }
 
+/** Format seconds like 86 => "1m 26s" */
+function formatSecLabel(sec: number | null | undefined): string {
+  if (sec == null || !Number.isFinite(sec)) return "-";
+  if (sec < 60) return `${sec}s`;
+  const minutes = Math.floor(sec / 60);
+  const seconds = sec % 60;
+  return `${minutes}m ${seconds}s`;
+}
+
 /* ================================================================
    coerceResponse: monta lista de imagens genérica
    ================================================================ */
@@ -331,6 +340,8 @@ const AcqPanel: React.FC<{ group: Group }> = ({ group }) => {
     totalSecondsForAcq > shownCount ? `${shownCount}+` : `${shownCount}`;
   const currentLabel = `${idx + 1}/${denomLabel}`;
 
+  const secLabel = formatSecLabel(photo.sec);
+
   return (
     <section className="rounded-2xl border border-zinc-700 bg-zinc-900 overflow-hidden text-base">
       <div className="px-4 py-3 flex items-center justify-between bg-zinc-900/70 border-b border-zinc-800">
@@ -380,7 +391,7 @@ const AcqPanel: React.FC<{ group: Group }> = ({ group }) => {
       </div>
 
       <div className="px-4 py-3 text-sm text-zinc-300 flex items-center justify-between border-t border-zinc-800">
-        <span>sec: {photo.sec}</span>
+        <span>sec: {secLabel}</span>
         <a
           href={photo.link}
           target="_blank"
@@ -484,7 +495,7 @@ const ImagesMosaic: React.FC = () => {
       <div className="p-4 flex flex-col items-center gap-3">
         <h2 className="text-2xl mb-1 font-semibold">Acquisitions</h2>
 
-        {/* Global stats (sem input, sem botões) */}
+        {/* Global stats */}
         <div className="mt-1 text-base text-zinc-200 w-full md:w-2/3 flex flex-col gap-1">
           <span>
             Total matched seconds:{" "}
