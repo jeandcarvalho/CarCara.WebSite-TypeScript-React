@@ -3,8 +3,7 @@ import Header from "./Header";
 import Footer from "./Footer";
 import loadgif from "../Components/img/gif.gif";
 
-/* ===================== Tipos ===================== */
-
+/* ===================== Types ===================== */
 type LinkDoc = {
   acq_id: string;
   sec: number | null;
@@ -21,17 +20,13 @@ type PageInfo = {
 };
 
 type Counts = { matched_acq_ids: number; matched_seconds?: number; total_links: number };
-
 type Group = { acq_id: string; photos: LinkDoc[] };
 
 /* ===================== Config ===================== */
-
-// ajuste aqui se seu host/rota forem diferentes:
-const API_DEFAULT_BASE = "http://localhost:8080";
+const API_DEFAULT_BASE = "https://carcara-web-api.onrender.com";
 const API_SEARCH_PATH = "/api/search";
 
 /* ===================== Helpers ===================== */
-
 const IMAGE_EXTS = new Set(["jpg", "jpeg", "png", "webp", "gif"]);
 
 function extFromLink(link: string): string | null {
@@ -74,7 +69,7 @@ function extractDriveId(link: string): string | null {
   return null;
 }
 
-// ordem: thumb → preview → uc
+// order: thumb → preview → uc
 function thumbUrl(link: string): string {
   const id = extractDriveId(link);
   return id ? `https://lh3.googleusercontent.com/d/${id}=w1200-h800-n` : link;
@@ -87,7 +82,7 @@ function fullImageUrl(link: string): string {
   return id ? `https://drive.google.com/uc?export=view&id=${id}` : link;
 }
 
-// normaliza formatos diferentes da API e já filtra imagens
+// normalize API formats and filter images
 function coerceResponse(json: any): { counts: Counts; page_info: PageInfo; images: LinkDoc[] } {
   if (json && Array.isArray(json.documents)) {
     const docs = (json.documents as LinkDoc[]).filter((d) => !!d.link);
@@ -123,7 +118,7 @@ function coerceResponse(json: any): { counts: Counts; page_info: PageInfo; image
   return { counts, page_info, images };
 }
 
-// dedup por segundo dentro de cada aquisição (mantém a primeira foto daquele sec)
+// dedup by second inside each acquisition (keeps first photo for that sec)
 function uniqueBySecond(photos: LinkDoc[]): LinkDoc[] {
   const seen = new Set<number>();
   const out: LinkDoc[] = [];
@@ -137,8 +132,8 @@ function uniqueBySecond(photos: LinkDoc[]): LinkDoc[] {
   return out;
 }
 
-/* ===================== NOVO: limitador uniforme de fotos por painel ===================== */
-function limitPhotosUniform(photos: LinkDoc[], max = 25): LinkDoc[] {
+/* ===================== Uniform limiter (max 5 photos per panel) ===================== */
+function limitPhotosUniform(photos: LinkDoc[], max = 5): LinkDoc[] {
   if (photos.length <= max) return photos;
   const step = photos.length / max;
   const result: LinkDoc[] = [];
@@ -149,15 +144,7 @@ function limitPhotosUniform(photos: LinkDoc[], max = 25): LinkDoc[] {
   return result;
 }
 
-/* ===================== URL Builder robusto ===================== */
-
-/**
- * Aceita:
- *  - URL completa da API (http://host:port/api/search?...);
- *  - URL do front com hash (#/search?...);
- *  - Apenas parâmetros (ex.: ?b.period=day&y.class=car).
- * Garante page/per_page.
- */
+/* ===================== Robust URL Builder ===================== */
 function buildSearchUrlFlexible(input: string, page: number, per_page: number): string {
   const ensurePageParams = (u: URL) => {
     u.searchParams.set("page", String(page));
@@ -167,10 +154,10 @@ function buildSearchUrlFlexible(input: string, page: number, per_page: number): 
 
   const trimmed = (input || "").trim();
 
-  // 1) URL completa (http/https)
+  // 1) Full URL (http/https)
   if (trimmed.startsWith("http")) {
     let urlObj = new URL(trimmed);
-    // Se for uma URL do front com hash (ex.: http://site/#/search?...), extrai os params do hash
+    // If it's a front URL with hash (e.g., http://site/#/search?...), extract params from hash
     if (urlObj.hash && urlObj.hash.includes("?") && !urlObj.pathname.includes("/api/")) {
       const afterQ = urlObj.hash.split("?")[1] || "";
       const u = new URL(API_DEFAULT_BASE + API_SEARCH_PATH);
@@ -180,7 +167,7 @@ function buildSearchUrlFlexible(input: string, page: number, per_page: number): 
     return ensurePageParams(urlObj);
   }
 
-  // 2) Apenas parâmetros (com ou sem '?')
+  // 2) Only params (with or without '?')
   if (trimmed.startsWith("?") || trimmed.includes("=")) {
     const u = new URL(API_DEFAULT_BASE + API_SEARCH_PATH);
     const qs = trimmed.startsWith("?") ? trimmed.slice(1) : trimmed;
@@ -188,7 +175,7 @@ function buildSearchUrlFlexible(input: string, page: number, per_page: number): 
     return ensurePageParams(u);
   }
 
-  // 3) Vazio → usa a barra do navegador (se tiver) só pelos params
+  // 3) Empty → use browser bar params (if any)
   if (typeof window !== "undefined") {
     const u = new URL(API_DEFAULT_BASE + API_SEARCH_PATH);
     const qs = window.location.search.replace(/^\?/, "");
@@ -200,19 +187,18 @@ function buildSearchUrlFlexible(input: string, page: number, per_page: number): 
   return `${API_DEFAULT_BASE}${API_SEARCH_PATH}?page=${page}&per_page=${per_page}`;
 }
 
-/* ===================== Painel de uma aquisição ===================== */
-
+/* ===================== Single acquisition panel ===================== */
 const AcqPanel: React.FC<{ group: Group }> = ({ group }) => {
   const photosSortedUnique = useMemo(() => {
     const ordered = [...group.photos].sort((a, b) => (a.sec ?? 0) - (b.sec ?? 0));
     const unique = uniqueBySecond(ordered);
-    return limitPhotosUniform(unique, 25);
+    return limitPhotosUniform(unique, 5);
   }, [group.photos]);
 
   const [idx, setIdx] = useState(0);
   const photo = photosSortedUnique[idx];
 
-  // detecta se todos os IDs/links colapsam para a mesma imagem (Drive ID igual)
+  // detects if all IDs/links collapse to the same image (same Drive ID)
   const allIdsEqual = useMemo(() => {
     const s = new Set<string>();
     for (const p of photosSortedUnique) {
@@ -222,7 +208,7 @@ const AcqPanel: React.FC<{ group: Group }> = ({ group }) => {
     return s.size === 1;
   }, [photosSortedUnique]);
 
-  // candidatos de src:
+  // src candidates:
   const makeSrcCandidates = (p: LinkDoc) => {
     const raw = p.link;
     const thumb = thumbUrl(p.link);
@@ -231,19 +217,22 @@ const AcqPanel: React.FC<{ group: Group }> = ({ group }) => {
     return allIdsEqual ? [raw, preview, uc, thumb] : [thumb, preview, uc, raw];
   };
 
-  const vtag = `v=${idx}_${photo.sec ?? "x"}`; // cache-buster por índice/segundo
+  const vtag = `v=${idx}_${photo.sec ?? "x"}`; // cache-buster
   const candidates = useMemo(() => {
     return makeSrcCandidates(photo).map((u) => (u.includes("?") ? `${u}&${vtag}` : `${u}?${vtag}`));
   }, [photo, allIdsEqual, vtag]);
 
-  // controla estágio de fallback desta imagem
+  // fallback stage
   const [stage, setStage] = useState(0);
   useEffect(() => {
-    setStage(0); // ao trocar de idx, reinicia fallback
+    setStage(0);
   }, [idx]);
 
   const currentSrc = candidates[Math.min(stage, candidates.length - 1)];
   const keyImg = `${group.acq_id}-${photo.sec ?? "x"}-${idx}-${stage}`;
+
+  const count = photosSortedUnique.length;
+  const secondsLabel = `${count} second${count === 1 ? "" : "s"}`;
 
   return (
     <section className="rounded-xl border border-zinc-800 bg-zinc-900 overflow-hidden">
@@ -251,14 +240,14 @@ const AcqPanel: React.FC<{ group: Group }> = ({ group }) => {
       <div className="px-4 py-3 flex items-center justify-between bg-zinc-900/60 border-b border-zinc-800">
         <div className="text-sm">
           <div className="font-semibold text-zinc-100">{group.acq_id}</div>
-          <div className="text-zinc-400">{photosSortedUnique.length} segundo(s)</div>
+          <div className="text-zinc-400">{secondsLabel}</div>
         </div>
         <div className="text-xs text-zinc-400">
-          {idx + 1} / {photosSortedUnique.length}
+          {idx + 1} / {count}
         </div>
       </div>
 
-      {/* Carrossel */}
+      {/* Carousel */}
       <div className="relative">
         <img
           key={keyImg}
@@ -280,8 +269,8 @@ const AcqPanel: React.FC<{ group: Group }> = ({ group }) => {
                 setIdx((p) => (p - 1 + photosSortedUnique.length) % photosSortedUnique.length);
               }}
               className="absolute left-2 top-1/2 -translate-y-1/2 px-2 py-1 rounded bg-black/50 hover:bg-black/70"
-              aria-label="Anterior"
-              title="Anterior"
+              aria-label="Previous"
+              title="Previous"
             >
               ‹
             </button>
@@ -291,8 +280,8 @@ const AcqPanel: React.FC<{ group: Group }> = ({ group }) => {
                 setIdx((p) => (p + 1) % photosSortedUnique.length);
               }}
               className="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 rounded bg-black/50 hover:bg-black/70"
-              aria-label="Próxima"
-              title="Próxima"
+              aria-label="Next"
+              title="Next"
             >
               ›
             </button>
@@ -310,28 +299,26 @@ const AcqPanel: React.FC<{ group: Group }> = ({ group }) => {
           className="underline hover:no-underline"
           onClick={(e) => e.stopPropagation()}
         >
-          abrir original
+          open original
         </a>
       </div>
 
-      {/* Pontinhos (mostra até 12 segundos) */}
+      {/* Dots (show up to 4 dots; if >=5, show "5+") */}
       {photosSortedUnique.length > 1 && (
-        <div className="px-4 pb-4 pt-1 flex flex-wrap gap-1">
-          {photosSortedUnique.slice(0, 12).map((p, i) => (
+        <div className="px-4 pb-4 pt-1 flex flex-wrap gap-1 justify-center">
+          {photosSortedUnique.slice(0, 4).map((p, i) => (
             <button
               key={`${group.acq_id}-${p.sec ?? i}`}
               onClick={(e) => {
                 e.stopPropagation();
                 setIdx(i);
               }}
-              className={`w-2.5 h-2.5 rounded-full ${
-                i === idx ? "bg-blue-500" : "bg-zinc-700 hover:bg-zinc-600"
-              }`}
-              title={`ir para sec ${p.sec ?? i}`}
+              className={`w-2.5 h-2.5 rounded-full ${i === idx ? "bg-blue-500" : "bg-zinc-700 hover:bg-zinc-600"}`}
+              title={`go to sec ${p.sec ?? i}`}
             />
           ))}
-          {photosSortedUnique.length > 12 && (
-            <span className="text-[10px] text-zinc-500">+{photosSortedUnique.length - 12}</span>
+          {photosSortedUnique.length >= 5 && (
+            <span className="text-[10px] text-zinc-500 font-semibold">5+</span>
           )}
         </div>
       )}
@@ -339,33 +326,32 @@ const AcqPanel: React.FC<{ group: Group }> = ({ group }) => {
   );
 };
 
-/* ===================== Componente principal ===================== */
-
+/* ===================== Main component ===================== */
 const ImagesMosaic: React.FC = () => {
   const [queryUrl, setQueryUrl] = useState<string>("");
 
-  // estado bruto da API
+  // raw API state
   const [apiPage, setApiPage] = useState<number>(0);
   const [apiHasMore, setApiHasMore] = useState<boolean>(false);
   const [counts, setCounts] = useState<Counts>({ matched_acq_ids: 0, total_links: 0 });
   const [totalPages, setTotalPages] = useState<number | undefined>(undefined);
   const [errMsg, setErrMsg] = useState<string>("");
 
-  // grupos (painéis)
+  // grouped panels
   const [groups, setGroups] = useState<Group[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // *** novo: loading específico dos painéis (início e troca de página) ***
+  // panel-specific loading (start and page change)
   const [isPanelsLoading, setIsPanelsLoading] = useState<boolean>(false);
 
-  // ====== configuração: 6 painéis por página (3 colunas × 2 linhas) ======
+  // ====== config: 6 panels per page (3 columns × 2 rows) ======
   const PANELS_PER_PAGE = 6;
   const [panelPage, setPanelPage] = useState<number>(1);
 
   // debug
   const [lastFetchUrl, setLastFetchUrl] = useState<string>("");
 
-  // ====== REFs espelhando estados (para loops async) ======
+  // ====== mirror refs for async loops ======
   const groupsRef = useRef<Group[]>(groups);
   const apiPageRef = useRef<number>(apiPage);
   const apiHasMoreRef = useRef<boolean>(apiHasMore);
@@ -373,11 +359,11 @@ const ImagesMosaic: React.FC = () => {
   useEffect(() => { apiPageRef.current = apiPage; }, [apiPage]);
   useEffect(() => { apiHasMoreRef.current = apiHasMore; }, [apiHasMore]);
 
-  // guards de concorrência
+  // concurrency guards
   const loadingMoreRef = useRef(false);
   const fetchingRef = useRef<Set<number>>(new Set());
 
-  // adiciona imagens ao agrupamento por aquisição
+  // add images to acquisition groups
   const addImagesToGroups = (batch: LinkDoc[]) => {
     if (!batch.length) return;
     setGroups((prev) => {
@@ -388,7 +374,7 @@ const ImagesMosaic: React.FC = () => {
         if (!map.has(key)) map.set(key, { acq_id: key, photos: [] });
         map.get(key)!.photos.push(img);
       }
-      // ordena e dedup por segundo
+      // order + dedup by second
       for (const [, v] of map) {
         v.photos.sort((a, b) => (a.sec ?? 0) - (b.sec ?? 0));
         v.photos = uniqueBySecond(v.photos);
@@ -399,7 +385,7 @@ const ImagesMosaic: React.FC = () => {
   };
 
   const fetchApiPage = async (p: number) => {
-    if (fetchingRef.current.has(p)) return; // evita duplicar a mesma página
+    if (fetchingRef.current.has(p)) return; // avoid duplicate page
     fetchingRef.current.add(p);
 
     setIsLoading(true);
@@ -419,7 +405,7 @@ const ImagesMosaic: React.FC = () => {
       addImagesToGroups(images);
     } catch (e: any) {
       console.error(e);
-      setErrMsg(e?.message || "Erro ao buscar a API.");
+      setErrMsg(e?.message || "Error fetching API.");
     } finally {
       fetchingRef.current.delete(p);
       setIsLoading(false);
@@ -429,7 +415,7 @@ const ImagesMosaic: React.FC = () => {
   const ensureGroupsForPanelPage = async (targetPanelPage: number) => {
     const need = targetPanelPage * PANELS_PER_PAGE;
 
-    if (loadingMoreRef.current) return; // evita concorrência
+    if (loadingMoreRef.current) return; // avoid concurrency
     loadingMoreRef.current = true;
 
     try {
@@ -438,12 +424,11 @@ const ImagesMosaic: React.FC = () => {
         const curPage = apiPageRef.current;
         const hasMore = apiHasMoreRef.current;
 
-        if (loadedGroups >= need) break;      // já temos painéis suficientes
-        if (!hasMore && curPage > 0) break;   // backend não tem mais páginas
+        if (loadedGroups >= need) break;      // enough panels
+        if (!hasMore && curPage > 0) break;   // backend has no more pages
 
         await fetchApiPage(curPage + 1);
-        // deixa o React aplicar setStates antes de reavaliar
-        await new Promise((r) => setTimeout(r, 0));
+        await new Promise((r) => setTimeout(r, 0)); // let React apply state
       }
     } finally {
       loadingMoreRef.current = false;
@@ -452,7 +437,7 @@ const ImagesMosaic: React.FC = () => {
 
   const onSearch = async () => {
     if (!queryUrl.trim()) {
-      setErrMsg("Cole a URL do front (#/search?...), a URL completa da API, ou só os parâmetros (?b.period=day...).");
+      setErrMsg("Paste the front URL (#/search?...), a full API URL, or just the parameters (?b.period=day...).");
       return;
     }
     setGroups([]);
@@ -463,7 +448,6 @@ const ImagesMosaic: React.FC = () => {
     setErrMsg("");
     setLastFetchUrl("");
 
-    // ativa loading de painéis no primeiro carregamento
     setIsPanelsLoading(true);
     await ensureGroupsForPanelPage(1);
     setIsPanelsLoading(false);
@@ -475,7 +459,6 @@ const ImagesMosaic: React.FC = () => {
     if (p < 1) p = 1;
     setPanelPage(p);
 
-    // ativa loading de painéis durante a troca de página
     setIsPanelsLoading(true);
     await ensureGroupsForPanelPage(p);
     setIsPanelsLoading(false);
@@ -493,7 +476,7 @@ const ImagesMosaic: React.FC = () => {
     return Math.max(1, Math.ceil(totalGroups / PANELS_PER_PAGE));
   }, [groups.length, apiHasMore, panelPage]);
 
-  // timeout opcional para imagens penduradas (10s)
+  // optional timeout for stuck images (10s)
   const timeoutRef = useRef<number | null>(null);
   useEffect(() => {
     if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
@@ -509,7 +492,7 @@ const ImagesMosaic: React.FC = () => {
               <svg xmlns='http://www.w3.org/2000/svg' width='400' height='225'>
                 <rect width='100%' height='100%' fill='#27272a'/>
                 <text x='50%' y='50%' fill='#9ca3af' font-size='14' text-anchor='middle' dominant-baseline='middle'>
-                  tempo esgotado
+                  timeout
                 </text>
               </svg>
             `);
@@ -536,12 +519,12 @@ const ImagesMosaic: React.FC = () => {
       <Header />
 
       <div className="flex flex-col items-center p-4">
-        <h2 className="text-xl font-semibold mb-3">📦 Aquisições (painéis) • 6 por página</h2>
+        <h2 className="text-xl font-semibold mb-3">📦 Acquisitions (panels) • 6 per page</h2>
 
         <div className="w-full md:w-3/4 flex flex-col gap-2">
           <input
             type="text"
-            placeholder="Cole a URL do front (#/search?...), a URL completa da API, ou só os parâmetros (?b.period=day...)"
+            placeholder="Paste the front URL (#/search?...), a full API URL, or only params (?b.period=day...)"
             value={queryUrl}
             onChange={(e) => setQueryUrl(e.target.value)}
             className="w-full px-3 py-2 rounded bg-zinc-800 text-gray-200 border border-zinc-700"
@@ -551,7 +534,7 @@ const ImagesMosaic: React.FC = () => {
               onClick={onSearch}
               className="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded font-semibold"
             >
-              Buscar
+              Search
             </button>
             <button
               onClick={() => {
@@ -567,19 +550,19 @@ const ImagesMosaic: React.FC = () => {
               }}
               className="bg-zinc-700 hover:bg-zinc-600 px-4 py-2 rounded font-semibold"
             >
-              Limpar
+              Clear
             </button>
             {errMsg && (
               <button
                 onClick={() => fetchApiPage(Math.max(1, apiPage || 1))}
                 className="bg-zinc-700 hover:bg-zinc-600 px-4 py-2 rounded font-semibold"
               >
-                Tentar de novo
+                Retry
               </button>
             )}
           </div>
 
-          {/* Debug compacto */}
+          {/* Debug */}
           <div className="text-xs text-zinc-400 space-y-1">
             {lastFetchUrl && (
               <div className="truncate">
@@ -587,46 +570,44 @@ const ImagesMosaic: React.FC = () => {
               </div>
             )}
             <div className="flex flex-wrap gap-x-4 gap-y-1">
-              <span>página baixada: <b>{apiPage || 0}</b>{typeof totalPages === "number" ? ` / ${totalPages}` : ""}</span>
+              <span>fetched page: <b>{apiPage || 0}</b>{typeof totalPages === "number" ? ` / ${totalPages}` : ""}</span>
               <span>has_more: <b>{String(apiHasMore)}</b></span>
-              <span>painéis carregados: <b>{groups.length}</b></span>
-              <span>visíveis: <b>{visibleGroups.length}</b></span>
-              <span>contagens: acqs <b>{counts.matched_acq_ids ?? 0}</b>, links <b>{counts.total_links ?? 0}</b></span>
+              <span>loaded panels: <b>{groups.length}</b></span>
+              <span>visible: <b>{visibleGroups.length}</b></span>
+              <span>counts: acqs <b>{counts.matched_acq_ids ?? 0}</b>, links <b>{counts.total_links ?? 0}</b></span>
             </div>
-            {errMsg && <div className="text-red-400">Erro: {errMsg}</div>}
+            {errMsg && <div className="text-red-400">Error: {errMsg}</div>}
           </div>
         </div>
       </div>
 
       <div className="flex-grow flex justify-center px-4">
         {isLoading && groups.length === 0 ? (
-          // loading inicial (antes de ter dados)
           <div className="w-full mt-11 flex justify-center items-center">
             <img src={loadgif} alt="Loading" className="w-32 h-32 mt-11 mb-11" />
           </div>
         ) : (
           <main className="w-full md:w-5/6 mx-auto pb-10">
             {isPanelsLoading ? (
-              // loading ao mudar de página (ou ao primeiro ensure dos painéis)
               <div className="w-full mt-11 flex justify-center items-center">
                 <img src={loadgif} alt="Loading" className="w-32 h-32 mt-11 mb-11" />
               </div>
             ) : visibleGroups.length > 0 ? (
               <>
-                {/* grade: 3 por linha (desktop), 2 no md, 1 no mobile */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {/* grid: 3 per row (desktop), 2 on md, 1 on mobile */}
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                   {visibleGroups.map((g) => (
                     <AcqPanel key={g.acq_id} group={g} />
                   ))}
                 </div>
 
-                {/* Paginação */}
+                {/* Pagination */}
                 <div className="flex items-center justify-center gap-2 mt-8">
                   <button
                     onClick={() => gotoPanelPage(1)}
                     disabled={panelPage <= 1}
                     className="px-3 py-1 rounded bg-zinc-800 disabled:opacity-40"
-                    title="Primeira"
+                    title="First"
                   >
                     «
                   </button>
@@ -634,7 +615,7 @@ const ImagesMosaic: React.FC = () => {
                     onClick={() => gotoPanelPage(panelPage - 1)}
                     disabled={panelPage <= 1}
                     className="px-3 py-1 rounded bg-zinc-800 disabled:opacity-40"
-                    title="Anterior"
+                    title="Previous"
                   >
                     ‹
                   </button>
@@ -643,9 +624,7 @@ const ImagesMosaic: React.FC = () => {
                     <button
                       key={p}
                       onClick={() => gotoPanelPage(p)}
-                      className={`px-3 py-1 rounded ${
-                        p === panelPage ? "bg-blue-600" : "bg-zinc-800 hover:bg-zinc-700"
-                      }`}
+                      className={`px-3 py-1 rounded ${p === panelPage ? "bg-blue-600" : "bg-zinc-800 hover:bg-zinc-700"}`}
                     >
                       {p}
                     </button>
@@ -655,7 +634,7 @@ const ImagesMosaic: React.FC = () => {
                     onClick={() => gotoPanelPage(panelPage + 1)}
                     disabled={!apiHasMore && panelPage >= totalPanelPages}
                     className="px-3 py-1 rounded bg-zinc-800 disabled:opacity-40"
-                    title="Próxima"
+                    title="Next"
                   >
                     ›
                   </button>
@@ -663,7 +642,7 @@ const ImagesMosaic: React.FC = () => {
                     onClick={() => gotoPanelPage(totalPanelPages || panelPage + 1)}
                     disabled={!apiHasMore && panelPage >= totalPanelPages}
                     className="px-3 py-1 rounded bg-zinc-800 disabled:opacity-40"
-                    title="Última"
+                    title="Last"
                   >
                     »
                   </button>
@@ -671,7 +650,7 @@ const ImagesMosaic: React.FC = () => {
               </>
             ) : (
               <p className="text-center text-gray-400 mt-8">
-                {isLoading ? "Carregando..." : "Nenhuma aquisição encontrada."}
+                {isLoading ? "Loading..." : "No acquisitions found."}
               </p>
             )}
           </main>
