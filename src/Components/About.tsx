@@ -6,7 +6,6 @@ import captur2 from "../Components/img/captur2.png";
 import captur3 from "../Components/img/captur3.png";
 import captur4 from "../Components/img/captur4.png";
 import captur5 from "../Components/img/captur5.png";
-import { Link } from 'react-router-dom';
 import { useEffect } from 'react';
 import jeep from "../Components/img/jeep.png";
 import jeep1 from "../Components/img/jeep1.png";
