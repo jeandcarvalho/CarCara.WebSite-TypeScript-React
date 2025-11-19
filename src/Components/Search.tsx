@@ -4,12 +4,12 @@ import Header from "./Header";
 import Footer from "./Footer";
 
 /**
- * CarCará · Search (accordion + responsive layout + animations)
+ * CarCará · Search (accordion + responsive layout)
  * - URL hydration via HashRouter
  * - Filters only (no explicit "Generated URL" panel)
  * - URL in the browser is kept in sync with the selected filters
  * - "View here" button sends the built query directly to /View
- * - All 5 panels are stacked vertically; Road Context keeps 2-column internal layout on md+
+ * - All panels stacked vertically; internal 2-column layouts on md+
  */
 
 // ===================== CONFIG (URL only) =====================
@@ -170,7 +170,7 @@ function approxEq(a: number, b: number, eps = 1e-2) {
   return Math.abs(a - b) <= eps;
 }
 
-// Animated collapsible section
+// Collapsible section (no height animation to avoid clipping on small widths)
 function Section({
   title,
   children,
@@ -187,25 +187,6 @@ function Section({
   summaryItems?: string[];
 }) {
   const bg = collapsed ? "bg-zinc-950/60" : "bg-zinc-800";
-  const contentRef = useRef<HTMLDivElement | null>(null);
-  const [height, setHeight] = useState<number>(0);
-
-  useEffect(() => {
-    if (!contentRef.current) return;
-    if (collapsed) {
-      requestAnimationFrame(() => setHeight(0));
-    } else {
-      const h = contentRef.current.scrollHeight;
-      requestAnimationFrame(() => setHeight(h));
-    }
-  }, [collapsed, children]);
-
-  useEffect(() => {
-    if (!collapsed && contentRef.current) {
-      const h = contentRef.current.scrollHeight;
-      setHeight(h);
-    }
-  });
 
   return (
     <section
@@ -223,22 +204,7 @@ function Section({
         <span className="text-zinc-400 text-sm">{collapsed ? "Expand" : "Collapse"}</span>
       </button>
       {collapsed ? <SummaryChips items={summaryItems} /> : null}
-      <div
-        style={{ maxHeight: height, overflow: "hidden" }}
-        className="transition-[max-height] duration-300 ease-in-out"
-      >
-        <div
-          ref={contentRef}
-          className={cls(
-            "px-4 pb-4",
-            collapsed ? "opacity-0 translate-y-[-4px]" : "opacity-100 translate-y-0",
-            "transition-all duration-300 ease-in-out"
-          )}
-          aria-hidden={collapsed}
-        >
-          {children}
-        </div>
-      </div>
+      {!collapsed && <div className="px-4 pb-4">{children}</div>}
     </section>
   );
 }
@@ -299,11 +265,14 @@ const SearchVerticalAnimated: React.FC = () => {
   const [colYOLO, setColYOLO] = useState(true);
   const [colSemSeg, setColSemSeg] = useState(true);
   const [colRoad, setColRoad] = useState(true);
+  const [colLanes, setColLanes] = useState(true);
 
-  // General (blocks + laneego visual) — MULTI for vehicle/period/condition
+  // General (blocks) — MULTI for vehicle/period/condition
   const [bVehicles, setBVehicles] = useState<string[]>([]);
   const [bPeriods, setBPeriods] = useState<string[]>([]);
   const [bConditions, setBConditions] = useState<string[]>([]);
+
+  // LaneEgo
   const [laneLeft, setLaneLeft] = useState<(typeof LANE_EGO_LEFT[number])[]>([]);
   const [laneRight, setLaneRight] = useState<(typeof LANE_EGO_RIGHT[number])[]>([]);
 
@@ -643,10 +612,15 @@ const SearchVerticalAnimated: React.FC = () => {
     bVehicles.forEach((v) => tags.push(`vehicle:${v}`));
     bPeriods.forEach((v) => tags.push(`period:${v}`));
     bConditions.forEach((v) => tags.push(`condition:${v}`));
+    return tags;
+  }, [bVehicles, bPeriods, bConditions]);
+
+  const lanesSummary = useMemo(() => {
+    const tags: string[] = [];
     laneLeft.forEach((v) => tags.push(`left:${v}`));
     laneRight.forEach((v) => tags.push(`right:${v}`));
     return tags;
-  }, [bVehicles, bPeriods, bConditions, laneLeft, laneRight]);
+  }, [laneLeft, laneRight]);
 
   const canSummary = useMemo(() => {
     const tags: string[] = [];
@@ -727,6 +701,7 @@ const SearchVerticalAnimated: React.FC = () => {
     setColYOLO(true);
     setColRoad(true);
     setColSemSeg(true);
+    setColLanes(true);
     setBVehicles([]);
     setBPeriods([]);
     setBConditions([]);
@@ -782,18 +757,37 @@ const SearchVerticalAnimated: React.FC = () => {
           </Link>
         </div>
 
-        
-
         <div className="px-4">
           <div className="max-w-7xl mx-auto space-y-4">
+            <h2 className="text-2xl md:text-3xl font-bold mb-1 text-yellow-300">
+              Adaptive DAQ
+            </h2>
 
-                <h2 className="text-2xl md:text-3xl font-bold mb-1 text-yellow-300">Adaptive DAQ</h2>
-            <div className="bg-zinc-900/70 border border-zinc-800 rounded-2xl px-4 py-3 text-sm text-zinc-200">
-              Use the filters below to build a search query and then open the results in the
-              <span className="font-semibold text-yellow-300"> View</span> page.
+            {/* Top info + actions panel */}
+            <div className="bg-zinc-900/70 border border-zinc-800 rounded-2xl px-4 py-3">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+                <p className="text-sm text-zinc-200">
+                  Use the filters below to build a search query and then open the results in the
+                  <span className="font-semibold text-yellow-300"> View</span> page.
+                </p>
+                <div className="flex gap-2 w-full md:w-auto justify-start md:justify-end">
+                  <button
+                    onClick={handleClear}
+                    className="flex-1 md:flex-none bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 px-4 py-2 rounded-md text-sm md:text-base"
+                  >
+                    Clear
+                  </button>
+                  <button
+                    onClick={handleViewHere}
+                    className="flex-1 md:flex-none bg-yellow-500 hover:bg-yellow-400 text-zinc-900 px-5 py-2 rounded-md text-sm md:text-base font-semibold"
+                  >
+                    View here
+                  </button>
+                </div>
+              </div>
             </div>
 
-            {/* All 5 panels stacked vertically */}
+            {/* All panels stacked vertically */}
             <div className="space-y-4">
               {/* Vehicle & Scene */}
               <Section
@@ -802,128 +796,72 @@ const SearchVerticalAnimated: React.FC = () => {
                 onToggle={() => setColVehicle((v) => !v)}
                 summaryItems={vehicleSummary}
               >
-                <div className="grid gap-3 text-sm md:text-base">
-                  {/* Vehicles */}
-                  <div>
-                    <div className="text-sm text-zinc-400 mb-1">Vehicle</div>
-                    <div className="flex flex-wrap gap-2">
-                      {VEHICLES.map((v) => (
-                        <button
-                          key={v}
-                          type="button"
-                          onClick={() => toggle(bVehicles, v, setBVehicles)}
-                          className={cls(
-                            "px-3 py-1 rounded-full text-sm border transition",
-                            bVehicles.includes(v)
-                              ? "bg-yellow-500 text-zinc-900 border-yellow-400"
-                              : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
-                          )}
-                        >
-                          {v}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Period */}
-                  <div>
-                    <div className="text-sm text-zinc-400 mb-1">Period</div>
-                    <div className="flex flex-wrap gap-2">
-                      {PERIODS.map((p) => (
-                        <button
-                          key={p}
-                          type="button"
-                          onClick={() => toggle(bPeriods, p, setBPeriods)}
-                          className={cls(
-                            "px-3 py-1 rounded-full text-sm border transition",
-                            bPeriods.includes(p)
-                              ? "bg-yellow-500 text-zinc-900 border-yellow-400"
-                              : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
-                          )}
-                        >
-                          {p}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Condition */}
-                  <div>
-                    <div className="text-sm text-zinc-400 mb-1">Condition</div>
-                    <div className="flex flex-wrap gap-2">
-                      {CONDITIONS.map((c) => (
-                        <button
-                          key={c.value}
-                          type="button"
-                          onClick={() => toggle(bConditions, c.value, setBConditions)}
-                          className={cls(
-                            "px-3 py-1 rounded-full text-sm border transition",
-                            bConditions.includes(c.value)
-                              ? "bg-yellow-500 text-zinc-900 border-yellow-400"
-                              : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
-                          )}
-                        >
-                          {c.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* LaneEgo */}
-                  <div className="border-t border-zinc-800 pt-2 grid gap-3">
+                <div className="grid gap-4 text-sm md:text-base md:grid-cols-2">
+                  {/* Left column: Vehicle + Period */}
+                  <div className="grid gap-3">
+                    {/* Vehicles */}
                     <div>
-                      <div className="text-sm text-zinc-400 mb-1">
-                        Left lane availability
-                      </div>
+                      <div className="text-sm text-zinc-400 mb-1">Vehicle</div>
                       <div className="flex flex-wrap gap-2">
-                        {LANE_EGO_LEFT.map((v) => (
+                        {VEHICLES.map((v) => (
                           <button
                             key={v}
                             type="button"
-                            onClick={() =>
-                              setLaneLeft((curr) =>
-                                curr.includes(v)
-                                  ? curr.filter((x) => x !== v)
-                                  : [...curr, v]
-                              )
-                            }
+                            onClick={() => toggle(bVehicles, v, setBVehicles)}
                             className={cls(
-                              "px-4 py-2 rounded-full text-sm border transition",
-                              laneLeft.includes(v)
+                              "px-3 py-1 rounded-full text-sm border transition",
+                              bVehicles.includes(v)
                                 ? "bg-yellow-500 text-zinc-900 border-yellow-400"
                                 : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
                             )}
                           >
-                            {v === "DISP" ? "Left available" : "Left unavailable"}
+                            {v}
                           </button>
                         ))}
                       </div>
                     </div>
 
+                    {/* Period */}
                     <div>
-                      <div className="text-sm text-zinc-400 mb-1">
-                        Right lane availability
-                      </div>
+                      <div className="text-sm text-zinc-400 mb-1">Period</div>
                       <div className="flex flex-wrap gap-2">
-                        {LANE_EGO_RIGHT.map((v) => (
+                        {PERIODS.map((p) => (
                           <button
-                            key={v}
+                            key={p}
                             type="button"
-                            onClick={() =>
-                              setLaneRight((curr) =>
-                                curr.includes(v)
-                                  ? curr.filter((x) => x !== v)
-                                  : [...curr, v]
-                              )
-                            }
+                            onClick={() => toggle(bPeriods, p, setBPeriods)}
                             className={cls(
-                              "px-4 py-2 rounded-full text-sm border transition",
-                              laneRight.includes(v)
+                              "px-3 py-1 rounded-full text-sm border transition",
+                              bPeriods.includes(p)
                                 ? "bg-yellow-500 text-zinc-900 border-yellow-400"
                                 : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
                             )}
                           >
-                            {v === "DISP" ? "Right available" : "Right unavailable"}
+                            {p}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right column: Condition */}
+                  <div className="grid gap-3">
+                    <div>
+                      <div className="text-sm text-zinc-400 mb-1">Condition</div>
+                      <div className="flex flex-wrap gap-2">
+                        {CONDITIONS.map((c) => (
+                          <button
+                            key={c.value}
+                            type="button"
+                            onClick={() => toggle(bConditions, c.value, setBConditions)}
+                            className={cls(
+                              "px-3 py-1 rounded-full text-sm border transition",
+                              bConditions.includes(c.value)
+                                ? "bg-yellow-500 text-zinc-900 border-yellow-400"
+                                : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
+                            )}
+                          >
+                            {c.label}
                           </button>
                         ))}
                       </div>
@@ -939,100 +877,98 @@ const SearchVerticalAnimated: React.FC = () => {
                 onToggle={() => setColCAN((v) => !v)}
                 summaryItems={canSummary}
               >
-                <div className="grid gap-3 text-sm md:text-base">
-                  <div className="grid gap-2">
-                    <span className="text-sm text-zinc-300">
-                      VehicleSpeed (km/h)
-                    </span>
-                    <RangePair
-                      compact
-                      min={vMin}
-                      max={vMax}
-                      onChange={(mn, mx) => {
-                        setVMin(mn);
-                        setVMax(mx);
-                      }}
-                    />
-                  </div>
+                <div className="grid gap-4 text-sm md:text-base md:grid-cols-2">
+                  {/* Left column: Speed + Brakes */}
+                  <div className="grid gap-3">
+                    <div className="grid gap-2">
+                      <span className="text-sm text-zinc-300">VehicleSpeed (km/h)</span>
+                      <RangePair
+                        compact
+                        min={vMin}
+                        max={vMax}
+                        onChange={(mn, mx) => {
+                          setVMin(mn);
+                          setVMax(mx);
+                        }}
+                      />
+                    </div>
 
-                  <div className="grid gap-2">
-                    <div className="text-sm text-zinc-400">
-                      SteeringWheelAngle
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {SWA_CHIPS.map((ch) => (
-                        <button
-                          key={ch.key}
-                          type="button"
-                          onClick={() =>
-                            setSwaChips((curr) =>
-                              curr.includes(ch.key)
-                                ? curr.filter((x) => x !== ch.key)
-                                : [...curr, ch.key]
-                            )
-                          }
-                          className={cls(
-                            "px-3 py-1 rounded-full text-sm border transition",
-                            swaChips.includes(ch.key)
-                              ? "bg-yellow-500 text-zinc-900 border-yellow-400"
-                              : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
-                          )}
-                        >
-                          {ch.label}
-                        </button>
-                      ))}
-                    </div>
-                    <button
-                      type="button"
-                      className="text-xs text-zinc-400 underline w-fit"
-                      onClick={() => setShowSwaAdvanced((v) => !v)}
-                    >
-                      {showSwaAdvanced ? "Hide advanced range" : "Advanced range"}
-                    </button>
-                    {showSwaAdvanced && (
-                      <div className="grid gap-2">
-                        <span className="text-sm text-zinc-300">
-                          Angle (degrees)
-                        </span>
-                        <RangePair
-                          compact
-                          min={swaMin}
-                          max={swaMax}
-                          onChange={(mn, mx) => {
-                            setSwaMin(mn);
-                            setSwaMax(mx);
-                          }}
-                        />
+                    <div>
+                      <div className="text-sm text-zinc-400 mb-2">BrakeInfoStatus</div>
+                      <div className="flex flex-wrap gap-2">
+                        {BRAKE_KEYS.map((k) => (
+                          <button
+                            key={k}
+                            type="button"
+                            onClick={() =>
+                              setBrakes((curr) =>
+                                curr.includes(k)
+                                  ? curr.filter((x) => x !== k)
+                                  : [...curr, k]
+                              )
+                            }
+                            className={cls(
+                              "px-4 py-2 rounded-full text-sm border transition",
+                              brakes.includes(k)
+                                ? "bg-yellow-500 text-zinc-900 border-yellow-400"
+                                : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
+                            )}
+                          >
+                            {k}
+                          </button>
+                        ))}
                       </div>
-                    )}
+                    </div>
                   </div>
 
-                  <div>
-                    <div className="text-sm text-zinc-400 mb-2">
-                      BrakeInfoStatus
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {BRAKE_KEYS.map((k) => (
-                        <button
-                          key={k}
-                          type="button"
-                          onClick={() =>
-                            setBrakes((curr) =>
-                              curr.includes(k)
-                                ? curr.filter((x) => x !== k)
-                                : [...curr, k]
-                            )
-                          }
-                          className={cls(
-                            "px-4 py-2 rounded-full text-sm border transition",
-                            brakes.includes(k)
-                              ? "bg-yellow-500 text-zinc-900 border-yellow-400"
-                              : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
-                          )}
-                        >
-                          {k}
-                        </button>
-                      ))}
+                  {/* Right column: Steering wheel angle */}
+                  <div className="grid gap-3">
+                    <div className="grid gap-2">
+                      <div className="text-sm text-zinc-400">SteeringWheelAngle</div>
+                      <div className="flex flex-wrap gap-2">
+                        {SWA_CHIPS.map((ch) => (
+                          <button
+                            key={ch.key}
+                            type="button"
+                            onClick={() =>
+                              setSwaChips((curr) =>
+                                curr.includes(ch.key)
+                                  ? curr.filter((x) => x !== ch.key)
+                                  : [...curr, ch.key]
+                              )
+                            }
+                            className={cls(
+                              "px-3 py-1 rounded-full text-sm border transition",
+                              swaChips.includes(ch.key)
+                                ? "bg-yellow-500 text-zinc-900 border-yellow-400"
+                                : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
+                            )}
+                          >
+                            {ch.label}
+                          </button>
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        className="text-xs text-zinc-400 underline w-fit"
+                        onClick={() => setShowSwaAdvanced((v) => !v)}
+                      >
+                        {showSwaAdvanced ? "Hide advanced range" : "Advanced range"}
+                      </button>
+                      {showSwaAdvanced && (
+                        <div className="grid gap-2">
+                          <span className="text-sm text-zinc-300">Angle (degrees)</span>
+                          <RangePair
+                            compact
+                            min={swaMin}
+                            max={swaMax}
+                            onChange={(mn, mx) => {
+                              setSwaMin(mn);
+                              setSwaMax(mx);
+                            }}
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1045,104 +981,108 @@ const SearchVerticalAnimated: React.FC = () => {
                 onToggle={() => setColYOLO((v) => !v)}
                 summaryItems={yoloSummary}
               >
-                <div className="grid gap-4 text-sm md:text-base">
-                  <div>
-                    <div className="text-sm text-zinc-400 mb-1">Classes</div>
-                    <div className="flex flex-wrap gap-2">
-                      {YOLO_CLASSES_COMMON.map((c) => (
+                <div className="grid gap-4 text-sm md:text-base md:grid-cols-2">
+                  {/* Left column: Classes + Position vs ego */}
+                  <div className="grid gap-3">
+                    <div>
+                      <div className="text-sm text-zinc-400 mb-1">Classes</div>
+                      <div className="flex flex-wrap gap-2">
+                        {YOLO_CLASSES_COMMON.map((c) => (
+                          <button
+                            key={c}
+                            type="button"
+                            onClick={() => toggle(yClasses, c, setYClasses)}
+                            className={cls(
+                              "px-3 py-1 rounded-full text-sm border transition",
+                              yClasses.includes(c)
+                                ? "bg-yellow-500 text-zinc-900 border-yellow-400"
+                                : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
+                            )}
+                          >
+                            {c}
+                          </button>
+                        ))}
+
+                        {/* Heavy vehicles (truck + bus) */}
                         <button
-                          key={c}
                           type="button"
-                          onClick={() => toggle(yClasses, c, setYClasses)}
+                          onClick={toggleHeavyVehicles}
                           className={cls(
                             "px-3 py-1 rounded-full text-sm border transition",
-                            yClasses.includes(c)
+                            heavyActive
                               ? "bg-yellow-500 text-zinc-900 border-yellow-400"
                               : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
                           )}
                         >
-                          {c}
+                          Heavy vehicles
                         </button>
-                      ))}
+                      </div>
+                    </div>
 
-                      {/* Heavy vehicles (truck + bus) */}
-                      <button
-                        type="button"
-                        onClick={toggleHeavyVehicles}
-                        className={cls(
-                          "px-3 py-1 rounded-full text-sm border transition",
-                          heavyActive
-                            ? "bg-yellow-500 text-zinc-900 border-yellow-400"
-                            : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
-                        )}
-                      >
-                        Heavy vehicles
-                      </button>
+                    <div>
+                      <div className="text-sm text-zinc-400 mb-1">Position vs ego</div>
+                      <div className="flex flex-wrap gap-2">
+                        {REL_TO_EGO.map((opt) => (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => toggle(relEgo, opt.value, setRelEgo)}
+                            className={cls(
+                              "px-3 py-1 rounded-full text-sm border transition",
+                              relEgo.includes(opt.value)
+                                ? "bg-yellow-500 text-zinc-900 border-yellow-400"
+                                : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
+                            )}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
-                  <div>
-                    <div className="text-sm text-zinc-400 mb-1">
-                      Position vs ego
+                  {/* Right column: Confidence + Distance */}
+                  <div className="grid gap-3">
+                    <div>
+                      <div className="text-sm text-zinc-400 mb-1">Confidence</div>
+                      <div className="flex flex-wrap gap-2">
+                        {(["low", "mid", "high"] as const).map((k) => (
+                          <button
+                            key={k}
+                            type="button"
+                            onClick={() =>
+                              toggle(confChips, k, (x) => setConfChips(x as any))
+                            }
+                            className={cls(
+                              "px-3 py-1 rounded-full text-sm border transition",
+                              confChips.includes(k)
+                                ? "bg-yellow-500 text-zinc-900 border-yellow-400"
+                                : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
+                            )}
+                          >
+                            {k === "low"
+                              ? "Low %"
+                              : k === "mid"
+                              ? "Medium %"
+                              : "High %"}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      {REL_TO_EGO.map((opt) => (
-                        <button
-                          key={opt.value}
-                          type="button"
-                          onClick={() => toggle(relEgo, opt.value, setRelEgo)}
-                          className={cls(
-                            "px-3 py-1 rounded-full text-sm border transition",
-                            relEgo.includes(opt.value)
-                              ? "bg-yellow-500 text-zinc-900 border-yellow-400"
-                              : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
-                          )}
-                        >
-                          {opt.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
 
-                  <div>
-                    <div className="text-sm text-zinc-400 mb-1">Confidence</div>
-                    <div className="flex flex-wrap gap-2">
-                      {(["low", "mid", "high"] as const).map((k) => (
-                        <button
-                          key={k}
-                          type="button"
-                          onClick={() =>
-                            toggle(confChips, k, (x) => setConfChips(x as any))
-                          }
-                          className={cls(
-                            "px-3 py-1 rounded-full text-sm border transition",
-                            confChips.includes(k)
-                              ? "bg-yellow-500 text-zinc-900 border-yellow-400"
-                              : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
-                          )}
-                        >
-                          {k === "low"
-                            ? "Low %"
-                            : k === "mid"
-                            ? "Medium %"
-                            : "High %"}
-                        </button>
-                      ))}
+                    <div className="grid gap-2">
+                      <span className="text-sm text-zinc-300">Distance (m)</span>
+                      <RangePair
+                        compact
+                        min={distMin}
+                        max={distMax}
+                        step={0.5}
+                        onChange={(mn, mx) => {
+                          setDistMin(mn);
+                          setDistMax(mx);
+                        }}
+                      />
                     </div>
-                  </div>
-
-                  <div className="grid gap-2">
-                    <span className="text-sm text-zinc-300">Distance (m)</span>
-                    <RangePair
-                      compact
-                      min={distMin}
-                      max={distMax}
-                      step={0.5}
-                      onChange={(mn, mx) => {
-                        setDistMin(mn);
-                        setDistMax(mx);
-                      }}
-                    />
                   </div>
                 </div>
               </Section>
@@ -1154,7 +1094,7 @@ const SearchVerticalAnimated: React.FC = () => {
                 onToggle={() => setColSemSeg((v) => !v)}
                 summaryItems={semsegSummary}
               >
-                <div className="grid gap-4 text-sm md:text-base">
+                <div className="grid gap-4 text-sm md:text-base md:grid-cols-2">
                   <div>
                     <div className="text-sm text-zinc-400 mb-1">Building</div>
                     <div className="flex flex-wrap gap-2">
@@ -1403,29 +1343,75 @@ const SearchVerticalAnimated: React.FC = () => {
                   </div>
                 </div>
               </Section>
-            </div>
 
-            {/* Actions */}
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 pt-2">
-              <div className="text-zinc-400 text-xs md:text-sm">
-                When you are satisfied with the filters, click{" "}
-                <span className="font-semibold text-yellow-300">View here</span>{" "}
-                to open the matching acquisitions in the gallery.
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={handleClear}
-                  className="bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 px-4 py-2 rounded-md text-sm md:text-base"
-                >
-                  Clear
-                </button>
-                <button
-                  onClick={handleViewHere}
-                  className="bg-yellow-500 hover:bg-yellow-400 text-zinc-900 px-5 py-2 rounded-md text-sm md:text-base font-semibold"
-                >
-                  View here
-                </button>
-              </div>
+              {/* Lanes */}
+              <Section
+                title="Lanes"
+                collapsed={colLanes}
+                onToggle={() => setColLanes((v) => !v)}
+                summaryItems={lanesSummary}
+              >
+                <div className="grid gap-4 text-sm md:text-base md:grid-cols-2">
+                  <div>
+                    <div className="text-sm text-zinc-400 mb-1">
+                      Left lane availability
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {LANE_EGO_LEFT.map((v) => (
+                        <button
+                          key={v}
+                          type="button"
+                          onClick={() =>
+                            setLaneLeft((curr) =>
+                              curr.includes(v)
+                                ? curr.filter((x) => x !== v)
+                                : [...curr, v]
+                            )
+                          }
+                          className={cls(
+                            "px-4 py-2 rounded-full text-sm border transition",
+                            laneLeft.includes(v)
+                              ? "bg-yellow-500 text-zinc-900 border-yellow-400"
+                              : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
+                          )}
+                        >
+                          {v === "DISP" ? "Left available" : "Left unavailable"}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-sm text-zinc-400 mb-1">
+                      Right lane availability
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {LANE_EGO_RIGHT.map((v) => (
+                        <button
+                          key={v}
+                          type="button"
+                          onClick={() =>
+                            setLaneRight((curr) =>
+                              curr.includes(v)
+                                ? curr.filter((x) => x !== v)
+                                : [...curr, v]
+                            )
+                          }
+                          className={cls(
+                            "px-4 py-2 rounded-full text-sm border transition",
+                            laneRight.includes(v)
+                              ? "bg-yellow-500 text-zinc-900 border-yellow-400"
+                              : "bg-zinc-800 text-zinc-200 border-zinc-700 hover:border-zinc-600"
+                          )}
+                        >
+                          {v === "DISP" ? "Right available" : "Right unavailable"}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Section>
+              <div className="pb-5"></div>
             </div>
           </div>
         </div>

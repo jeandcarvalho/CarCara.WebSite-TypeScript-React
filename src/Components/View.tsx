@@ -841,7 +841,7 @@ const View: React.FC = () => {
     <div className="bg-zinc-950 min-h-screen flex flex-col text-white text-base">
       <Header />
 
-      <div className="my-1 ml-3">
+      <div className="my-3 ml-3">
         <Link to={currentQuery ? `/search${currentQuery}` : "/search"}>
           <button className="bg-gray-700 text-white hover:bg-gray-600 text-base md:text-lg font-bold py-1 px-3 rounded-full transition duration-300 text-roboto">
             ← Search
