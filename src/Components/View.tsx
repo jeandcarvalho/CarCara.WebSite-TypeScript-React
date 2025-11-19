@@ -353,10 +353,9 @@ const AcqPanel: React.FC<{ group: Group }> = ({ group }) => {
   const src = candidates[Math.min(stage, candidates.length - 1)];
   const acqLabel = formatAcqIdLabel(group.acq_id);
 
-  // contador do canto direito: x/5 ou x/5+
+  // contador do canto direito: x/y ou x/y+
   const shownCount = photosForUi.length;
-  const denomLabel =
-    totalSecondsForAcq > shownCount ? `${shownCount}+` : `${shownCount}`;
+  const denomLabel = totalSecondsForAcq > shownCount ? `${shownCount}+` : `${shownCount}`;
   const currentLabel = `${idx + 1}/${denomLabel}`;
 
   const secLabel = formatSecLabel(photo.sec);
@@ -366,10 +365,6 @@ const AcqPanel: React.FC<{ group: Group }> = ({ group }) => {
       <div className="px-4 py-3 flex items-center justify-between bg-zinc-900/70 border-b border-zinc-800">
         <div className="text-base">
           <div className="font-semibold text-zinc-100">{acqLabel}</div>
-          <div className="text-sm text-zinc-300">
-            matched seconds for this acquisition:{" "}
-            <span className="text-yellow-400 font-semibold">{totalSecondsForAcq}</span>
-          </div>
         </div>
         <div className="text-sm text-zinc-300">{currentLabel}</div>
       </div>
@@ -410,7 +405,7 @@ const AcqPanel: React.FC<{ group: Group }> = ({ group }) => {
       </div>
 
       <div className="px-4 py-3 text-sm text-zinc-300 flex items-center justify-between border-t border-zinc-800">
-        <span>sec: {secLabel}</span>
+        <span>{secLabel}</span>
         <a
           href={photo.link}
           target="_blank"
@@ -511,7 +506,7 @@ const ImagesMosaic: React.FC = () => {
     <div className="bg-zinc-950 min-h-screen flex flex-col text-white text-base">
       <Header />
 
-      <div className="p-4 flex flex-col items-center gap-3">
+      <div className="p-4 flex flex-col itemscenter gap-3">
         <h2 className="text-2xl mb-1 font-semibold">Acquisitions</h2>
 
         {/* Global stats */}
