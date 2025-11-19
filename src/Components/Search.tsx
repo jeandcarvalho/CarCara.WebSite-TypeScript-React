@@ -784,10 +784,10 @@ const SearchVerticalAnimated: React.FC = () => {
 
         
 
-        <div className="px-4 pb-6">
+        <div className="px-4">
           <div className="max-w-7xl mx-auto space-y-4">
 
-                <h2 className="text-5xl md:text-5xl font-bold mb-4 mt-2 text-yellow-300">Adaptive DAQ</h2>
+                <h2 className="text-2xl md:text-3xl font-bold mb-1 text-yellow-300">Adaptive DAQ</h2>
             <div className="bg-zinc-900/70 border border-zinc-800 rounded-2xl px-4 py-3 text-sm text-zinc-200">
               Use the filters below to build a search query and then open the results in the
               <span className="font-semibold text-yellow-300"> View</span> page.
