@@ -20,7 +20,7 @@ type PageInfo = {
   total_pages?: number;
 };
 
-type Counts = { matched_acq_ids: number; matched_seconds?: number; total_links: number };
+type Counts = { matched_acq_ids: number; matched_seconds: number };
 
 type Group = {
   acq_id: string;
@@ -119,7 +119,7 @@ function coerceResponse(json: any): { counts: Counts; page_info: PageInfo; image
     return {
       counts: json.counts || {
         matched_acq_ids: json.matched_acq_ids ?? new Set(images.map((i) => i.acq_id)).size,
-        total_links: images.length,
+        matched_seconds: json.total_hits ?? images.length,
       },
       page_info: json.page_info || {
         page: json.page ?? 1,
@@ -175,7 +175,7 @@ function coerceResponse(json: any): { counts: Counts; page_info: PageInfo; image
       json.counts ||
       ({
         matched_acq_ids: json.matched_acq_ids ?? new Set(images.map((i) => i.acq_id)).size,
-        total_links: json.total_hits ?? images.length,
+        matched_seconds: json.total_hits ?? images.length,
       } as Counts);
 
     const page_info: PageInfo =
@@ -207,7 +207,7 @@ function coerceResponse(json: any): { counts: Counts; page_info: PageInfo; image
     json.counts ||
     ({
       matched_acq_ids: json.matched_acq_ids ?? new Set(images.map((i) => i.acq_id)).size,
-      total_links: images.length,
+      matched_seconds: json.total_hits ?? images.length,
     } as Counts);
 
   const page_info: PageInfo =
@@ -356,7 +356,7 @@ const AcqPanel: React.FC<{ group: Group }> = ({ group }) => {
   // contador do canto direito: x/5 ou x/5+
   const shownCount = photosForUi.length;
   const denomLabel =
-    shownCount === 5 && totalSecondsForAcq > shownCount ? `${shownCount}+` : `${shownCount}`;
+    totalSecondsForAcq > shownCount ? `${shownCount}+` : `${shownCount}`;
   const currentLabel = `${idx + 1}/${denomLabel}`;
 
   const secLabel = formatSecLabel(photo.sec);
@@ -366,6 +366,10 @@ const AcqPanel: React.FC<{ group: Group }> = ({ group }) => {
       <div className="px-4 py-3 flex items-center justify-between bg-zinc-900/70 border-b border-zinc-800">
         <div className="text-base">
           <div className="font-semibold text-zinc-100">{acqLabel}</div>
+          <div className="text-sm text-zinc-300">
+            matched seconds for this acquisition:{" "}
+            <span className="text-yellow-400 font-semibold">{totalSecondsForAcq}</span>
+          </div>
         </div>
         <div className="text-sm text-zinc-300">{currentLabel}</div>
       </div>
@@ -406,7 +410,7 @@ const AcqPanel: React.FC<{ group: Group }> = ({ group }) => {
       </div>
 
       <div className="px-4 py-3 text-sm text-zinc-300 flex items-center justify-between border-t border-zinc-800">
-        <span>{secLabel}</span>
+        <span>sec: {secLabel}</span>
         <a
           href={photo.link}
           target="_blank"
@@ -424,7 +428,7 @@ const AcqPanel: React.FC<{ group: Group }> = ({ group }) => {
 /* ===================== Main Component ===================== */
 
 const ImagesMosaic: React.FC = () => {
-  const [counts, setCounts] = useState<Counts>({ matched_acq_ids: 0, total_links: 0 });
+  const [counts, setCounts] = useState<Counts>({ matched_acq_ids: 0, matched_seconds: 0 });
   const [groups, setGroups] = useState<Group[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -440,7 +444,7 @@ const ImagesMosaic: React.FC = () => {
     try {
       let page = 1;
       let hasMore = true;
-      let finalCounts: Counts = { matched_acq_ids: 0, total_links: 0 };
+      let finalCounts: Counts = { matched_acq_ids: 0, matched_seconds: 0 };
       const map = new Map<string, Group>();
 
       while (hasMore) {
@@ -515,7 +519,7 @@ const ImagesMosaic: React.FC = () => {
           <span>
             Total matched seconds:{" "}
             <span className="text-yellow-400 font-semibold">
-              {counts.total_links ?? 0}
+              {counts.matched_seconds ?? 0}
             </span>
           </span>
           <span>
