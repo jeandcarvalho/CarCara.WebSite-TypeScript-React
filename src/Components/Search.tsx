@@ -98,12 +98,12 @@ const SEMSEG_THRESH = {
 // Steering chips (deg)
 const SWA_CHIPS = [
   { key: "straight", label: "Straight", range: "-5..5" },
-  { key: "l-gentle", label: "Left · Gentle", range: "-180..-30" },
-  { key: "l-mod", label: "Left · Moderate", range: "-360..-180" },
-  { key: "l-hard", label: "Left · Hard", range: "-999..-360" },
-  { key: "r-gentle", label: "Right · Gentle", range: "30..180" },
-  { key: "r-mod", label: "Right · Moderate", range: "180..360" },
-  { key: "r-hard", label: "Right · Hard", range: "360..999" },
+  { key: "l-gentle", label: "Left · Gentle", range: "180..30" },
+  { key: "l-mod", label: "Left · Moderate", range: "360..180" },
+  { key: "l-hard", label: "Left · Hard", range: "999..360" },
+  { key: "r-gentle", label: "Right · Gentle", range: "-30..-180" },
+  { key: "r-mod", label: "Right · Moderate", range: "-180..-360" },
+  { key: "r-hard", label: "Right · Hard", range: "-360..-999" },
 ] as const;
 
 // BR speed-limit presets (km/h)
@@ -782,8 +782,12 @@ const SearchVerticalAnimated: React.FC = () => {
           </Link>
         </div>
 
+        
+
         <div className="px-4 pb-6">
           <div className="max-w-7xl mx-auto space-y-4">
+
+                <h2 className="text-5xl md:text-5xl font-bold mb-4 mt-2 text-yellow-300">Adaptive DAQ</h2>
             <div className="bg-zinc-900/70 border border-zinc-800 rounded-2xl px-4 py-3 text-sm text-zinc-200">
               Use the filters below to build a search query and then open the results in the
               <span className="font-semibold text-yellow-300"> View</span> page.

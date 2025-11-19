@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
 import loadgif from "../Components/img/gif.gif";
+import { Link } from "react-router-dom";
 
 /* ===================== Types ===================== */
 
@@ -31,7 +32,7 @@ type Group = {
 
 const API_DEFAULT_BASE = "https://carcara-web-api.onrender.com";
 const API_SEARCH_PATH = "/api/search";
-const PANELS_PER_PAGE = 6;
+const PANELS_PER_PAGE = 24;
 
 /* ===================== Helpers ===================== */
 
@@ -122,7 +123,8 @@ function coerceResponse(json: any): {
 
     return {
       counts: json.counts || {
-        matched_acq_ids: json.matched_acq_ids ?? new Set(images.map((i) => i.acq_id)).size,
+        matched_acq_ids:
+          json.matched_acq_ids ?? new Set(images.map((i) => i.acq_id)).size,
         matched_seconds: json.total_hits ?? images.length,
       },
       page_info: json.page_info || {
@@ -178,7 +180,8 @@ function coerceResponse(json: any): {
     const counts: Counts =
       json.counts ||
       ({
-        matched_acq_ids: json.matched_acq_ids ?? new Set(images.map((i) => i.acq_id)).size,
+        matched_acq_ids:
+          json.matched_acq_ids ?? new Set(images.map((i) => i.acq_id)).size,
         matched_seconds: json.total_hits ?? images.length,
       } as Counts);
 
@@ -210,7 +213,8 @@ function coerceResponse(json: any): {
   const counts: Counts =
     json.counts ||
     ({
-      matched_acq_ids: json.matched_acq_ids ?? new Set(images.map((i) => i.acq_id)).size,
+      matched_acq_ids:
+        json.matched_acq_ids ?? new Set(images.map((i) => i.acq_id)).size,
       matched_seconds: json.total_hits ?? images.length,
     } as Counts);
 
@@ -251,7 +255,11 @@ function limitPhotosUniform(photos: LinkDoc[], max = 5): LinkDoc[] {
 
 /* ===================== URL Builder ===================== */
 
-function buildSearchUrlFlexible(input: string, page: number, per_page: number): string {
+function buildSearchUrlFlexible(
+  input: string,
+  page: number,
+  per_page: number,
+): string {
   const ensure = (u: URL) => {
     u.searchParams.set("page", String(page));
     u.searchParams.set("per_page", String(per_page));
@@ -279,7 +287,9 @@ function buildSearchUrlFlexible(input: string, page: number, per_page: number): 
       if (q >= 0) {
         const params = hash.slice(q + 1);
         if (params) {
-          new URLSearchParams(params).forEach((v, k) => api.searchParams.append(k, v));
+          new URLSearchParams(params).forEach((v, k) =>
+            api.searchParams.append(k, v),
+          );
         }
       }
       return ensure(api);
@@ -300,7 +310,9 @@ function buildSearchUrlFlexible(input: string, page: number, per_page: number): 
     if (q >= 0) {
       const params = trimmed.slice(q + 1);
       if (params) {
-        new URLSearchParams(params).forEach((v, k) => api.searchParams.append(k, v));
+        new URLSearchParams(params).forEach((v, k) =>
+          api.searchParams.append(k, v),
+        );
       }
     }
     return ensure(api);
@@ -316,6 +328,229 @@ function buildSearchUrlFlexible(input: string, page: number, per_page: number): 
 
   // 4) vazio ou outra coisa → busca geral sem filtros
   return `${API_DEFAULT_BASE}${API_SEARCH_PATH}?page=${page}&per_page=${per_page}`;
+}
+
+/* ===================== Pretty labels for filter tags ===================== */
+
+const KEY_LABELS: Record<string, string> = {
+  // Vehicle & Scene
+  "b.vehicle": "Vehicle",
+  "b.period": "Period",
+  "b.condition": "Condition",
+  "b.city": "City",
+  "b.state": "State",
+  "b.country": "Country",
+
+  "l.left": "Left lane availability",
+  "l.right": "Right lane availability",
+
+  // Vehicle dynamics
+  "c.v": "VehicleSpeed (km/h)",
+  "c.swa": "SteeringWheelAngle",
+  "c.brakes": "BrakeInfoStatus",
+
+  // Perception (YOLO + SemSeg)
+  "y.classes": "YOLO classes",
+  "y.rel": "Position vs ego",
+  "y.conf": "Confidence",
+  "y.dist": "Distance (m)",
+
+  // Environment (SemSeg)
+  "s.building": "Building",
+  "s.vegetation": "Vegetation",
+
+  // Road context (Overpass)
+  "o.highway": "Highway (groups)",
+  "o.landuse": "Landuse (groups)",
+  "o.lanes": "Lanes",
+  "o.maxspeed": "Maxspeed (BR presets)",
+  "o.oneway": "Oneway",
+  "o.surface": "Surface",
+  "o.sidewalk": "Sidewalk",
+  "o.cycleway": "Cycleway",
+};
+
+const VALUE_LABELS: Record<string, Record<string, string>> = {
+  // Vehicle & Scene
+  "b.vehicle": {
+    Captur: "Captur",
+    "DAF CF 410": "DAF CF 410",
+    Renegade: "Renegade",
+  },
+  "b.period": {
+    day: "day",
+    night: "night",
+    dusk: "dusk",
+    dawn: "dawn",
+  },
+  "b.condition": {
+    "Clear sky": "Clear sky",
+    "Mainly clear": "Mainly clear",
+    "Partly cloudy": "Partly cloudy",
+    Overcast: "Overcast",
+    Fog: "Fog",
+    "Fog (rime)": "Fog (rime)",
+    "Drizzle: light": "Drizzle: light",
+    "Drizzle: moderate": "Drizzle: moderate",
+    "Drizzle: dense": "Drizzle: dense",
+    "Rain: slight": "Rain: slight",
+    "Rain: moderate": "Rain: moderate",
+    "Rain: heavy": "Rain: heavy",
+  },
+  "l.left": {
+    DISP: "Left available",
+    INDISP: "Left unavailable",
+  },
+  "l.right": {
+    DISP: "Right available",
+    INDISP: "Right unavailable",
+  },
+
+  // Vehicle dynamics
+  "c.swa": {
+    STRAIGHT: "Straight",
+    L_GENTLE: "Left · Gentle",
+    L_MODERATE: "Left · Moderate",
+    L_HARD: "Left · Hard",
+    R_GENTLE: "Right · Gentle",
+    R_MODERATE: "Right · Moderate",
+    R_HARD: "Right · Hard",
+  },
+  "c.brakes": {
+    not_pressed: "not_pressed",
+    pressed: "pressed",
+  },
+
+  // Perception
+  "y.classes": {
+    car: "car",
+    motorcycle: "motorcycle",
+    bicycle: "bicycle",
+    person: "person",
+    heavy: "Heavy vehicles",
+  },
+  "y.rel": {
+    EGO: "Ego lane",
+    "L-1": "Left adjacent (L-1)",
+    "R+1": "Right adjacent (R+1)",
+    "OUT-L": "Outside left (OUT-L)",
+    "OUT-R": "Outside right (OUT-R)",
+  },
+  "y.conf": {
+    LOW: "Low %",
+    MED: "Medium %",
+    HIGH: "High %",
+  },
+
+  // Environment (SemSeg) – se você usar tokens, pode mapear aqui depois
+  "s.building": {
+    LOW: "Low %",
+    MED: "Medium %",
+    HIGH: "High %",
+  },
+  "s.vegetation": {
+    LOW: "Low %",
+    MED: "Medium %",
+    HIGH: "High %",
+  },
+
+  // Road context
+  "o.highway": {
+    primary: "primary",
+    primary_link: "primary_link",
+    secondary: "secondary",
+    secondary_link: "secondary_link",
+    local: "local",
+  },
+  "o.landuse": {
+    residential: "residential",
+    commercial: "commercial",
+    industrial: "industrial",
+    agro: "agro",
+  },
+  "o.oneway": {
+    yes: "yes",
+    no: "no",
+  },
+  "o.surface": {
+    paved: "paved",
+    unpaved: "unpaved",
+  },
+  "o.sidewalk": {
+    both: "both",
+    left: "left",
+    right: "right",
+    no: "no",
+  },
+};
+
+function autoPrettyKey(key: string): string {
+  if (KEY_LABELS[key]) return KEY_LABELS[key];
+
+  let k = key;
+  k = k.replace(/^b\./, "block ");
+  k = k.replace(/^c\./, "can ");
+  k = k.replace(/^l\./, "lane ");
+  k = k.replace(/^o\./, "osm ");
+  k = k.replace(/^s\./, "semseg ");
+  k = k.replace(/^y\./, "yolo ");
+
+  return k
+    .split(/[._]/)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function prettyValue(key: string, value: string): string {
+  const dict = VALUE_LABELS[key];
+  if (dict && dict[value] !== undefined) return dict[value];
+  return value;
+}
+
+/* ===================== Filter tags from query ===================== */
+
+function parseFilterTags(query: string | null): string[] {
+  if (!query) return [];
+  let qs = query.trim();
+
+  try {
+    if (qs.startsWith("http")) {
+      const u = new URL(qs);
+      if (u.search) {
+        qs = u.search.slice(1);
+      } else if (u.hash.includes("?")) {
+        qs = u.hash.split("?")[1] ?? "";
+      } else {
+        qs = "";
+      }
+    } else if (qs.startsWith("#")) {
+      const idx = qs.indexOf("?");
+      qs = idx >= 0 ? qs.slice(idx + 1) : "";
+    } else if (qs.startsWith("?")) {
+      qs = qs.slice(1);
+    } else if (!qs.includes("=")) {
+      qs = "";
+    }
+  } catch {
+    qs = "";
+  }
+
+  if (!qs) return [];
+  const params = new URLSearchParams(qs);
+  const ignore = new Set(["page", "per_page"]);
+  const tags: string[] = [];
+
+  params.forEach((value, key) => {
+    if (ignore.has(key)) return;
+    if (!value) return;
+
+    const labelKey = autoPrettyKey(key);
+    const labelValue = prettyValue(key, value);
+
+    tags.push(`${labelKey}: ${labelValue}`);
+  });
+
+  return Array.from(new Set(tags));
 }
 
 /* ===================== Panel Component ===================== */
@@ -357,10 +592,14 @@ const AcqPanel: React.FC<{ group: Group }> = ({ group }) => {
   const src = candidates[Math.min(stage, candidates.length - 1)];
   const acqLabel = formatAcqIdLabel(group.acq_id);
 
-  // contador do canto direito: x/5 ou x/5+
+  // contador do canto direito: x/5+ quando há 5 imagens (ou mais segundos)
   const shownCount = photosForUi.length;
   const denomLabel =
-    totalSecondsForAcq > shownCount ? `${shownCount}+` : `${shownCount}`;
+    shownCount === 5
+      ? `${shownCount}+`
+      : totalSecondsForAcq > shownCount
+      ? `${shownCount}+`
+      : `${shownCount}`;
   const currentLabel = `${idx + 1}/${denomLabel}`;
 
   const secLabel = formatSecLabel(photo.sec);
@@ -370,12 +609,8 @@ const AcqPanel: React.FC<{ group: Group }> = ({ group }) => {
       <div className="px-4 py-3 flex items-center justify-between bg-zinc-900/70 border-b border-zinc-800">
         <div className="text-base">
           <div className="font-semibold text-zinc-100">{acqLabel}</div>
-          <div className="text-sm text-zinc-300">
-            matched seconds for this acquisition:{" "}
-            <span className="text-yellow-400 font-semibold">{totalSecondsForAcq}</span>
-          </div>
         </div>
-        <div className="text-sm text-zinc-300">{currentLabel}</div>
+        <div className="text-sm text-yellow-400 font-semibold">{currentLabel}</div>
       </div>
 
       <div className="relative">
@@ -385,7 +620,9 @@ const AcqPanel: React.FC<{ group: Group }> = ({ group }) => {
           alt=""
           referrerPolicy="no-referrer"
           className="w-full aspect-[16/9] object-cover bg-zinc-800"
-          onError={() => setStage((s) => (s + 1 < candidates.length ? s + 1 : s))}
+          onError={() =>
+            setStage((s) => (s + 1 < candidates.length ? s + 1 : s))
+          }
         />
 
         {photosForUi.length > 1 && (
@@ -410,6 +647,24 @@ const AcqPanel: React.FC<{ group: Group }> = ({ group }) => {
               ›
             </button>
           </>
+        )}
+
+        {photosForUi.length > 1 && (
+          <div className="absolute inset-x-0 bottom-3 flex items-center justify-center gap-2">
+            {photosForUi.map((_, i) => {
+              const active = i === idx;
+              return (
+                <span
+                  key={i}
+                  className={`h-2.5 w-2.5 rounded-full border ${
+                    active
+                      ? "bg-yellow-400 border-yellow-400"
+                      : "border-yellow-400/60 bg-black/60"
+                  }`}
+                />
+              );
+            })}
+          </div>
         )}
       </div>
 
@@ -447,6 +702,11 @@ const View: React.FC = () => {
   const [apiHasMore, setApiHasMore] = useState(false);
   const [currentQuery, setCurrentQuery] = useState<string | null>(null);
 
+  const filterTags = useMemo(
+    () => parseFilterTags(currentQuery),
+    [currentQuery],
+  );
+
   // total de páginas baseado no TOTAL de acquisições (global)
   const totalPanelPages = useMemo(() => {
     const totalAcqs = counts.matched_acq_ids ?? 0;
@@ -463,6 +723,12 @@ const View: React.FC = () => {
   const canGoPrevPanel = panelPage > 1;
   const canGoNextLoaded = panelPage < loadedPanelPages;
   const hasMoreOverall = panelPage < totalPanelPages;
+
+  // scroll pro topo sempre que trocar de página de painel
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [panelPage]);
 
   // Busca uma página da API (append ou reset)
   const fetchPageFromApi = async (
@@ -482,7 +748,6 @@ const View: React.FC = () => {
       setApiPage(page);
 
       setGroups((prev) => {
-        // mantém ordem original das páginas: prev (páginas anteriores) + nova página
         const map = new Map<string, Group>();
         // primeiro, tudo que já existia
         for (const g of prev) {
@@ -497,8 +762,14 @@ const View: React.FC = () => {
           map.get(key)!.photos.push(img);
         }
 
-        // NENHUM sort aqui: confia na ordem da API (já deve vir desc)
-        return Array.from(map.values());
+        // sort por timeline (mais novo → mais velho)
+        const sorted = Array.from(map.values()).sort((a, b) => {
+          const na = Number(a.acq_id.replace(/\D/g, "")) || 0;
+          const nb = Number(b.acq_id.replace(/\D/g, "")) || 0;
+          return nb - na;
+        });
+
+        return sorted;
       });
 
       if (!append) {
@@ -570,23 +841,60 @@ const View: React.FC = () => {
     <div className="bg-zinc-950 min-h-screen flex flex-col text-white text-base">
       <Header />
 
-      <div className="p-4 flex flex-col items-center gap-3">
-        <h2 className="text-2xl mb-1 font-semibold">Acquisitions</h2>
+      <div className="my-1 ml-3">
+        <Link to={currentQuery ? `/search${currentQuery}` : "/search"}>
+          <button className="bg-gray-700 text-white hover:bg-gray-600 text-base md:text-lg font-bold py-1 px-3 rounded-full transition duration-300 text-roboto">
+            ← Search
+          </button>
+        </Link>
+      </div>
 
-        {/* Global stats */}
-        <div className="mt-1 text-base text-zinc-200 w-full md:w-2/3 flex flex-col gap-1">
-          <span>
-            Total matched seconds:{" "}
-            <span className="text-yellow-400 font-semibold">
-              {counts.matched_seconds ?? 0}
-            </span>
-          </span>
-          <span>
-            Total matched acquisitions:{" "}
-            <span className="text-yellow-400 font-semibold">
-              {counts.matched_acq_ids ?? 0}
-            </span>
-          </span>
+      <div className="p-4 flex flex-col items-center gap-3">
+        <h2 className="text-2xl md:text-3xl font-bold mb-1 text-yellow-300">Acquisitions</h2>
+
+        {/* Painel global stats + tags de filtros */}
+        <div className="w-full md:w-4/5 lg:w-2/3 mt-1 mx-auto">
+          <div className="rounded-2xl border border-zinc-700 bg-zinc-900/80 px-4 py-4 md:px-6 md:py-5 shadow-lg flex flex-col md:flex-row gap-4 md:gap-6">
+            <div className="flex-1 flex flex-col justify-center gap-1">
+              <div className="text-xs md:text-sm uppercase tracking-wide text-zinc-400">
+                Global stats
+              </div>
+              <div className="text-base text-zinc-100">
+                Matched seconds:{" "}
+                <span className="text-yellow-400 font-semibold">
+                  {counts.matched_seconds ?? 0}
+                </span>
+              </div>
+              <div className="text-base text-zinc-100">
+                Matched acquisitions:{" "}
+                <span className="text-yellow-400 font-semibold">
+                  {counts.matched_acq_ids ?? 0}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex-1">
+              <div className="text-xs md:text-sm uppercase tracking-wide text-zinc-400 mb-1">
+                Active filters
+              </div>
+              {filterTags.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {filterTags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-2.5 py-1 rounded-full border border-yellow-500/60 bg-yellow-500/10 text-xs md:text-sm text-yellow-300"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-zinc-500 italic">
+                  No filters applied
+                </p>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -597,6 +905,42 @@ const View: React.FC = () => {
           </div>
         ) : visibleGroups.length > 0 ? (
           <>
+            <div className="flex items-center justify-center gap-6 text-base text-zinc-200 mt-2">
+              <button
+                disabled={!canGoPrevPanel || isLoading}
+                onClick={handlePrevPanel}
+                className={`px-4 py-2 rounded-lg font-semibold ${
+                  canGoPrevPanel && !isLoading
+                    ? "bg-zinc-800 hover:bg-zinc-700"
+                    : "bg-zinc-900 text-zinc-600 cursor-not-allowed"
+                }`}
+              >
+                Previous
+              </button>
+
+              <span className="font-medium">
+                Page {panelPage} of {totalPanelPages}
+              </span>
+
+              <button
+                disabled={nextDisabled}
+                onClick={handleNextPanel}
+                className={`px-4 py-2 rounded-lg font-semibold ${
+                  nextDisabled
+                    ? "bg-zinc-900 text-zinc-600 cursor-not-allowed"
+                    : "bg-zinc-800 hover:bg-zinc-700"
+                }`}
+              >
+                {isLoading
+                  ? "Loading..."
+                  : canGoNextLoaded
+                  ? "Next"
+                  : hasMoreOverall
+                  ? "Load more results"
+                  : "No more results"}
+              </button>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
               {visibleGroups.map((g) => (
                 <AcqPanel key={g.acq_id} group={g} />
@@ -614,11 +958,11 @@ const View: React.FC = () => {
                     : "bg-zinc-900 text-zinc-600 cursor-not-allowed"
                 }`}
               >
-                Previous panel page
+                Previous
               </button>
 
               <span className="font-medium">
-                Panel page {panelPage} of {totalPanelPages}
+                Page {panelPage} of {totalPanelPages}
               </span>
 
               <button
@@ -633,7 +977,7 @@ const View: React.FC = () => {
                 {isLoading
                   ? "Loading..."
                   : canGoNextLoaded
-                  ? "Next panel page"
+                  ? "Next"
                   : hasMoreOverall
                   ? "Load more results"
                   : "No more results"}

@@ -7,9 +7,8 @@ const Footer: React.FC = () => {
         {/* Links do site */}
         <nav className="flex flex-wrap justify-center gap-4 mb-2">
           <Link to="/" className="text-zinc-400 hover:text-white">Home</Link>
-          <Link to="/Intermediary" className="text-zinc-400 hover:text-white">Acquisitions</Link>
+          <Link to="/Search" className="text-zinc-400 hover:text-white">Acquisitions</Link>
           <Link to="/About" className="text-zinc-400 hover:text-white">About</Link>
-          <Link to="/OurModels" className="text-zinc-400 hover:text-white">Our Models</Link>
         </nav>
 
         {/* Links de contato */}

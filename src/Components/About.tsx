@@ -37,22 +37,12 @@ const About = () => {
     <div className="min-h-screen flex flex-col bg-zinc-900">
       <Header />
 
-      <div className="my-3 ml-3">
-        <Link to="/">
-          <button
-            type="button"
-            className="bg-gray-700 text-white hover:bg-gray-600 text-base md:text-lg font-bold py-1 px-3 rounded-full transition duration-300 text-roboto"
-          >
-            ← Overview
-          </button>
-        </Link>
-      </div>
 
       {/* Index */}
       <div className="bg-zinc-900 text-white px-4">
         <div className="max-w-5xl mx-auto text-center">
           {/* Título Principal */}
-          <h2 className="text-5xl md:text-5xl font-bold mb-4 text-yellow-300">DAQ Architecture</h2>
+          <h2 className="text-5xl md:text-5xl font-bold mb-4 mt-2 text-yellow-300">DAQ Architecture</h2>
 
           {/* Introdução ao Sumário */}
           <p className="text-lg text-gray-300 mb-6">
