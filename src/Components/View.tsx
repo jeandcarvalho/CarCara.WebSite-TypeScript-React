@@ -102,7 +102,11 @@ function formatSecLabel(sec: number | null | undefined): string {
    coerceResponse: monta lista de imagens genérica
    ================================================================ */
 
-function coerceResponse(json: any): { counts: Counts; page_info: PageInfo; images: LinkDoc[] } {
+function coerceResponse(json: any): {
+  counts: Counts;
+  page_info: PageInfo;
+  images: LinkDoc[];
+} {
   let images: LinkDoc[] = [];
 
   // caso antigo: documents
@@ -353,9 +357,10 @@ const AcqPanel: React.FC<{ group: Group }> = ({ group }) => {
   const src = candidates[Math.min(stage, candidates.length - 1)];
   const acqLabel = formatAcqIdLabel(group.acq_id);
 
-  // contador do canto direito: x/y ou x/y+
+  // contador do canto direito: x/5 ou x/5+
   const shownCount = photosForUi.length;
-  const denomLabel = totalSecondsForAcq > shownCount ? `${shownCount}+` : `${shownCount}`;
+  const denomLabel =
+    totalSecondsForAcq > shownCount ? `${shownCount}+` : `${shownCount}`;
   const currentLabel = `${idx + 1}/${denomLabel}`;
 
   const secLabel = formatSecLabel(photo.sec);
@@ -365,6 +370,10 @@ const AcqPanel: React.FC<{ group: Group }> = ({ group }) => {
       <div className="px-4 py-3 flex items-center justify-between bg-zinc-900/70 border-b border-zinc-800">
         <div className="text-base">
           <div className="font-semibold text-zinc-100">{acqLabel}</div>
+          <div className="text-sm text-zinc-300">
+            matched seconds for this acquisition:{" "}
+            <span className="text-yellow-400 font-semibold">{totalSecondsForAcq}</span>
+          </div>
         </div>
         <div className="text-sm text-zinc-300">{currentLabel}</div>
       </div>
@@ -405,7 +414,7 @@ const AcqPanel: React.FC<{ group: Group }> = ({ group }) => {
       </div>
 
       <div className="px-4 py-3 text-sm text-zinc-300 flex items-center justify-between border-t border-zinc-800">
-        <span>{secLabel}</span>
+        <span>sec: {secLabel}</span>
         <a
           href={photo.link}
           target="_blank"
@@ -422,58 +431,94 @@ const AcqPanel: React.FC<{ group: Group }> = ({ group }) => {
 
 /* ===================== Main Component ===================== */
 
-const ImagesMosaic: React.FC = () => {
-  const [counts, setCounts] = useState<Counts>({ matched_acq_ids: 0, matched_seconds: 0 });
+const View: React.FC = () => {
+  const [counts, setCounts] = useState<Counts>({
+    matched_acq_ids: 0,
+    matched_seconds: 0,
+  });
   const [groups, setGroups] = useState<Group[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  // paginação de painéis (front)
   const [panelPage, setPanelPage] = useState(1);
 
-  const totalPanelPages = useMemo(
+  // paginação da API
+  const [apiPage, setApiPage] = useState(1);
+  const [apiHasMore, setApiHasMore] = useState(false);
+  const [currentQuery, setCurrentQuery] = useState<string | null>(null);
+
+  // total de páginas baseado no TOTAL de acquisições (global)
+  const totalPanelPages = useMemo(() => {
+    const totalAcqs = counts.matched_acq_ids ?? 0;
+    if (!totalAcqs) return 1;
+    return Math.max(1, Math.ceil(totalAcqs / PANELS_PER_PAGE));
+  }, [counts.matched_acq_ids]);
+
+  // páginas que já estão efetivamente carregadas na memória
+  const loadedPanelPages = useMemo(
     () => (groups.length === 0 ? 1 : Math.ceil(groups.length / PANELS_PER_PAGE)),
     [groups.length],
   );
 
-  const fetchAllPages = async (input: string) => {
+  const canGoPrevPanel = panelPage > 1;
+  const canGoNextLoaded = panelPage < loadedPanelPages;
+  const hasMoreOverall = panelPage < totalPanelPages;
+
+  // Busca uma página da API (append ou reset)
+  const fetchPageFromApi = async (
+    input: string,
+    page: number,
+    append: boolean,
+  ) => {
     setIsLoading(true);
     try {
-      let page = 1;
-      let hasMore = true;
-      let finalCounts: Counts = { matched_acq_ids: 0, matched_seconds: 0 };
-      const map = new Map<string, Group>();
+      const url = buildSearchUrlFlexible(input, page, 100);
+      const resp = await fetch(url);
+      const json = await resp.json();
+      const { counts: cts, images, page_info } = coerceResponse(json);
 
-      while (hasMore) {
-        const url = buildSearchUrlFlexible(input, page, 100);
-        const resp = await fetch(url);
-        const json = await resp.json();
-        const { counts: cts, images, page_info } = coerceResponse(json);
+      setCounts(cts);
+      setApiHasMore(!!page_info.has_more);
+      setApiPage(page);
 
-        finalCounts = cts;
-
+      setGroups((prev) => {
+        // mantém ordem original das páginas: prev (páginas anteriores) + nova página
+        const map = new Map<string, Group>();
+        // primeiro, tudo que já existia
+        for (const g of prev) {
+          map.set(g.acq_id, { acq_id: g.acq_id, photos: [...g.photos] });
+        }
+        // depois, as novas imagens na ordem que vieram da API
         for (const img of images) {
           const key = img.acq_id;
-          if (!map.has(key)) map.set(key, { acq_id: key, photos: [] });
+          if (!map.has(key)) {
+            map.set(key, { acq_id: key, photos: [] });
+          }
           map.get(key)!.photos.push(img);
         }
 
-        hasMore = page_info.has_more;
-        page += 1;
-      }
-
-      const sortedGroups = Array.from(map.values()).sort((a, b) => {
-        const na = Number(a.acq_id.replace(/\D/g, "")) || 0;
-        const nb = Number(b.acq_id.replace(/\D/g, "")) || 0;
-        return nb - na; // newest first
+        // NENHUM sort aqui: confia na ordem da API (já deve vir desc)
+        return Array.from(map.values());
       });
 
-      setCounts(finalCounts);
-      setGroups(sortedGroups);
-      setPanelPage(1);
+      if (!append) {
+        setPanelPage(1);
+      }
     } catch (err) {
       console.error(err);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Inicia uma nova busca (reset)
+  const startNewSearch = (input: string) => {
+    setCurrentQuery(input);
+    setApiPage(1);
+    setApiHasMore(false);
+    setGroups([]);
+    setCounts({ matched_acq_ids: 0, matched_seconds: 0 });
+    fetchPageFromApi(input, 1, false);
   };
 
   // Auto-search quando abrir /View com query no hash
@@ -489,7 +534,7 @@ const ImagesMosaic: React.FC = () => {
       const qIndex = hash.indexOf("?");
       if (qIndex >= 0) {
         const paramsWithQ = hash.slice(qIndex); // inclui "?"
-        fetchAllPages(paramsWithQ);
+        startNewSearch(paramsWithQ);
       }
     }
   }, []);
@@ -499,14 +544,33 @@ const ImagesMosaic: React.FC = () => {
     return groups.slice(start, start + PANELS_PER_PAGE);
   }, [groups, panelPage]);
 
-  const canGoPrevPanel = panelPage > 1;
-  const canGoNextPanel = panelPage < totalPanelPages;
+  const handlePrevPanel = () => {
+    if (canGoPrevPanel) {
+      setPanelPage((p) => p - 1);
+    }
+  };
+
+  const handleNextPanel = async () => {
+    // ainda tem próxima página dentro dos grupos já carregados
+    if (canGoNextLoaded) {
+      setPanelPage((p) => p + 1);
+      return;
+    }
+
+    // chegou no fim do que está carregado, mas ainda tem mais páginas globais
+    if (hasMoreOverall && apiHasMore && currentQuery && !isLoading) {
+      await fetchPageFromApi(currentQuery, apiPage + 1, true);
+      setPanelPage((p) => p + 1);
+    }
+  };
+
+  const nextDisabled = (!canGoNextLoaded && !hasMoreOverall) || isLoading;
 
   return (
     <div className="bg-zinc-950 min-h-screen flex flex-col text-white text-base">
       <Header />
 
-      <div className="p-4 flex flex-col itemscenter gap-3">
+      <div className="p-4 flex flex-col items-center gap-3">
         <h2 className="text-2xl mb-1 font-semibold">Acquisitions</h2>
 
         {/* Global stats */}
@@ -539,13 +603,13 @@ const ImagesMosaic: React.FC = () => {
               ))}
             </div>
 
-            {/* Panel pagination */}
+            {/* Panel pagination + auto load from API */}
             <div className="flex items-center justify-center gap-6 text-base text-zinc-200 mt-2">
               <button
-                disabled={!canGoPrevPanel}
-                onClick={() => canGoPrevPanel && setPanelPage((p) => p - 1)}
+                disabled={!canGoPrevPanel || isLoading}
+                onClick={handlePrevPanel}
                 className={`px-4 py-2 rounded-lg font-semibold ${
-                  canGoPrevPanel
+                  canGoPrevPanel && !isLoading
                     ? "bg-zinc-800 hover:bg-zinc-700"
                     : "bg-zinc-900 text-zinc-600 cursor-not-allowed"
                 }`}
@@ -558,15 +622,21 @@ const ImagesMosaic: React.FC = () => {
               </span>
 
               <button
-                disabled={!canGoNextPanel}
-                onClick={() => canGoNextPanel && setPanelPage((p) => p + 1)}
+                disabled={nextDisabled}
+                onClick={handleNextPanel}
                 className={`px-4 py-2 rounded-lg font-semibold ${
-                  canGoNextPanel
-                    ? "bg-zinc-800 hover:bg-zinc-700"
-                    : "bg-zinc-900 text-zinc-600 cursor-not-allowed"
+                  nextDisabled
+                    ? "bg-zinc-900 text-zinc-600 cursor-not-allowed"
+                    : "bg-zinc-800 hover:bg-zinc-700"
                 }`}
               >
-                Next panel page
+                {isLoading
+                  ? "Loading..."
+                  : canGoNextLoaded
+                  ? "Next panel page"
+                  : hasMoreOverall
+                  ? "Load more results"
+                  : "No more results"}
               </button>
             </div>
           </>
@@ -582,4 +652,4 @@ const ImagesMosaic: React.FC = () => {
   );
 };
 
-export default ImagesMosaic;
+export default View;
