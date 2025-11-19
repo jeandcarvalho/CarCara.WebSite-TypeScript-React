@@ -32,7 +32,7 @@ type Group = {
 
 const API_DEFAULT_BASE = "https://carcara-web-api.onrender.com";
 const API_SEARCH_PATH = "/api/search";
-const PANELS_PER_PAGE = 24;
+const PANELS_PER_PAGE = 15;
 
 /* ===================== Helpers ===================== */
 
