@@ -11,6 +11,7 @@ import Search from "./Components/Search";
 import View from "./Components/View";
 import Auth from "./Components/Auth";  // ⬅️ novo
 import MyAccount from "./Components/MyAccount";  // ⬅️ novo
+import Acquisition from "./Components/Acquisition";  // ⬅️ novo
 
 export const Routes = createHashRouter([
   {
@@ -24,7 +25,9 @@ export const Routes = createHashRouter([
       { path: "search", element: <Search /> },
       { path: "view", element: <View /> },
       { path: "auth", element: <Auth /> }, // ⬅️ NOVO LOGIN/CADASTRO
-         { path: "account", element: <MyAccount /> }, // ⬅️ NOVO LOGIN/CADASTRO
+      { path: "account", element: <MyAccount /> }, // ⬅️ NOVO LOGIN/CADASTRO
+     { path: "/acquisition/:acqId", element: <Acquisition /> },
+
     ],
   },
 ]);

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
 import loadgif from "../Components/img/gif.gif";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 /* ===================== Types ===================== */
 
@@ -555,7 +555,9 @@ function parseFilterTags(query: string | null): string[] {
 
 /* ===================== Panel Component ===================== */
 
-const AcqPanel: React.FC<{ group: Group }> = ({ group }) => {
+type AcqPanelProps = { group: Group; onOpen: () => void };
+
+const AcqPanel: React.FC<AcqPanelProps> = ({ group, onOpen }) => {
   const totalSecondsForAcq = useMemo(
     () => new Set(group.photos.map((p) => p.sec ?? -1)).size,
     [group.photos],
@@ -605,7 +607,10 @@ const AcqPanel: React.FC<{ group: Group }> = ({ group }) => {
   const secLabel = formatSecLabel(photo.sec);
 
   return (
-    <section className="rounded-2xl border border-zinc-700 bg-zinc-900 overflow-hidden text-base">
+    <section
+      className="rounded-2xl border border-zinc-700 bg-zinc-900 overflow-hidden text-base hover:border-yellow-500/60 hover:bg-zinc-900/90 cursor-pointer transition-colors"
+      onClick={onOpen}
+    >
       <div className="px-4 py-3 flex items-center justify-between bg-zinc-900/70 border-b border-zinc-800">
         <div className="text-base">
           <div className="font-semibold text-zinc-100">{acqLabel}</div>
@@ -687,6 +692,34 @@ const AcqPanel: React.FC<{ group: Group }> = ({ group }) => {
 /* ===================== Main Component ===================== */
 
 const View: React.FC = () => {
+  const navigate = useNavigate();
+
+
+  const handleOpenAcquisition = (acqId: string) => {
+    let suffix = "";
+
+    if (currentQuery) {
+      const q = currentQuery.trim();
+      if (q.startsWith("?")) {
+        suffix = q;
+      } else if (q.startsWith("http")) {
+        try {
+          const u = new URL(q);
+          suffix = u.search || "";
+          if (!suffix && u.hash.includes("?")) {
+            suffix = "?" + u.hash.split("?")[1];
+          }
+        } catch {
+          suffix = "";
+        }
+      } else if (q.includes("=")) {
+        suffix = "?" + q;
+      }
+    }
+
+    navigate(`/acquisition/${acqId}${suffix}`);
+  };
+
   const [counts, setCounts] = useState<Counts>({
     matched_acq_ids: 0,
     matched_seconds: 0,
@@ -943,7 +976,11 @@ const View: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
               {visibleGroups.map((g) => (
-                <AcqPanel key={g.acq_id} group={g} />
+                <AcqPanel
+                  key={g.acq_id}
+                  group={g}
+                  onOpen={() => handleOpenAcquisition(g.acq_id)}
+                />
               ))}
             </div>
 
