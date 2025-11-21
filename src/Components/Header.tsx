@@ -6,7 +6,7 @@ import customStyles from '../Styles/Header.tsx';
 
 const options = [
   { value: '/', label: 'Overview' },
-  { value: '/FullFiles', label: 'Download' },
+  { value: '/Search', label: 'Adaptive DAQ' },
   { value: '/About', label: 'Architecture' },  
 ];
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
-import loadgif from "../Components/img/gif.gif";
+import loadgif from "./Components/img/gif.gif";
 import { Link, useNavigate } from "react-router-dom";
 
 /* ===================== Types ===================== */

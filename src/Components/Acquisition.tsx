@@ -242,21 +242,9 @@ const Acquisition: React.FC = () => {
       <Header />
 
       {/* CONTEÚDO PRINCIPAL EMPURRANDO O FOOTER */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col mt-5">
         {/* topo / navegação */}
-        <div className="my-3 px-2 sm:px-3 flex flex-wrap gap-2">
-          <Link to="/">
-            <button className="bg-gray-700 text-white hover:bg-gray-600 text-sm sm:text-base md:text-lg font-bold py-1 px-3 rounded-full transition duration-300 text-roboto">
-              ← Home
-            </button>
-          </Link>
-          <button
-            onClick={() => navigate(-1)}
-            className="bg-zinc-800 text-gray-100 hover:bg-zinc-700 text-sm sm:text-base md:text-lg font-bold py-1 px-3 rounded-full transition duration-300 text-roboto"
-          >
-            ← Back
-          </button>
-        </div>
+
 
         {errorMsg && (
           <div className="mx-3 mb-2 bg-red-900 text-red-100 text-sm px-3 py-2 rounded border border-red-700">

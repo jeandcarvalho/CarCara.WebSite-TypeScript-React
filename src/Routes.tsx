@@ -7,8 +7,8 @@ import App from "./App";
 import About from "./Components/About";
 import FullFiles from "./Components/FullFiles";
 import FullVideo from "./Components/FullVideo";
-import Search from "./Components/Search";
-import View from "./Components/View";
+import Search from "./Components/Search/Search";
+import View from "./Components/View/View";
 import Auth from "./Components/Auth";  // ⬅️ novo
 import MyAccount from "./Components/MyAccount";  // ⬅️ novo
 import Acquisition from "./Components/Acquisition";  // ⬅️ novo
