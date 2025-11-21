@@ -1,6 +1,6 @@
 // src/Components/Acquisition.tsx
 import React, { useEffect, useMemo, useState } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import {useLocation, useNavigate, useParams } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
 

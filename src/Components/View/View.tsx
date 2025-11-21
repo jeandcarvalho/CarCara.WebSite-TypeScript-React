@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import Header from "../Header";
 import Footer from "../Footer";
 import loadgif from "../img/gif.gif";
-import { Link, useNavigate } from "react-router-dom";
+import {useNavigate } from "react-router-dom";
 
 import AcqPanel from "./AcqPanel";
 import {
