@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
 
@@ -135,15 +135,6 @@ const MyAccount: React.FC = () => {
   return (
     <div className="bg-zinc-950 min-h-screen flex flex-col">
       <Header />
-
-      <div className="my-3 ml-3">
-        <Link to="/">
-          <button className="bg-gray-700 text-white hover:bg-gray-600 text-base md:text-lg font-bold py-1 px-3 rounded-full transition duration-300 text-roboto">
-            ← Home
-          </button>
-        </Link>
-      </div>
-
       <div className="flex-grow flex justify-center px-4">
         <main className="w-full max-w-5xl">
           <h1 className="text-3xl font-medium text-yellow-300 mb-4">
