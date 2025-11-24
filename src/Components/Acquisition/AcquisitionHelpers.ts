@@ -32,12 +32,14 @@ export function extractDriveId(link: string): string | null {
 
 export function thumbUrl(link: string): string {
   const id = extractDriveId(link);
-  return id ? `https://lh3.googleusercontent.com/d/${id}=w1200-h800-n` : link;
+  return id ? `https://lh3.googleusercontent.com/d/${id}=w640-h360-n` : link;
 }
 
 export function fullImageUrl(link: string): string {
   const id = extractDriveId(link);
-  return id ? `https://drive.google.com/uc?export=view&id=${id}` : link;
+  // Use direct lh3 image URL so it can be rendered inside <img> without HTML wrapper
+  // Higher resolution to look good in the main panel
+  return id ? `https://lh3.googleusercontent.com/d/${id}=w1920-h1080-n` : link;
 }
 
 export function getDrivePreviewUrl(link: string | null): string | null {
