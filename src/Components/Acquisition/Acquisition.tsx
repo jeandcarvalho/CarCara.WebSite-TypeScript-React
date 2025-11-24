@@ -113,7 +113,6 @@ const Acquisition: React.FC = () => {
 
   // fetch acq_ids list (navigation) based on filters only
   useEffect(() => {
-
     const fetchAcqNav = async () => {
       setAcqNavLoading(true);
       setAcqNavError("");
@@ -217,8 +216,6 @@ const Acquisition: React.FC = () => {
     return photos[activePhotoIndex];
   }, [activePhotoIndex, photos]);
 
-
-
   const acqList = acqNav?.acq_ids ?? [];
   const currentIndex = useMemo(() => {
     if (!acqId || !acqList.length) return -1;
@@ -291,27 +288,72 @@ const Acquisition: React.FC = () => {
           <main className="w-full max-w-7xl grid gap-4 lg:grid-cols-3 items-start">
             <section className="lg:col-span-2 bg-zinc-900 border border-zinc-800 rounded-lg p-3 sm:p-4 flex flex-col gap-4">
               <div className="w-full">
+                {/* NAV / CONTROLS */}
                 <div className="flex flex-col gap-1 mb-2">
-                  <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1">
-                    <div>
+                  <div className="mt-1 flex items-start justify-between text-[11px] sm:text-xs text-gray-200 gap-2">
+                    {/* Left column: Back to View + Previous */}
+                    <div className="flex flex-col gap-1">
                       <button
                         type="button"
                         onClick={goBackToView}
-                        className="mt-1 inline-flex items-center text-[11px] sm:text-xs px-2 py-1 rounded-full border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-gray-200"
+                        className="inline-flex items-center text-[11px] sm:text-xs px-2 py-1 rounded-full border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-gray-200"
                       >
                         ← Back to View
                       </button>
+
+                      {acqList.length > 0 && currentIndex >= 0 && (
+                        <button
+                          type="button"
+                          onClick={goPrevAcq}
+                          disabled={!hasPrev}
+                          className={`px-3 py-1 rounded-full border ${
+                            hasPrev
+                              ? "border-zinc-600 bg-zinc-800 hover:bg-zinc-700 cursor-pointer"
+                              : "border-zinc-800 bg-zinc-900 text-zinc-500 cursor-not-allowed"
+                          }`}
+                        >
+                          ← Previous
+                        </button>
+                      )}
                     </div>
 
-                    {mainMode === "photo" && (
-                      <button
-                        type="button"
-                        onClick={backToVideo}
-                        className="self-start mt-1 bg-zinc-800 hover:bg-zinc-700 text-gray-100 text-xs sm:text-sm px-3 py-1 rounded-full border border-zinc-700"
-                      >
-                        Back to video
-                      </button>
+                    {/* Middle: acquisition counter */}
+                    {acqList.length > 0 && currentIndex >= 0 && (
+                      <div className="flex-1 text-center mt-4 sm:mt-3">
+                        <span>
+                          Acquisition {currentIndex + 1} of{" "}
+                          {acqNav?.total ?? acqList.length}
+                        </span>
+                      </div>
                     )}
+
+                    {/* Right column: Back to video + Next */}
+                    <div className="flex flex-col gap-1 items-end">
+                      {mainMode === "photo" && (
+                        <button
+                          type="button"
+                          onClick={backToVideo}
+                          className="px-3 py-1 rounded-full border border-zinc-600 bg-zinc-800 hover:bg-zinc-700 text-gray-100"
+                        >
+                          Back to video
+                        </button>
+                      )}
+
+                      {acqList.length > 0 && currentIndex >= 0 && (
+                        <button
+                          type="button"
+                          onClick={goNextAcq}
+                          disabled={!hasNext}
+                          className={`px-3 py-1 rounded-full border ${
+                            hasNext
+                              ? "border-zinc-600 bg-zinc-800 hover:bg-zinc-700 cursor-pointer"
+                              : "border-zinc-800 bg-zinc-900 text-zinc-500 cursor-not-allowed"
+                          }`}
+                        >
+                          Next →
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {acqNavLoading && (
@@ -319,45 +361,9 @@ const Acquisition: React.FC = () => {
                       Loading acquisition list...
                     </p>
                   )}
-
-                  {acqList.length > 0 && currentIndex >= 0 && (
-                    <div className="mt-1 flex items-center justify-between text-[11px] sm:text-xs text-gray-200 gap-2">
-                      <button
-                        type="button"
-                        onClick={goPrevAcq}
-                        disabled={!hasPrev}
-                        className={`px-3 py-1 rounded-full border ${
-                          hasPrev
-                            ? "border-zinc-600 bg-zinc-800 hover:bg-zinc-700 cursor-pointer"
-                            : "border-zinc-800 bg-zinc-900 text-zinc-500 cursor-not-allowed"
-                        }`}
-                      >
-                        ← Previous
-                      </button>
-
-                      <div className="flex-1 text-center">
-                        <span>
-                          Acquisition {currentIndex + 1} of{" "}
-                          {acqNav?.total ?? acqList.length}
-                        </span>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={goNextAcq}
-                        disabled={!hasNext}
-                        className={`px-3 py-1 rounded-full border ${
-                          hasNext
-                            ? "border-zinc-600 bg-zinc-800 hover:bg-zinc-700 cursor-pointer"
-                            : "border-zinc-800 bg-zinc-900 text-zinc-500 cursor-not-allowed"
-                        }`}
-                      >
-                        Next →
-                      </button>
-                    </div>
-                  )}
                 </div>
 
+                {/* MAIN PANEL: VIDEO / PHOTO */}
                 <div className="relative w-full rounded overflow-hidden bg-black aspect-video min-h-[180px] xs:min-h-[200px] sm:min-h-[220px] md:min-h-[260px] lg:min-h-[300px]">
                   {loading ? (
                     <div className="absolute inset-0 flex items-center justify-center">
@@ -487,7 +493,8 @@ const Acquisition: React.FC = () => {
                 <>
                   {!isLogged && (
                     <p className="text-gray-400 text-[11px] sm:text-xs mb-1">
-                      Log in to manage your own collections and save favorite acquisitions.
+                      Log in to manage your own collections and save favorite
+                      acquisitions.
                     </p>
                   )}
                   <p className="text-gray-300 text-sm">
