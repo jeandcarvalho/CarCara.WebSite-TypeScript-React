@@ -11,7 +11,7 @@ import Search from "./Components/Search/Search";
 import View from "./Components/View/View";
 import Auth from "./Components/Auth";  // ⬅️ novo
 import MyAccount from "./Components/MyAccount";  // ⬅️ novo
-import Acquisition from "./Components/Acquisition";  // ⬅️ novo
+import Acquisition from "./Components/Acquisition/Acquisition";  // ⬅️ novo
 
 export const Routes = createHashRouter([
   {

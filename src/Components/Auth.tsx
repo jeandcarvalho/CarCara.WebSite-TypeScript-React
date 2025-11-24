@@ -1,5 +1,6 @@
+// src/Components/Auth.tsx
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
 
@@ -7,6 +8,7 @@ const API_BASE = "https://carcara-web-api.onrender.com";
 
 const Auth: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
@@ -15,6 +17,12 @@ const Auth: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+
+  // lê ?redirect=/Path%20aqui
+  const searchParams = new URLSearchParams(location.search);
+  const redirectTo = searchParams.get("redirect")
+    ? decodeURIComponent(searchParams.get("redirect") as string)
+    : "/";
 
   const toggleMode = () => {
     setMode(mode === "login" ? "register" : "login");
@@ -53,13 +61,15 @@ const Auth: React.FC = () => {
         return;
       }
 
-      // LOGIN: save token + user
       if (mode === "login") {
+        // LOGIN: save token + user
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
-        navigate("/"); // redirect to home
+
+        // volta pra página de origem (ou "/" se não tiver redirect)
+        navigate(redirectTo || "/", { replace: true });
       } else {
-        // REGISTER: switch to login mode
+        // REGISTER: troca pra modo login, mantendo o redirect na URL
         setMode("login");
         setPassword("");
       }
@@ -76,9 +86,9 @@ const Auth: React.FC = () => {
 
       {/* Back button */}
       <div className="my-3 ml-3">
-        <Link to="/">
+        <Link to={redirectTo || "/"}>
           <button className="bg-gray-700 text-white hover:bg-gray-600 text-base md:text-lg font-bold py-1 px-3 rounded-full transition duration-300 text-roboto">
-            ← Home
+            ← Back
           </button>
         </Link>
       </div>

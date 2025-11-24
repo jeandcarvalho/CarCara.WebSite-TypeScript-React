@@ -1,8 +1,16 @@
 // src/Components/Acquisition.tsx
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import Header from "./Header";
-import Footer from "./Footer";
+import Header from "../Header";
+import Footer from "../Footer";
+import {
+  getDrivePreviewUrl,
+  getDriveThumbUrl,
+  getDriveImageUrl,
+  parseFilterTagsFromSearch,
+  EXT_DOWNLOAD_ORDER,
+  FilterTag,
+} from "./AcquisitionHelpers";
 
 const API_BASE = "https://carcara-web-api.onrender.com";
 
@@ -27,235 +35,19 @@ type PhotoItem = {
   fullUrl: string;
 };
 
-const FILTER_LABELS: Record<string, string> = {
-  "b.vehicle": "Vehicle",
-  "b.period": "Period",
-  "b.condition": "Condition",
-  "b.city": "City",
-  "b.state": "State",
-  "b.country": "Country",
-  "l.left": "Left lane",
-  "l.right": "Right lane",
-  "c.v": "Vehicle speed",
-  "c.swa": "Steering angle",
-  "c.brakes": "Brakes",
-  "o.highway": "Highway",
-  "o.landuse": "Land use",
-  "o.surface": "Surface",
-  "o.lanes": "Lanes",
-  "o.maxspeed": "Max speed",
-  "o.oneway": "Oneway",
-  "o.sidewalk": "Sidewalk",
-  "o.cycleway": "Cycleway",
-  "s.building": "Buildings",
-  "s.vegetation": "Vegetation",
+type AcqIdsResponse = {
+  page: number;
+  per_page: number;
+  has_more: boolean;
+  total?: number;
+  total_pages?: number;
+  acq_ids: string[];
 };
-
-
-const KEY_LABELS: Record<string, string> = {
-  // Vehicle & Scene
-  "b.vehicle": "Vehicle",
-  "b.period": "Period",
-  "b.condition": "Condition",
-  "b.city": "City",
-  "b.state": "State",
-  "b.country": "Country",
-
-  "l.left": "Left lane availability",
-  "l.right": "Right lane availability",
-
-  // Vehicle dynamics
-  "c.v": "VehicleSpeed (km/h)",
-  "c.swa": "SteeringWheelAngle",
-  "c.brakes": "BrakeInfoStatus",
-
-  // Perception (YOLO + SemSeg)
-  "y.classes": "YOLO classes",
-  "y.rel": "Position vs ego",
-  "y.conf": "Confidence",
-  "y.dist": "Distance (m)",
-
-  // Environment (SemSeg)
-  "s.building": "Building",
-  "s.vegetation": "Vegetation",
-
-  // Road context (Overpass)
-  "o.highway": "Highway (groups)",
-  "o.landuse": "Landuse (groups)",
-  "o.lanes": "Lanes",
-  "o.maxspeed": "Maxspeed (BR presets)",
-  "o.oneway": "Oneway",
-  "o.surface": "Surface",
-  "o.sidewalk": "Sidewalk",
-  "o.cycleway": "Cycleway",
-};
-
-const VALUE_LABELS: Record<string, Record<string, string>> = {
-  // Vehicle & Scene
-  "b.vehicle": {
-    Captur: "Captur",
-    "DAF CF 410": "DAF CF 410",
-    Renegade: "Renegade",
-  },
-  "b.period": {
-    day: "day",
-    night: "night",
-    dusk: "dusk",
-    dawn: "dawn",
-  },
-  "b.condition": {
-    "Clear sky": "Clear sky",
-    "Mainly clear": "Mainly clear",
-    "Partly cloudy": "Partly cloudy",
-    Overcast: "Overcast",
-    Fog: "Fog",
-    "Fog (rime)": "Fog (rime)",
-    "Drizzle: light": "Drizzle: light",
-    "Drizzle: moderate": "Drizzle: moderate",
-    "Drizzle: dense": "Drizzle: dense",
-    "Rain: slight": "Rain: slight",
-    "Rain: moderate": "Rain: moderate",
-    "Rain: heavy": "Rain: heavy",
-  },
-  "l.left": {
-    DISP: "Left available",
-    INDISP: "Left unavailable",
-  },
-  "l.right": {
-    DISP: "Right available",
-    INDISP: "Right unavailable",
-  },
-
-  // Vehicle dynamics
-  "c.swa": {
-    STRAIGHT: "Straight",
-    L_GENTLE: "Left · Gentle",
-    L_MODERATE: "Left · Moderate",
-    L_HARD: "Left · Hard",
-    R_GENTLE: "Right · Gentle",
-    R_MODERATE: "Right · Moderate",
-    R_HARD: "Right · Hard",
-  },
-  "c.brakes": {
-    not_pressed: "not_pressed",
-    pressed: "pressed",
-  },
-
-  // Perception
-  "y.classes": {
-    car: "car",
-    motorcycle: "motorcycle",
-    bicycle: "bicycle",
-    person: "person",
-    heavy: "Heavy vehicles",
-  },
-  "y.rel": {
-    EGO: "Ego lane",
-    "L-1": "Left adjacent (L-1)",
-    "R+1": "Right adjacent (R+1)",
-    "OUT-L": "Outside left (OUT-L)",
-    "OUT-R": "Outside right (OUT-R)",
-  },
-  "y.conf": {
-    LOW: "Low %",
-    MED: "Medium %",
-    HIGH: "High %",
-  },
-
-  // Environment (SemSeg)
-  "s.building": {
-    LOW: "Low %",
-    MED: "Medium %",
-    HIGH: "High %",
-  },
-  "s.vegetation": {
-    LOW: "Low %",
-    MED: "Medium %",
-    HIGH: "High %",
-  },
-
-  // Road context
-  "o.highway": {
-    primary: "primary",
-    primary_link: "primary_link",
-    secondary: "secondary",
-    secondary_link: "secondary_link",
-    local: "local",
-  },
-  "o.landuse": {
-    residential: "residential",
-    commercial: "commercial",
-    industrial: "industrial",
-    agro: "agro",
-  },
-  "o.oneway": {
-    yes: "yes",
-    no: "no",
-  },
-  "o.surface": {
-    paved: "paved",
-    unpaved: "unpaved",
-  },
-  "o.sidewalk": {
-    both: "both",
-    left: "left",
-    right: "right",
-    no: "no",
-  },
-};
-
-
-
-const EXT_DOWNLOAD_ORDER = ["avi", "csv", "mf4", "blf"];
-
-/* ========= Helpers ========= */
-
-function extractDriveId(link: string | null): string | null {
-  if (!link) return null;
-  let match = link.match(/\/d\/([^/]+)\//);
-  if (!match) {
-    match = link.match(/[?&]id=([^&]+)/);
-  }
-  return match ? match[1] : null;
-}
-
-function getDrivePreviewUrl(link: string | null): string | null {
-  const fileId = extractDriveId(link);
-  if (!fileId) return null;
-  return `https://drive.google.com/file/d/${fileId}/preview?vq=hd1080`;
-}
-
-function getDriveThumbUrl(link: string | null): string | null {
-  const fileId = extractDriveId(link);
-  if (!fileId) return null;
-  return `https://drive.google.com/thumbnail?id=${fileId}&sz=w400-h400`;
-}
-
-function getDriveImageUrl(link: string | null): string | null {
-  const fileId = extractDriveId(link);
-  if (!fileId) return null;
-  return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1600-h1600`;
-}
 
 function formatTime(sec: number): string {
   const m = Math.floor(sec / 60);
   const s = sec % 60;
   return `${m}:${s.toString().padStart(2, "0")}`;
-}
-
-/**
- * Converte acqId no formato YYYYMMDDHHMMSS
- * para DD/MM/YYYY HH:MM:SS
- */
-function formatAcqDate(acqId?: string | null): string {
-  if (!acqId || acqId.length !== 14) return acqId || "";
-  const year = acqId.slice(0, 4);
-  const month = acqId.slice(4, 6);
-  const day = acqId.slice(6, 8);
-  const hour = acqId.slice(8, 10);
-  const minute = acqId.slice(10, 12);
-  const second = acqId.slice(12, 14);
-  return `${day}/${month}/${year} ${hour}:${minute}:${second}`;
 }
 
 const Acquisition: React.FC = () => {
@@ -269,21 +61,17 @@ const Acquisition: React.FC = () => {
 
   const token = localStorage.getItem("token");
 
-  // modo do painel principal: vídeo ou foto
   const [mainMode, setMainMode] = useState<"video" | "photo">("video");
   const [activePhotoIndex, setActivePhotoIndex] = useState<number | null>(null);
 
-  /* -------- auth redirect -------- */
-  useEffect(() => {
-    if (!token) {
-      navigate("/auth");
-    }
-  }, [token, navigate]);
+  // lista de acq_ids que batem com os mesmos filtros (sem acq_id)
+  const [acqNav, setAcqNav] = useState<AcqIdsResponse | null>(null);
+  const [acqNavLoading, setAcqNavLoading] = useState(false);
+  const [acqNavError, setAcqNavError] = useState("");
 
-  /* -------- fetch acquisition -------- */
+  // fetch acquisition data
   useEffect(() => {
     if (!acqId) return;
-    if (!token) return;
 
     const fetchData = async () => {
       setLoading(true);
@@ -295,10 +83,13 @@ const Acquisition: React.FC = () => {
 
         const url = `${API_BASE}/api/acquisition?${search.toString()}`;
 
+        const headers: Record<string, string> = {};
+        if (token) {
+          headers.Authorization = `Bearer ${token}`;
+        }
+
         const res = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers,
         });
 
         const json = await res.json();
@@ -320,7 +111,61 @@ const Acquisition: React.FC = () => {
     fetchData();
   }, [acqId, location.search, token]);
 
-  /* -------- memo derivations -------- */
+  // fetch acq_ids list (navigation) based on filters only
+  useEffect(() => {
+
+    const fetchAcqNav = async () => {
+      setAcqNavLoading(true);
+      setAcqNavError("");
+
+      try {
+        const params = new URLSearchParams(location.search);
+        params.delete("acq_id");
+
+        // evita query gigante sem filtros (match vazio no Mongo)
+        const hasFilters = Array.from(params.keys()).some((k) => {
+          if (k === "page" || k === "per_page") return false;
+          const v = params.get(k);
+          return !!v;
+        });
+
+        if (!hasFilters) {
+          setAcqNav(null);
+          setAcqNavLoading(false);
+          return;
+        }
+
+        const url = new URL(`${API_BASE}/api/search-acq-ids`);
+        params.forEach((value, key) => {
+          if (value) url.searchParams.append(key, value);
+        });
+
+        const headers: Record<string, string> = {};
+        if (token) {
+          headers.Authorization = `Bearer ${token}`;
+        }
+
+        const res = await fetch(url.toString(), {
+          headers,
+        });
+        const json = await res.json();
+
+        if (!res.ok) {
+          setAcqNavError(json.error || "Error loading acquisitions list.");
+          setAcqNav(null);
+        } else {
+          setAcqNav(json);
+        }
+      } catch (err) {
+        setAcqNavError("Connection error while loading acquisitions list.");
+        setAcqNav(null);
+      } finally {
+        setAcqNavLoading(false);
+      }
+    };
+
+    fetchAcqNav();
+  }, [location.search, token]);
 
   const previewUrl = useMemo(() => {
     if (!data) return null;
@@ -342,19 +187,10 @@ const Acquisition: React.FC = () => {
     }).filter(Boolean) as { ext: string; link: string }[];
   }, [data]);
 
-  const filterTags = useMemo(() => {
-    const search = new URLSearchParams(location.search);
-    const tags: { key: string; label: string; value: string }[] = [];
-
-    search.forEach((value, key) => {
-      if (!value) return;
-      if (key === "page" || key === "per_page" || key === "acq_id") return;
-      const label = KEY_LABELS[key] || FILTER_LABELS[key] || key;
-      tags.push({ key, label, value });
-    });
-
-    return tags;
-  }, [location.search]);
+  const filterTags = useMemo<FilterTag[]>(
+    () => parseFilterTagsFromSearch(location.search),
+    [location.search]
+  );
 
   const photos = useMemo<PhotoItem[]>(() => {
     if (!data) return [];
@@ -381,12 +217,18 @@ const Acquisition: React.FC = () => {
     return photos[activePhotoIndex];
   }, [activePhotoIndex, photos]);
 
-  const formattedAcqDate = useMemo(
-    () => formatAcqDate(acqId),
-    [acqId]
-  );
 
-  /* -------- handlers -------- */
+
+  const acqList = acqNav?.acq_ids ?? [];
+  const currentIndex = useMemo(() => {
+    if (!acqId || !acqList.length) return -1;
+    return acqList.indexOf(acqId);
+  }, [acqId, acqList]);
+
+  const hasPrev = currentIndex > 0;
+  const hasNext = currentIndex >= 0 && currentIndex < acqList.length - 1;
+
+  const isLogged = !!token;
 
   const openPhotoInMainPanel = (index: number) => {
     setActivePhotoIndex(index);
@@ -405,42 +247,114 @@ const Acquisition: React.FC = () => {
     setActivePhotoIndex(nextIndex);
   };
 
-  /* ================= Render ================= */
+  const goToAcq = (targetId: string | null) => {
+    if (!targetId) return;
+    navigate(`/acquisition/${targetId}${location.search}`);
+  };
+
+  const goPrevAcq = () => {
+    if (!hasPrev) return;
+    const targetId = acqList[currentIndex - 1];
+    goToAcq(targetId);
+  };
+
+  const goNextAcq = () => {
+    if (!hasNext) return;
+    const targetId = acqList[currentIndex + 1];
+    goToAcq(targetId);
+  };
+
+  const goBackToView = () => {
+    const params = new URLSearchParams(location.search);
+    params.delete("acq_id");
+    const qs = params.toString();
+    navigate(`/View${qs ? `?${qs}` : ""}`);
+  };
 
   return (
     <div className="bg-zinc-950 min-h-screen flex flex-col">
       <Header />
 
-      {/* CONTEÚDO PRINCIPAL EMPURRANDO O FOOTER */}
       <div className="flex-1 flex flex-col mt-5">
         {errorMsg && (
           <div className="mx-3 mb-2 bg-red-900 text-red-100 text-sm px-3 py-2 rounded border border-red-700">
             {errorMsg}
           </div>
         )}
+        {acqNavError && (
+          <div className="mx-3 mb-2 bg-red-900 text-red-100 text-xs px-3 py-1 rounded border border-red-700">
+            {acqNavError}
+          </div>
+        )}
 
         <div className="flex justify-center px-2 sm:px-3 pb-6">
           <main className="w-full max-w-7xl grid gap-4 lg:grid-cols-3 items-start">
-            {/* Painel principal: vídeo ou foto + filtros + downloads */}
             <section className="lg:col-span-2 bg-zinc-900 border border-zinc-800 rounded-lg p-3 sm:p-4 flex flex-col gap-4">
               <div className="w-full">
-                <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 mb-2">
-                  <div>
-                    <h2 className="text-lg sm:text-xl text-yellow-200 break-all">
-                      {formattedAcqDate
-                        ? `Acquisition ${formattedAcqDate}`
-                        : `Acquisition ${acqId}`}
-                    </h2>
+                <div className="flex flex-col gap-1 mb-2">
+                  <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1">
+                    <div>
+                      <button
+                        type="button"
+                        onClick={goBackToView}
+                        className="mt-1 inline-flex items-center text-[11px] sm:text-xs px-2 py-1 rounded-full border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-gray-200"
+                      >
+                        ← Back to View
+                      </button>
+                    </div>
+
+                    {mainMode === "photo" && (
+                      <button
+                        type="button"
+                        onClick={backToVideo}
+                        className="self-start mt-1 bg-zinc-800 hover:bg-zinc-700 text-gray-100 text-xs sm:text-sm px-3 py-1 rounded-full border border-zinc-700"
+                      >
+                        Back to video
+                      </button>
+                    )}
                   </div>
 
-                  {mainMode === "photo" && previewUrl && (
-                    <button
-                      type="button"
-                      onClick={backToVideo}
-                      className="self-start mt-1 bg-zinc-800 hover:bg-zinc-700 text-gray-100 text-xs sm:text-sm px-3 py-1 rounded-full border border-zinc-700"
-                    >
-                      Back to video
-                    </button>
+                  {acqNavLoading && (
+                    <p className="text-xs text-gray-400">
+                      Loading acquisition list...
+                    </p>
+                  )}
+
+                  {acqList.length > 0 && currentIndex >= 0 && (
+                    <div className="mt-1 flex items-center justify-between text-[11px] sm:text-xs text-gray-200 gap-2">
+                      <button
+                        type="button"
+                        onClick={goPrevAcq}
+                        disabled={!hasPrev}
+                        className={`px-3 py-1 rounded-full border ${
+                          hasPrev
+                            ? "border-zinc-600 bg-zinc-800 hover:bg-zinc-700 cursor-pointer"
+                            : "border-zinc-800 bg-zinc-900 text-zinc-500 cursor-not-allowed"
+                        }`}
+                      >
+                        ← Previous
+                      </button>
+
+                      <div className="flex-1 text-center">
+                        <span>
+                          Acquisition {currentIndex + 1} of{" "}
+                          {acqNav?.total ?? acqList.length}
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={goNextAcq}
+                        disabled={!hasNext}
+                        className={`px-3 py-1 rounded-full border ${
+                          hasNext
+                            ? "border-zinc-600 bg-zinc-800 hover:bg-zinc-700 cursor-pointer"
+                            : "border-zinc-800 bg-zinc-900 text-zinc-500 cursor-not-allowed"
+                        }`}
+                      >
+                        Next →
+                      </button>
+                    </div>
                   )}
                 </div>
 
@@ -515,8 +429,13 @@ const Acquisition: React.FC = () => {
                           key={idx}
                           className="bg-zinc-800 text-gray-100 text-[11px] sm:text-xs px-2 py-1 rounded-full border border-zinc-700"
                         >
-                          <span className="font-semibold">{tag.label}:</span>{" "}
-                          {VALUE_LABELS[tag.key]?.[tag.value] || tag.value}
+                          {tag.label}
+                          {tag.value && (
+                            <>
+                              <span className="font-semibold">: </span>
+                              {tag.value}
+                            </>
+                          )}
                         </span>
                       ))}
                     </div>
@@ -550,7 +469,6 @@ const Acquisition: React.FC = () => {
               </div>
             </section>
 
-            {/* Painel de fotos */}
             <section className="lg:col-span-1 bg-zinc-900 border border-zinc-800 rounded-lg p-3 sm:p-4 flex flex-col">
               <div className="flex items-baseline justify-between gap-2 mb-2">
                 <h2 className="text-lg sm:text-xl text-yellow-200">
@@ -566,9 +484,16 @@ const Acquisition: React.FC = () => {
               {loading ? (
                 <p className="text-gray-300 text-sm">Loading photos...</p>
               ) : photos.length === 0 ? (
-                <p className="text-gray-300 text-sm">
-                  No photos found for this acquisition.
-                </p>
+                <>
+                  {!isLogged && (
+                    <p className="text-gray-400 text-[11px] sm:text-xs mb-1">
+                      Log in to manage your own collections and save favorite acquisitions.
+                    </p>
+                  )}
+                  <p className="text-gray-300 text-sm">
+                    No photos found for this acquisition.
+                  </p>
+                </>
               ) : (
                 <div className="border border-zinc-800 rounded p-2 bg-zinc-950 overflow-y-auto max-h-[28rem] xs:max-h-[32rem] sm:max-h-[26rem] md:max-h-[26rem] lg:max-h-[30rem] w-full">
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
