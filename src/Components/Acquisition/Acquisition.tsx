@@ -268,6 +268,12 @@ const Acquisition: React.FC = () => {
     navigate(`/View${qs ? `?${qs}` : ""}`);
   };
 
+  const goToFirstPhoto = () => {
+    if (photos.length === 0) return;
+    setActivePhotoIndex(0);
+    setMainMode("photo");
+  };
+
   return (
     <div className="bg-zinc-950 min-h-screen flex flex-col">
       <Header />
@@ -327,31 +333,41 @@ const Acquisition: React.FC = () => {
                       </div>
                     )}
 
-                    {/* Right column: Back to video + Next */}
+                    {/* Right column: Go to photos / Back to video + Next */}
                     <div className="flex flex-col gap-1 items-end">
-                      {mainMode === "photo" && (
-                        <button
-                          type="button"
-                          onClick={backToVideo}
-                          className="px-3 py-1 rounded-full border border-zinc-600 bg-zinc-800 hover:bg-zinc-700 text-gray-100"
-                        >
-                          Back to video
-                        </button>
-                      )}
-
                       {acqList.length > 0 && currentIndex >= 0 && (
-                        <button
-                          type="button"
-                          onClick={goNextAcq}
-                          disabled={!hasNext}
-                          className={`px-3 py-1 rounded-full border ${
-                            hasNext
-                              ? "border-zinc-600 bg-zinc-800 hover:bg-zinc-700 cursor-pointer"
-                              : "border-zinc-800 bg-zinc-900 text-zinc-500 cursor-not-allowed"
-                          }`}
-                        >
-                          Next →
-                        </button>
+                        <>
+                          {mainMode === "photo" ? (
+                            <button
+                              type="button"
+                              onClick={backToVideo}
+                              className="px-3 py-1 rounded-full border border-zinc-600 bg-zinc-800 hover:bg-zinc-700 text-gray-100"
+                            >
+                              Back to video
+                            </button>
+                          ) : photos.length > 0 ? (
+                            <button
+                              type="button"
+                              onClick={goToFirstPhoto}
+                              className="px-3 py-1 rounded-full border border-zinc-600 bg-zinc-800 hover:bg-zinc-700 text-gray-100"
+                            >
+                              Go to photos
+                            </button>
+                          ) : null}
+
+                          <button
+                            type="button"
+                            onClick={goNextAcq}
+                            disabled={!hasNext}
+                            className={`px-3 py-1 rounded-full border ${
+                              hasNext
+                                ? "border-zinc-600 bg-zinc-800 hover:bg-zinc-700 cursor-pointer"
+                                : "border-zinc-800 bg-zinc-900 text-zinc-500 cursor-not-allowed"
+                            }`}
+                          >
+                            Next →
+                          </button>
+                        </>
                       )}
                     </div>
                   </div>
@@ -493,8 +509,7 @@ const Acquisition: React.FC = () => {
                 <>
                   {!isLogged && (
                     <p className="text-gray-400 text-[11px] sm:text-xs mb-1">
-                      Log in to manage your own collections and save favorite
-                      acquisitions.
+                      Log in to manage your own collections and save favorite acquisitions.
                     </p>
                   )}
                   <p className="text-gray-300 text-sm">
