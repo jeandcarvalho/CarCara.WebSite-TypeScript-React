@@ -72,8 +72,8 @@ export const REL_TO_EGO = [
   { label: "Ego lane", value: "EGO" },
   { label: "Left adjacent (L-1)", value: "L-1" },
   { label: "Right adjacent (R+1)", value: "R+1" },
-  { label: "Outside left (OUT-L)", value: "OUT-L" },
-  { label: "Outside right (OUT-R)", value: "OUT-R" },
+  { label: "Outside left (OUT-L)", value: "L-out" },
+  { label: "Outside right (OUT-R)", value: "R-out" },
 ] as const;
 
 // LaneEgo
@@ -88,7 +88,7 @@ export const SEMSEG_THRESH = {
 
 // Steering chips (deg)
 export const SWA_CHIPS = [
-  { key: "straight", label: "Straight", range: "5..-5" },
+  { key: "straight", label: "Straight", range: "-5..5" },
   { key: "l-gentle", label: "Right · Gentle", range: "-180..-30" },
   { key: "l-mod", label: "Right · Moderate", range: "-360..-180" },
   { key: "l-hard", label: "Right · Hard", range: "-999..-360" },
