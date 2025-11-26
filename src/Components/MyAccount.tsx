@@ -41,6 +41,7 @@ const MyAccount: React.FC = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        setErrorMsg("");
 
         // user info (auth/me)
         const meRes = await fetch(`${API_BASE}/auth/me`, {
@@ -136,7 +137,7 @@ const MyAccount: React.FC = () => {
     <div className="bg-zinc-950 min-h-screen flex flex-col">
       <Header />
       <div className="flex-grow flex justify-center px-4">
-        <main className="w-full max-w-5xl">
+        <main className="w-full max-w-5xl py-4">
           <h1 className="text-3xl font-medium text-yellow-300 mb-4">
             My Account
           </h1>
@@ -154,9 +155,7 @@ const MyAccount: React.FC = () => {
               {/* User info */}
               {user && (
                 <section className="bg-zinc-900 border border-zinc-800 rounded p-4 mb-6">
-                  <h2 className="text-xl text-yellow-200 mb-2">
-                    Profile
-                  </h2>
+                  <h2 className="text-xl text-yellow-200 mb-2">Profile</h2>
                   <p className="text-gray-200">
                     <span className="font-semibold">Name:</span>{" "}
                     {user.name || "-"}
@@ -178,9 +177,7 @@ const MyAccount: React.FC = () => {
                   className="space-y-3 md:flex md:items-end md:space-y-0 md:space-x-3"
                 >
                   <div className="flex-1">
-                    <label className="text-gray-300 block mb-1">
-                      Name
-                    </label>
+                    <label className="text-gray-300 block mb-1">Name</label>
                     <input
                       className="w-full p-2 rounded bg-zinc-800 text-gray-100 border border-zinc-700"
                       value={newName}
@@ -222,9 +219,9 @@ const MyAccount: React.FC = () => {
                     {collections.map((c) => (
                       <li
                         key={c.id}
-                        className="flex flex-col md:flex-row md:items-center justify-between bg-zinc-800 rounded p-3"
+                        className="flex flex-col md:flex-row md:items-center justify-between bg-zinc-800 rounded p-3 gap-2"
                       >
-                        <div>
+                        <div className="flex-1">
                           <p className="text-yellow-100 font-semibold">
                             {c.name}
                           </p>
@@ -237,12 +234,22 @@ const MyAccount: React.FC = () => {
                             {c.itemsCount} items
                           </p>
                         </div>
-                        <button
-                          onClick={() => handleDelete(c.id)}
-                          className="mt-2 md:mt-0 bg-red-600 hover:bg-red-500 text-white font-bold py-1 px-3 rounded text-sm"
-                        >
-                          Delete
-                        </button>
+
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => navigate(`/collections/${c.id}`)}
+                            className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-1 px-3 rounded text-sm"
+                          >
+                            View items
+                          </button>
+
+                          <button
+                            onClick={() => handleDelete(c.id)}
+                            className="bg-red-600 hover:bg-red-500 text-white font-bold py-1 px-3 rounded text-sm"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </li>
                     ))}
                   </ul>
