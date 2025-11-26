@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Header from "../Header";
 import Footer from "../Footer";
+
 import {
   getDrivePreviewUrl,
   getDriveThumbUrl,
@@ -49,7 +50,6 @@ type Collection = {
   name: string;
   description?: string | null;
 };
-
 
 function formatTime(sec: number): string {
   const m = Math.floor(sec / 60);
@@ -150,6 +150,47 @@ async function removeItemFromCollectionApi(
   });
 }
 
+async function addItemsToCollectionApi(
+  collectionId: string,
+  acqId: string,
+  secs: number[],
+  token: string
+): Promise<void> {
+  if (!secs.length) return;
+
+  await fetch(`${API_BASE}/collections/${collectionId}/items/add`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      items: secs.map((sec) => ({ acq_id: acqId, sec })),
+    }),
+  });
+}
+
+async function removeItemsFromCollectionApi(
+  collectionId: string,
+  acqId: string,
+  secs: number[],
+  token: string
+): Promise<void> {
+  if (!secs.length) return;
+
+  await fetch(`${API_BASE}/collections/${collectionId}/items/remove`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      items: secs.map((sec) => ({ acq_id: acqId, sec })),
+    }),
+  });
+}
+
+
 async function createCollectionApi(
   name: string,
   description: string | null,
@@ -205,6 +246,8 @@ const Acquisition: React.FC = () => {
 
   const [collectionItemsLoading, setCollectionItemsLoading] = useState(false);
   const [collectionItemsError, setCollectionItemsError] = useState("");
+
+  const [bulkUpdatingCollection, setBulkUpdatingCollection] = useState(false);
 
   const [selectedSecs, setSelectedSecs] = useState<Set<number>>(new Set());
 
@@ -547,7 +590,106 @@ const Acquisition: React.FC = () => {
         return next;
       });
     }
+
+
+
   };
+
+    const handleSelectAllInCollection = async () => {
+  if (
+    !isLogged ||
+    !token ||
+    !selectedCollectionId ||
+    !acqId ||
+    photos.length === 0 ||
+    bulkUpdatingCollection
+  ) {
+    return;
+  }
+
+  const ok = window.confirm(
+    "Are you sure you want to add all images to this collection?"
+  );
+  if (!ok) return;
+
+  const validSecs = photos
+    .map((p) =>
+      typeof p.sec === "number" && !Number.isNaN(p.sec) ? p.sec : null
+    )
+    .filter((sec): sec is number => sec !== null);
+
+  if (validSecs.length === 0) return;
+
+  const prevSelected = new Set(selectedSecs);
+  const secsToAdd = validSecs.filter((sec) => !prevSelected.has(sec));
+  if (secsToAdd.length === 0) return;
+
+  // optimistic update
+  setSelectedSecs(new Set([...prevSelected, ...secsToAdd]));
+  setBulkUpdatingCollection(true);
+
+  try {
+    await addItemsToCollectionApi(selectedCollectionId, acqId, secsToAdd, token);
+  } catch (err) {
+    setSelectedSecs(prevSelected);
+    setCollectionItemsError("Error selecting all items for this acquisition.");
+  } finally {
+    setBulkUpdatingCollection(false);
+  }
+};
+
+
+ const handleClearAllInCollection = async () => {
+  if (
+    !isLogged ||
+    !token ||
+    !selectedCollectionId ||
+    !acqId ||
+    photos.length === 0 ||
+    bulkUpdatingCollection
+  ) {
+    return;
+  }
+
+  const ok = window.confirm(
+    "Are you sure you want to remove all images from this collection?"
+  );
+  if (!ok) return;
+
+  const prevSelected = new Set(selectedSecs);
+  if (prevSelected.size === 0) return;
+
+  const validSecs = photos
+    .map((p) =>
+      typeof p.sec === "number" && !Number.isNaN(p.sec) ? p.sec : null
+    )
+    .filter((sec): sec is number => sec !== null);
+
+  const secsToRemove = validSecs.filter((sec) => prevSelected.has(sec));
+  if (secsToRemove.length === 0) return;
+
+  // optimistic update
+  const newSelected = new Set(prevSelected);
+  secsToRemove.forEach((sec) => newSelected.delete(sec));
+  setSelectedSecs(newSelected);
+  setBulkUpdatingCollection(true);
+
+  try {
+    await removeItemsFromCollectionApi(
+      selectedCollectionId,
+      acqId,
+      secsToRemove,
+      token
+    );
+  } catch (err) {
+    setSelectedSecs(prevSelected);
+    setCollectionItemsError("Error clearing items for this acquisition.");
+  } finally {
+    setBulkUpdatingCollection(false);
+  }
+};
+
+
 
   const handleCreateCollection = async (
     e: React.FormEvent<HTMLFormElement>
@@ -990,9 +1132,38 @@ const Acquisition: React.FC = () => {
                               Syncing items for this acquisition...
                             </p>
                           )}
-                          <p className="text-[10px] sm:text-[11px] text-gray-400">
-                            Click a thumbnail to open it. Use ✓ to add or remove it from your collection.
-                          </p>
+                          <div className="flex items-center justify-between gap-2 mt-1">
+                            <p className="text-[10px] sm:text-[11px] text-gray-400">
+                              Click a thumbnail to open it. Use ✓ to add or remove it from your collection.
+                            </p>
+                            {!isLogged ? (
+                              <div className="text-xs text-gray-400 italic px-2 py-1">
+                                Log in to create personalized photo collections.
+                              </div>
+                            ) : (
+                              selectedCollectionId &&
+                              photos.length > 0 && (
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={handleSelectAllInCollection}
+                                    disabled={bulkUpdatingCollection || collectionItemsLoading}
+                                    className="text-[10px] sm:text-[11px] px-2 py-0.5 rounded-full border border-teal-500 text-teal-100 bg-zinc-900 hover:bg-zinc-800"
+                                  >
+                                    Select all
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={handleClearAllInCollection}
+                                    disabled={bulkUpdatingCollection || collectionItemsLoading}
+                                    className="text-[10px] sm:text-[11px] px-2 py-0.5 rounded-full border border-zinc-600 text-gray-100 bg-zinc-900 hover:bg-zinc-800"
+                                  >
+                                    Clear all
+                                  </button>
+                                </div>
+                              )
+                            )}
+                          </div>
                         </div>
                       )}
                       {collectionsError && (
