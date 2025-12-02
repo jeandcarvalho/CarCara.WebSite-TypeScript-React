@@ -52,20 +52,47 @@ type AcqCard = {
 
 type ViewerContext = "all" | "acq";
 
-const PHOTOS_PER_PAGE = 24;
+const PHOTOS_PER_PAGE = 60;
 
-// Converte acq_id numérico (YYYYMMDDHHMMSS) em "DD/MM/YYYY HH:MM:SS"
+type ParsedAcqId = {
+  year: string;
+  month: string;
+  day: string;
+  hour: string;
+  minute: string;
+  second: string;
+};
+
+function parseAcqId(acq_id: string): ParsedAcqId | null {
+  if (!/^\d{14}$/.test(acq_id)) return null;
+  const year = acq_id.slice(0, 4);
+  const month = acq_id.slice(4, 6);
+  const day = acq_id.slice(6, 8);
+  const hour = acq_id.slice(8, 10);
+  const minute = acq_id.slice(10, 12);
+  const second = acq_id.slice(12, 14);
+  return { year, month, day, hour, minute, second };
+}
+
+// Completo: "DD/MM/YYYY HH:MM:SS"
 function formatAcqId(acq_id: string): string {
-  if (/^\d{14}$/.test(acq_id)) {
-    const year = acq_id.slice(0, 4);
-    const month = acq_id.slice(4, 6);
-    const day = acq_id.slice(6, 8);
-    const hour = acq_id.slice(8, 10);
-    const minute = acq_id.slice(10, 12);
-    const second = acq_id.slice(12, 14);
-    return `${day}/${month}/${year} ${hour}:${minute}:${second}`;
-  }
-  return acq_id;
+  const p = parseAcqId(acq_id);
+  if (!p) return acq_id;
+  return `${p.day}/${p.month}/${p.year} ${p.hour}:${p.minute}:${p.second}`;
+}
+
+// Só data: "DD/MM/YYYY"
+function formatAcqIdDate(acq_id: string): string {
+  const p = parseAcqId(acq_id);
+  if (!p) return acq_id;
+  return `${p.day}/${p.month}/${p.year}`;
+}
+
+// Só hora: "HH:MM:SS"
+function formatAcqIdTime(acq_id: string): string {
+  const p = parseAcqId(acq_id);
+  if (!p) return "";
+  return `${p.hour}:${p.minute}:${p.second}`;
 }
 
 // helpers locais para add/remove itens na coleção
@@ -105,6 +132,38 @@ async function removeItemFromCollectionApi(
   });
 }
 
+async function addManyItemsToCollectionApi(
+  collectionId: string,
+  items: { acq_id: string; sec: number }[],
+  token: string
+): Promise<void> {
+  if (!items.length) return;
+  await fetch(`${API_BASE}/collections/${collectionId}/items/add`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ items }),
+  });
+}
+
+async function removeManyItemsFromCollectionApi(
+  collectionId: string,
+  items: { acq_id: string; sec: number }[],
+  token: string
+): Promise<void> {
+  if (!items.length) return;
+  await fetch(`${API_BASE}/collections/${collectionId}/items/remove`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ items }),
+  });
+}
+
 const CollectionDetails: React.FC = () => {
   const { collectionId } = useParams<{ collectionId: string }>();
   const navigate = useNavigate();
@@ -128,7 +187,8 @@ const CollectionDetails: React.FC = () => {
   // Query params: mode, page, acq
   const searchParams = new URLSearchParams(location.search);
   const modeParam = searchParams.get("mode");
-  const viewMode: ViewMode = modeParam === "acq" ? "acq" : "photos";
+  // Default agora é Acquisition Manager
+  const viewMode: ViewMode = modeParam === "photos" ? "photos" : "acq";
 
   const pageParam = parseInt(searchParams.get("page") || "1", 10);
   const page = Number.isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
@@ -358,7 +418,8 @@ const CollectionDetails: React.FC = () => {
 
   // --- EDIT MODE (mosaico da acquisition) ---
 
-  const [editMode, setEditMode] = useState(false);
+  const [editMode, setEditMode] = useState(false); // edit dentro da acquisition
+  const [acqEditMode, setAcqEditMode] = useState(false); // edit geral de acquisitions
   const [membershipSet, setMembershipSet] = useState<Set<string>>(
     () => new Set()
   );
@@ -367,11 +428,11 @@ const CollectionDetails: React.FC = () => {
   // helper pra chave única de cada foto
   const makeKey = (acq_id: string, sec: number) => `${acq_id}-${sec}`;
 
-  // sempre que trocar acquisition selecionada ou dados, reseta membership para "tudo dentro"
+  // sempre que trocar acquisition selecionada ou dados, reseta membership
   useEffect(() => {
     if (!selectedAcq || selectedAcqPhotos.length === 0) {
       setMembershipSet(new Set());
-      setEditMode(false);
+      setEditMode(false); // agora NÃO liga sozinho
       setEditError("");
       return;
     }
@@ -381,6 +442,7 @@ const CollectionDetails: React.FC = () => {
       next.add(makeKey(p.acq_id, p.sec));
     });
     setMembershipSet(next);
+    // deixa editMode false por padrão, usuário que liga
     setEditMode(false);
     setEditError("");
   }, [selectedAcq, selectedAcqPhotos]);
@@ -421,6 +483,125 @@ const CollectionDetails: React.FC = () => {
         return next;
       });
       setEditError("Error updating this photo in the collection.");
+    }
+  };
+
+  // Remove todos os itens de UMA acquisition (modo geral, lista de aquisições)
+  const handleRemoveAllFromAcquisition = async (acqId: string) => {
+    if (!token || !collectionId || !data) return;
+
+    const item = data.items.find((it) => it.acq_id === acqId);
+    if (!item || item.secs.length === 0) return;
+
+    const confirmRemove = window.confirm(
+      "Are you sure you want to remove all photos from this acquisition in this collection? This action cannot be undone."
+    );
+    if (!confirmRemove) return;
+
+    const itemsPayload = item.secs.map((sec) => ({ acq_id: acqId, sec }));
+
+    setEditError("");
+
+    try {
+      await removeManyItemsFromCollectionApi(collectionId, itemsPayload, token);
+
+      // atualiza data local removendo essa acquisition (ou limpando)
+      setData((prev) => {
+        if (!prev) return prev;
+        const newItems = prev.items
+          .map((it) =>
+            it.acq_id === acqId ? { ...it, secs: [], images: [] } : it
+          )
+          .filter((it) => it.secs.length > 0 || it.images.length > 0);
+        return { ...prev, items: newItems };
+      });
+    } catch (err) {
+      setEditError("Error removing all photos from this acquisition.");
+    }
+  };
+
+  // Remove todas as fotos da acquisition atual (modo dentro da acquisition)
+  const handleRemoveAllInSelectedAcq = async () => {
+    if (!token || !collectionId || !selectedAcq || selectedAcqPhotos.length === 0)
+      return;
+
+    const photosInCollection = selectedAcqPhotos.filter((p) =>
+      membershipSet.has(makeKey(p.acq_id, p.sec))
+    );
+    if (!photosInCollection.length) return;
+
+    const confirmRemove = window.confirm(
+      "Are you sure you want to remove all photos from this acquisition in this collection? This action cannot be undone."
+    );
+    if (!confirmRemove) return;
+
+    const itemsPayload = photosInCollection.map((p) => ({
+      acq_id: p.acq_id,
+      sec: p.sec,
+    }));
+
+    setEditError("");
+    // otimista: remove todas do membership
+    setMembershipSet((prev) => {
+      const next = new Set(prev);
+      photosInCollection.forEach((p) =>
+        next.delete(makeKey(p.acq_id, p.sec))
+      );
+      return next;
+    });
+
+    try {
+      await removeManyItemsFromCollectionApi(collectionId, itemsPayload, token);
+    } catch (err) {
+      // reverte
+      setMembershipSet((prev) => {
+        const next = new Set(prev);
+        photosInCollection.forEach((p) =>
+          next.add(makeKey(p.acq_id, p.sec))
+        );
+        return next;
+      });
+      setEditError("Error removing all photos from this acquisition.");
+    }
+  };
+
+  // Adiciona todas as fotos (que estavam removidas) na acquisition atual
+  const handleAddAllInSelectedAcq = async () => {
+    if (!token || !collectionId || !selectedAcq || selectedAcqPhotos.length === 0)
+      return;
+
+    const photosNotInCollection = selectedAcqPhotos.filter(
+      (p) => !membershipSet.has(makeKey(p.acq_id, p.sec))
+    );
+    if (!photosNotInCollection.length) return;
+
+    const itemsPayload = photosNotInCollection.map((p) => ({
+      acq_id: p.acq_id,
+      sec: p.sec,
+    }));
+
+    setEditError("");
+    // otimista: adiciona todas no membership
+    setMembershipSet((prev) => {
+      const next = new Set(prev);
+      photosNotInCollection.forEach((p) =>
+        next.add(makeKey(p.acq_id, p.sec))
+      );
+      return next;
+    });
+
+    try {
+      await addManyItemsToCollectionApi(collectionId, itemsPayload, token);
+    } catch (err) {
+      // reverte
+      setMembershipSet((prev) => {
+        const next = new Set(prev);
+        photosNotInCollection.forEach((p) =>
+          next.delete(makeKey(p.acq_id, p.sec))
+        );
+        return next;
+      });
+      setEditError("Error adding all photos back to this acquisition.");
     }
   };
 
@@ -569,29 +750,35 @@ const CollectionDetails: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                  {/* thumbs ainda menores, mais colunas → mais fotos por tela */}
+                  <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-[6px]">
                     {photosForCurrentPage.map((p, idx) => {
                       const globalIndex =
                         (currentPage - 1) * PHOTOS_PER_PAGE + idx;
+                      const dateLabel = formatAcqIdDate(p.acq_id);
+                      const timeLabel = formatAcqIdTime(p.acq_id);
+
                       return (
                         <button
                           key={`${p.acq_id}-${p.sec}-${idx}`}
                           className="bg-zinc-900 border border-zinc-800 rounded overflow-hidden text-left hover:border-yellow-500 transition"
                           onClick={() => openViewerFromAll(globalIndex)}
                         >
-                          <div className="relative w-full h-32">
+                          <div className="relative w-full h-16">
                             <img
                               src={thumbUrl(p.imageLink)}
                               alt={`${formatAcqId(p.acq_id)} · sec ${p.sec}`}
                               className="w-full h-full object-cover"
                             />
                           </div>
-                          <div className="px-2 py-1">
-                            <p className="text-xs text-yellow-100 truncate">
-                              {formatAcqId(p.acq_id)}
+                          <div className="px-1.5 py-1">
+                            <p className="text-[9px] text-yellow-100 truncate">
+                              {dateLabel}
                             </p>
-                            <p className="text-[10px] text-gray-300">
-                              sec {p.sec}
+                            <p className="text-[9px] text-gray-300 truncate">
+                              {timeLabel
+                                ? `${timeLabel} · sec ${p.sec}`
+                                : `sec ${p.sec}`}
                             </p>
                           </div>
                         </button>
@@ -606,15 +793,44 @@ const CollectionDetails: React.FC = () => {
               <section className="mt-2">
                 {!selectedAcq && (
                   <>
-                    <p className="text-gray-300 text-sm mb-3">
-                      Click an acquisition to view and edit only the photos from
-                      that acq_id.
-                    </p>
+                    <div className="flex items-center justify-between mb-3 gap-2">
+                      <p className="text-gray-300 text-sm">
+                        Click an acquisition to view and edit only the photos
+                        from that acq_id.
+                      </p>
+                      {acqCards.length > 0 && (
+                        <div className="flex flex-col items-end gap-1">
+                          <button
+                            type="button"
+                            onClick={() => setAcqEditMode((prev) => !prev)}
+                            className={`px-3 py-1 rounded-full border text-xs ${
+                              acqEditMode
+                                ? "border-teal-500 bg-teal-900 text-teal-100 hover:bg-teal-800"
+                                : "border-zinc-600 bg-zinc-800 text-gray-100 hover:bg-zinc-700"
+                            }`}
+                          >
+                            {acqEditMode
+                              ? "Done editing acquisitions"
+                              : "Edit acquisitions"}
+                          </button>
+                          {acqEditMode && (
+                            <p className="text-[10px] text-gray-400 text-right max-w-xs">
+                              In acquisition edit mode, use “Remove all” on a
+                              card to delete all photos from that acquisition in
+                              this collection.
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                       {acqCards.map((card) => (
                         <div
                           key={card.acq_id}
-                          className="bg-zinc-950 border border-zinc-800 rounded p-3 flex flex-col"
+                          className={`bg-zinc-950 rounded p-3 flex flex-col border ${
+                            acqEditMode ? "border-zinc-700" : "border-zinc-800"
+                          }`}
                         >
                           <button
                             onClick={() =>
@@ -668,6 +884,18 @@ const CollectionDetails: React.FC = () => {
                               </div>
                             </div>
                           )}
+
+                          {acqEditMode && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleRemoveAllFromAcquisition(card.acq_id)
+                              }
+                              className="mt-3 text-[11px] px-2 py-1 rounded-full border border-red-500 text-red-300 hover:bg-red-900/40"
+                            >
+                              Remove all photos from this acquisition
+                            </button>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -676,7 +904,7 @@ const CollectionDetails: React.FC = () => {
 
                 {selectedAcq && (
                   <div>
-                    <div className="flex items-center justify-between mb-3 gap-2">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-3 gap-3">
                       <div>
                         <button
                           onClick={() =>
@@ -686,7 +914,7 @@ const CollectionDetails: React.FC = () => {
                               page: 1,
                             })
                           }
-                           className="inline-flex items-center text-[11px] sm:text-xs px-2 py-1 rounded-full border border-zinc-700 bg-zinc-700 hover:bg-zinc-800 text-gray-200 mb-3"
+                          className="text-xs text-gray-300 hover:underline"
                         >
                           ← Back to acquisitions
                         </button>
@@ -712,11 +940,29 @@ const CollectionDetails: React.FC = () => {
                             {editMode ? "Done editing" : "Edit mode"}
                           </button>
                           {editMode && (
-                            <p className="text-[10px] text-gray-400 text-right max-w-xs">
-                              In edit mode, use ✓ to keep or – to remove photos
-                              from this collection. Changes are synced
-                              immediately.
-                            </p>
+                            <>
+                              <div className="flex flex-wrap gap-2 mt-1">
+                                <button
+                                  type="button"
+                                  onClick={handleRemoveAllInSelectedAcq}
+                                  className="text-[11px] px-2 py-1 rounded-full border border-red-500 text-red-300 hover:bg-red-900/40"
+                                >
+                                  Remove all photos
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={handleAddAllInSelectedAcq}
+                                  className="text-[11px] px-2 py-1 rounded-full border border-teal-500 text-teal-200 hover:bg-teal-900/40"
+                                >
+                                  Add all photos
+                                </button>
+                              </div>
+                              <p className="text-[10px] text-gray-400 text-right max-w-xs">
+                                In edit mode, use ✓ to keep, – to remove, or the
+                                buttons above to update all photos in this
+                                acquisition.
+                              </p>
+                            </>
                           )}
                         </div>
                       )}
@@ -849,7 +1095,7 @@ const CollectionDetails: React.FC = () => {
               ← Previous
             </button>
 
-            <div className="max-w-5xl max-h-[80vh] mx-4">
+          <div className="max-w-5xl max-h-[80vh] mx-4">
               <img
                 src={fullImageUrl(viewerList[viewerIndex].imageLink)}
                 alt={`${formatAcqId(
