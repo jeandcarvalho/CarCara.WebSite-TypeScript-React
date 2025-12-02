@@ -54,6 +54,57 @@ type ViewerContext = "all" | "acq";
 
 const PHOTOS_PER_PAGE = 24;
 
+// Converte acq_id numérico (YYYYMMDDHHMMSS) em "DD/MM/YYYY HH:MM:SS"
+function formatAcqId(acq_id: string): string {
+  if (/^\d{14}$/.test(acq_id)) {
+    const year = acq_id.slice(0, 4);
+    const month = acq_id.slice(4, 6);
+    const day = acq_id.slice(6, 8);
+    const hour = acq_id.slice(8, 10);
+    const minute = acq_id.slice(10, 12);
+    const second = acq_id.slice(12, 14);
+    return `${day}/${month}/${year} ${hour}:${minute}:${second}`;
+  }
+  return acq_id;
+}
+
+// helpers locais para add/remove itens na coleção
+async function addItemToCollectionApi(
+  collectionId: string,
+  acqId: string,
+  sec: number,
+  token: string
+): Promise<void> {
+  await fetch(`${API_BASE}/collections/${collectionId}/items/add`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      items: [{ acq_id: acqId, sec }],
+    }),
+  });
+}
+
+async function removeItemFromCollectionApi(
+  collectionId: string,
+  acqId: string,
+  sec: number,
+  token: string
+): Promise<void> {
+  await fetch(`${API_BASE}/collections/${collectionId}/items/remove`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      items: [{ acq_id: acqId, sec }],
+    }),
+  });
+}
+
 const CollectionDetails: React.FC = () => {
   const { collectionId } = useParams<{ collectionId: string }>();
   const navigate = useNavigate();
@@ -300,6 +351,79 @@ const CollectionDetails: React.FC = () => {
     );
   };
 
+  // BOTÃO BACK TO MY ACCOUNT: ir direto pra /account com estilo do Back to View
+  const goBackToAccount = () => {
+    navigate("/account");
+  };
+
+  // --- EDIT MODE (mosaico da acquisition) ---
+
+  const [editMode, setEditMode] = useState(false);
+  const [membershipSet, setMembershipSet] = useState<Set<string>>(
+    () => new Set()
+  );
+  const [editError, setEditError] = useState("");
+
+  // helper pra chave única de cada foto
+  const makeKey = (acq_id: string, sec: number) => `${acq_id}-${sec}`;
+
+  // sempre que trocar acquisition selecionada ou dados, reseta membership para "tudo dentro"
+  useEffect(() => {
+    if (!selectedAcq || selectedAcqPhotos.length === 0) {
+      setMembershipSet(new Set());
+      setEditMode(false);
+      setEditError("");
+      return;
+    }
+
+    const next = new Set<string>();
+    selectedAcqPhotos.forEach((p) => {
+      next.add(makeKey(p.acq_id, p.sec));
+    });
+    setMembershipSet(next);
+    setEditMode(false);
+    setEditError("");
+  }, [selectedAcq, selectedAcqPhotos]);
+
+  const handleTogglePhotoInCollection = async (photo: PhotoItem) => {
+    if (!token || !collectionId || !selectedAcq) return;
+
+    const key = makeKey(photo.acq_id, photo.sec);
+    const isInCollection = membershipSet.has(key);
+
+    // optimistic
+    setMembershipSet((prev) => {
+      const next = new Set(prev);
+      if (isInCollection) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+    setEditError("");
+
+    try {
+      if (isInCollection) {
+        await removeItemFromCollectionApi(collectionId, photo.acq_id, photo.sec, token);
+      } else {
+        await addItemToCollectionApi(collectionId, photo.acq_id, photo.sec, token);
+      }
+    } catch (err) {
+      // reverte em caso de erro
+      setMembershipSet((prev) => {
+        const next = new Set(prev);
+        if (isInCollection) {
+          next.add(key);
+        } else {
+          next.delete(key);
+        }
+        return next;
+      });
+      setEditError("Error updating this photo in the collection.");
+    }
+  };
+
   if (!collectionId) {
     return <div>Missing collection id.</div>;
   }
@@ -310,295 +434,360 @@ const CollectionDetails: React.FC = () => {
 
       <div className="flex-grow flex justify-center px-4">
         <main className="w-full max-w-6xl py-4">
+          {/* Back to My Account com estilo do Back to View */}
           <button
-            onClick={() => navigate(-1)}
-            className="text-sm text-gray-300 mb-2 hover:underline"
+            type="button"
+            onClick={goBackToAccount}
+            className="inline-flex items-center text-[11px] sm:text-xs px-2 py-1 rounded-full border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-gray-200 mb-3"
           >
             ← Back to My Account
           </button>
 
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
-            <div>
-              <h1 className="text-3xl font-medium text-yellow-300">
-                {data?.name || "Collection"}
-              </h1>
-              {data?.description && (
-                <p className="text-gray-300 text-sm mt-1">
-                  {data.description}
-                </p>
-              )}
-              <p className="text-gray-400 text-xs mt-1">
-                {totalAcq} acquisitions · {totalSecs} seconds · {totalImages}{" "}
-                images
-              </p>
-            </div>
-
-            <div className="flex gap-2">
-              <button
-                onClick={() =>
-                  updateQueryParams({ mode: "photos", page: 1, acq: null })
-                }
-                className={`px-3 py-1 rounded text-sm font-semibold border ${
-                  viewMode === "photos"
-                    ? "bg-yellow-500 text-black border-yellow-400"
-                    : "bg-zinc-800 text-gray-200 border-zinc-700 hover:bg-zinc-700"
-                }`}
-              >
-                Photos view
-              </button>
-              <button
-                onClick={() =>
-                  updateQueryParams({ mode: "acq", page: 1, acq: null })
-                }
-                className={`px-3 py-1 rounded text-sm font-semibold border ${
-                  viewMode === "acq"
-                    ? "bg-yellow-500 text-black border-yellow-400"
-                    : "bg-zinc-800 text-gray-200 border-zinc-700 hover:bg-zinc-700"
-                }`}
-              >
-                Acquisitions view
-              </button>
-            </div>
-          </div>
-
-          {errorMsg && (
-            <div className="bg-zinc-900 border border-red-700 text-red-100 p-2 rounded mb-4">
-              {errorMsg}
-            </div>
-          )}
-
-          {loading && (
-            <p className="text-gray-300 mb-4">Loading collection data…</p>
-          )}
-
-          {!loading && data && data.items.length === 0 && (
-            <p className="text-gray-300">
-              This collection is empty. Add items from the Highlights panel.
-            </p>
-          )}
-
-          {/* Modo PHOTOS: todas as fotos, paginado */}
-          {!loading && data && viewMode === "photos" && allPhotos.length > 0 && (
-            <section>
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-gray-300 text-sm">
-                  Showing{" "}
-                  <span className="font-semibold">
-                    {(currentPage - 1) * PHOTOS_PER_PAGE +
-                      1 <= allPhotos.length
-                      ? (currentPage - 1) * PHOTOS_PER_PAGE + 1
-                      : allPhotos.length}
-                  </span>{" "}
-                  –{" "}
-                  <span className="font-semibold">
-                    {Math.min(
-                      currentPage * PHOTOS_PER_PAGE,
-                      allPhotos.length
-                    )}
-                  </span>{" "}
-                  of{" "}
-                  <span className="font-semibold">{allPhotos.length}</span>{" "}
-                  photos
-                </p>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    disabled={currentPage <= 1}
-                    onClick={() =>
-                      updateQueryParams({
-                        page: Math.max(1, currentPage - 1),
-                      })
-                    }
-                    className={`px-2 py-1 rounded text-xs border ${
-                      currentPage <= 1
-                        ? "border-zinc-800 text-zinc-600 cursor-not-allowed"
-                        : "border-zinc-700 text-gray-200 hover:bg-zinc-800"
-                    }`}
-                  >
-                    Previous
-                  </button>
-                  <span className="text-gray-300 text-xs">
-                    Page {currentPage} / {totalPages}
-                  </span>
-                  <button
-                    disabled={currentPage >= totalPages}
-                    onClick={() =>
-                      updateQueryParams({
-                        page: Math.min(totalPages, currentPage + 1),
-                      })
-                    }
-                    className={`px-2 py-1 rounded text-xs border ${
-                      currentPage >= totalPages
-                        ? "border-zinc-800 text-zinc-600 cursor-not-allowed"
-                        : "border-zinc-700 text-gray-200 hover:bg-zinc-800"
-                    }`}
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                {photosForCurrentPage.map((p, idx) => {
-                  const globalIndex =
-                    (currentPage - 1) * PHOTOS_PER_PAGE + idx;
-                  return (
-                    <button
-                      key={`${p.acq_id}-${p.sec}-${idx}`}
-                      className="bg-zinc-900 border border-zinc-800 rounded overflow-hidden text-left hover:border-yellow-500 transition"
-                      onClick={() => openViewerFromAll(globalIndex)}
-                    >
-                      <div className="relative w-full h-32">
-                        <img
-                          src={thumbUrl(p.imageLink)}
-                          alt={`${p.acq_id} sec ${p.sec}`}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="px-2 py-1">
-                        <p className="text-xs text-yellow-100 truncate">
-                          {p.acq_id}
-                        </p>
-                        <p className="text-[10px] text-gray-300">
-                          sec {p.sec}
-                        </p>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </section>
-          )}
-
-          {/* Modo ACQ: mosaico de acq_id e depois fotos por acq */}
-          {!loading && data && viewMode === "acq" && (
-            <section className="mt-4">
-              {!selectedAcq && (
-                <>
-                  <p className="text-gray-300 text-sm mb-3">
-                    Click an acquisition to view only the photos from that
-                    acq_id.
+          {/* Big panel englobando toda a visualização da coleção */}
+          <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-3 sm:p-4 flex flex-col gap-4">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+              <div>
+                <h1 className="text-3xl font-medium text-yellow-300">
+                  {data?.name || "Collection"}
+                </h1>
+                {data?.description && (
+                  <p className="text-gray-300 text-sm mt-1">
+                    {data.description}
                   </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {acqCards.map((card) => (
-                      <div
-                        key={card.acq_id}
-                        className="bg-zinc-900 border border-zinc-800 rounded p-3 flex flex-col"
-                      >
-                        <button
-                          onClick={() =>
-                            updateQueryParams({
-                              mode: "acq",
-                              acq: card.acq_id,
-                              page: 1,
-                            })
-                          }
-                          className="text-left"
-                        >
-                          <div className="w-full h-32 mb-2 rounded overflow-hidden border border-zinc-800 bg-zinc-950">
-                            {card.previewLink ? (
-                              <img
-                                src={thumbUrl(card.previewLink)}
-                                alt={card.acq_id}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-xs text-gray-500">
-                                No preview image
-                              </div>
-                            )}
-                          </div>
-                          <p className="text-yellow-100 font-semibold truncate">
-                            {card.acq_id}
-                          </p>
-                          <p className="text-gray-300 text-xs mt-1">
-                            {card.secsCount} seconds · {card.imagesCount} images
-                          </p>
-                        </button>
+                )}
+                <p className="text-gray-400 text-xs mt-1">
+                  {totalAcq} acquisitions · {totalSecs} seconds · {totalImages}{" "}
+                  images
+                </p>
+              </div>
 
-                        {card.files.length > 0 && (
-                          <div className="mt-3">
-                            <p className="text-gray-400 text-xs mb-1">
-                              Files for this acquisition:
-                            </p>
-                            <div className="flex flex-wrap gap-2">
-                              {card.files.map((f) => (
-                                <a
-                                  key={f.ext}
-                                  href={f.link}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="text-[11px] px-2 py-1 border border-zinc-700 rounded hover:border-yellow-500 text-gray-200"
-                                >
-                                  {f.ext.toUpperCase()}
-                                </a>
-                              ))}
-                            </div>
-                          </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() =>
+                    updateQueryParams({ mode: "photos", page: 1, acq: null })
+                  }
+                  className={`px-3 py-1 rounded text-sm font-semibold border ${
+                    viewMode === "photos"
+                      ? "bg-yellow-500 text-black border-yellow-400"
+                      : "bg-zinc-800 text-gray-200 border-zinc-700 hover:bg-zinc-700"
+                  }`}
+                >
+                  Highlights Mosaic
+                </button>
+                <button
+                  onClick={() =>
+                    updateQueryParams({ mode: "acq", page: 1, acq: null })
+                  }
+                  className={`px-3 py-1 rounded text-sm font-semibold border ${
+                    viewMode === "acq"
+                      ? "bg-yellow-500 text-black border-yellow-400"
+                      : "bg-zinc-800 text-gray-200 border-zinc-700 hover:bg-zinc-700"
+                  }`}
+                >
+                  Acquisition Manager
+                </button>
+              </div>
+            </div>
+
+            {errorMsg && (
+              <div className="bg-zinc-900 border border-red-700 text-red-100 p-2 rounded">
+                {errorMsg}
+              </div>
+            )}
+
+            {loading && (
+              <p className="text-gray-300">Loading collection data…</p>
+            )}
+
+            {!loading && data && data.items.length === 0 && (
+              <p className="text-gray-300">
+                This collection is empty. Add items from the Highlights panel.
+              </p>
+            )}
+
+            {/* Modo PHOTOS: todas as fotos, paginado */}
+            {!loading &&
+              data &&
+              viewMode === "photos" &&
+              allPhotos.length > 0 && (
+                <section>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-gray-300 text-sm">
+                      Showing{" "}
+                      <span className="font-semibold">
+                        {(currentPage - 1) * PHOTOS_PER_PAGE + 1 <=
+                        allPhotos.length
+                          ? (currentPage - 1) * PHOTOS_PER_PAGE + 1
+                          : allPhotos.length}
+                      </span>{" "}
+                      –{" "}
+                      <span className="font-semibold">
+                        {Math.min(
+                          currentPage * PHOTOS_PER_PAGE,
+                          allPhotos.length
                         )}
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
+                      </span>{" "}
+                      of{" "}
+                      <span className="font-semibold">{allPhotos.length}</span>{" "}
+                      photos
+                    </p>
 
-              {selectedAcq && (
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
+                    <div className="flex items-center gap-2">
                       <button
+                        disabled={currentPage <= 1}
                         onClick={() =>
-                          updateQueryParams({ mode: "acq", acq: null, page: 1 })
+                          updateQueryParams({
+                            page: Math.max(1, currentPage - 1),
+                          })
                         }
-                        className="text-xs text-gray-300 hover:underline"
+                        className={`px-2 py-1 rounded text-xs border ${
+                          currentPage <= 1
+                            ? "border-zinc-800 text-zinc-600 cursor-not-allowed"
+                            : "border-zinc-700 text-gray-200 hover:bg-zinc-800"
+                        }`}
                       >
-                        ← Back to acquisitions
+                        Previous
                       </button>
-                      <h2 className="text-xl text-yellow-200 mt-1">
-                        Acquisition {selectedAcq}
-                      </h2>
-                      <p className="text-gray-400 text-xs">
-                        {selectedAcqPhotos.length} photos
-                      </p>
+                      <span className="text-gray-300 text-xs">
+                        Page {currentPage} / {totalPages}
+                      </span>
+                      <button
+                        disabled={currentPage >= totalPages}
+                        onClick={() =>
+                          updateQueryParams({
+                            page: Math.min(totalPages, currentPage + 1),
+                          })
+                        }
+                        className={`px-2 py-1 rounded text-xs border ${
+                          currentPage >= totalPages
+                            ? "border-zinc-800 text-zinc-600 cursor-not-allowed"
+                            : "border-zinc-700 text-gray-200 hover:bg-zinc-800"
+                        }`}
+                      >
+                        Next
+                      </button>
                     </div>
                   </div>
 
-                  {selectedAcqPhotos.length === 0 ? (
-                    <p className="text-gray-300">
-                      No images were found for this acquisition in this
-                      collection.
-                    </p>
-                  ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                      {selectedAcqPhotos.map((p, idx) => (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                    {photosForCurrentPage.map((p, idx) => {
+                      const globalIndex =
+                        (currentPage - 1) * PHOTOS_PER_PAGE + idx;
+                      return (
                         <button
                           key={`${p.acq_id}-${p.sec}-${idx}`}
                           className="bg-zinc-900 border border-zinc-800 rounded overflow-hidden text-left hover:border-yellow-500 transition"
-                          onClick={() => openViewerFromAcq(idx)}
+                          onClick={() => openViewerFromAll(globalIndex)}
                         >
                           <div className="relative w-full h-32">
                             <img
                               src={thumbUrl(p.imageLink)}
-                              alt={`${p.acq_id} sec ${p.sec}`}
+                              alt={`${formatAcqId(p.acq_id)} · sec ${p.sec}`}
                               className="w-full h-full object-cover"
                             />
                           </div>
                           <div className="px-2 py-1">
                             <p className="text-xs text-yellow-100 truncate">
-                              {p.acq_id}
+                              {formatAcqId(p.acq_id)}
                             </p>
                             <p className="text-[10px] text-gray-300">
                               sec {p.sec}
                             </p>
                           </div>
                         </button>
+                      );
+                    })}
+                  </div>
+                </section>
+              )}
+
+            {/* Modo ACQ: mosaico de acq_id e depois fotos por acq */}
+            {!loading && data && viewMode === "acq" && (
+              <section className="mt-2">
+                {!selectedAcq && (
+                  <>
+                    <p className="text-gray-300 text-sm mb-3">
+                      Click an acquisition to view and edit only the photos from
+                      that acq_id.
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                      {acqCards.map((card) => (
+                        <div
+                          key={card.acq_id}
+                          className="bg-zinc-950 border border-zinc-800 rounded p-3 flex flex-col"
+                        >
+                          <button
+                            onClick={() =>
+                              updateQueryParams({
+                                mode: "acq",
+                                acq: card.acq_id,
+                                page: 1,
+                              })
+                            }
+                            className="text-left"
+                          >
+                            <div className="w-full h-32 mb-2 rounded overflow-hidden border border-zinc-800 bg-zinc-950">
+                              {card.previewLink ? (
+                                <img
+                                  src={thumbUrl(card.previewLink)}
+                                  alt={formatAcqId(card.acq_id)}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-xs text-gray-500">
+                                  No preview image
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-yellow-100 font-semibold truncate">
+                              {formatAcqId(card.acq_id)}
+                            </p>
+                            <p className="text-gray-300 text-xs mt-1">
+                              {card.secsCount} seconds · {card.imagesCount}{" "}
+                              images
+                            </p>
+                          </button>
+
+                          {card.files.length > 0 && (
+                            <div className="mt-3">
+                              <p className="text-gray-400 text-xs mb-1">
+                                Files for this acquisition:
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {card.files.map((f) => (
+                                  <a
+                                    key={f.ext}
+                                    href={f.link}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-[11px] px-2 py-1 border border-zinc-700 rounded hover:border-yellow-500 text-gray-200"
+                                  >
+                                    {f.ext.toUpperCase()}
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       ))}
                     </div>
-                  )}
-                </div>
-              )}
-            </section>
-          )}
+                  </>
+                )}
+
+                {selectedAcq && (
+                  <div>
+                    <div className="flex items-center justify-between mb-3 gap-2">
+                      <div>
+                        <button
+                          onClick={() =>
+                            updateQueryParams({
+                              mode: "acq",
+                              acq: null,
+                              page: 1,
+                            })
+                          }
+                           className="inline-flex items-center text-[11px] sm:text-xs px-2 py-1 rounded-full border border-zinc-700 bg-zinc-700 hover:bg-zinc-800 text-gray-200 mb-3"
+                        >
+                          ← Back to acquisitions
+                        </button>
+                        <h2 className="text-xl text-yellow-200 mt-1">
+                          Acquisition {formatAcqId(selectedAcq)}
+                        </h2>
+                        <p className="text-gray-400 text-xs">
+                          {selectedAcqPhotos.length} photos
+                        </p>
+                      </div>
+
+                      {selectedAcqPhotos.length > 0 && (
+                        <div className="flex flex-col items-end gap-1">
+                          <button
+                            type="button"
+                            onClick={() => setEditMode((prev) => !prev)}
+                            className={`px-3 py-1 rounded-full border text-xs ${
+                              editMode
+                                ? "border-teal-500 bg-teal-900 text-teal-100 hover:bg-teal-800"
+                                : "border-zinc-600 bg-zinc-800 text-gray-100 hover:bg-zinc-700"
+                            }`}
+                          >
+                            {editMode ? "Done editing" : "Edit mode"}
+                          </button>
+                          {editMode && (
+                            <p className="text-[10px] text-gray-400 text-right max-w-xs">
+                              In edit mode, use ✓ to keep or – to remove photos
+                              from this collection. Changes are synced
+                              immediately.
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {editError && (
+                      <p className="text-xs text-red-300 mb-2">{editError}</p>
+                    )}
+
+                    {selectedAcqPhotos.length === 0 ? (
+                      <p className="text-gray-300">
+                        No images were found for this acquisition in this
+                        collection.
+                      </p>
+                    ) : (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                        {selectedAcqPhotos.map((p, idx) => {
+                          const key = makeKey(p.acq_id, p.sec);
+                          const isInCollection = membershipSet.has(key);
+
+                          return (
+                            <button
+                              key={`${p.acq_id}-${p.sec}-${idx}`}
+                              className={`bg-zinc-950 rounded overflow-hidden text-left transition border ${
+                                isInCollection
+                                  ? "border-zinc-800 hover:border-yellow-500"
+                                  : "border-red-500/80 hover:border-red-400/90"
+                              }`}
+                              onClick={() => openViewerFromAcq(idx)}
+                            >
+                              <div className="relative w-full h-32">
+                                <img
+                                  src={thumbUrl(p.imageLink)}
+                                  alt={`${formatAcqId(p.acq_id)} · sec ${p.sec}`}
+                                  className="w-full h-full object-cover"
+                                />
+                                {editMode && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleTogglePhotoInCollection(p);
+                                    }}
+                                    className={`absolute top-1 right-1 text-[10px] px-1.5 py-0.5 rounded-full border ${
+                                      isInCollection
+                                        ? "bg-teal-500 border-teal-400 text-black"
+                                        : "bg-red-600 border-red-400 text-white"
+                                    }`}
+                                  >
+                                    {isInCollection ? "✓" : "–"}
+                                  </button>
+                                )}
+                              </div>
+                              <div className="px-2 py-1">
+                                <p className="text-xs text-yellow-100 truncate">
+                                  {formatAcqId(p.acq_id)}
+                                </p>
+                                <p className="text-[10px] text-gray-300">
+                                  sec {p.sec}
+                                </p>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </section>
+            )}
+          </div>
         </main>
       </div>
 
@@ -608,12 +797,36 @@ const CollectionDetails: React.FC = () => {
       {viewerOpen && viewerList.length > 0 && (
         <div className="fixed inset-0 z-50 bg-black/80 flex flex-col">
           <div className="flex items-center justify-between px-4 py-2 bg-zinc-950/70 border-b border-zinc-800">
-            <div className="text-xs text-gray-200">
-              <span className="font-semibold">
-                {viewerList[viewerIndex].acq_id}
-              </span>{" "}
-              · sec {viewerList[viewerIndex].sec} · {viewerIndex + 1} /{" "}
-              {viewerList.length}
+            <div className="flex items-center gap-3">
+              <div className="text-xs text-gray-200">
+                <span className="font-semibold">
+                  {formatAcqId(viewerList[viewerIndex].acq_id)}
+                </span>{" "}
+                · sec {viewerList[viewerIndex].sec} · {viewerIndex + 1} /{" "}
+                {viewerList.length}
+              </div>
+              {editMode && viewerContext === "acq" && (
+                (() => {
+                  const current = viewerList[viewerIndex];
+                  const key = makeKey(current.acq_id, current.sec);
+                  const isInCollection = membershipSet.has(key);
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => handleTogglePhotoInCollection(current)}
+                      className={`text-[11px] px-2 py-0.5 rounded-full border ${
+                        isInCollection
+                          ? "border-red-500 text-red-300 hover:bg-red-900/40"
+                          : "border-teal-500 text-teal-200 hover:bg-teal-900/40"
+                      }`}
+                    >
+                      {isInCollection
+                        ? "Remove from this collection"
+                        : "Re-add to this collection"}
+                    </button>
+                  );
+                })()
+              )}
             </div>
             <button
               onClick={closeViewer}
@@ -639,9 +852,9 @@ const CollectionDetails: React.FC = () => {
             <div className="max-w-5xl max-h-[80vh] mx-4">
               <img
                 src={fullImageUrl(viewerList[viewerIndex].imageLink)}
-                alt={`${viewerList[viewerIndex].acq_id} sec ${
-                  viewerList[viewerIndex].sec
-                }`}
+                alt={`${formatAcqId(
+                  viewerList[viewerIndex].acq_id
+                )} · sec ${viewerList[viewerIndex].sec}`}
                 className="max-w-full max-h-[80vh] object-contain rounded border border-zinc-700 bg-black"
               />
             </div>
