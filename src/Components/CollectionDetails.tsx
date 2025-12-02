@@ -356,8 +356,7 @@ const CollectionDetails: React.FC = () => {
   const totalAcq = data?.items.length ?? 0;
   const totalSecs =
     data?.items.reduce((sum, it) => sum + it.secs.length, 0) ?? 0;
-  const totalImages =
-    data?.items.reduce((sum, it) => sum + it.images.length, 0) ?? 0;
+
 
   // Paginação do modo “photos”
   const totalPages =
@@ -637,8 +636,7 @@ const CollectionDetails: React.FC = () => {
                   </p>
                 )}
                 <p className="text-gray-400 text-xs mt-1">
-                  {totalAcq} acquisitions · {totalSecs} seconds · {totalImages}{" "}
-                  images
+                  {totalAcq} acquisitions · {totalSecs} Highlights
                 </p>
               </div>
 
@@ -795,8 +793,8 @@ const CollectionDetails: React.FC = () => {
                   <>
                     <div className="flex items-center justify-between mb-3 gap-2">
                       <p className="text-gray-300 text-sm">
-                        Click an acquisition to view and edit only the photos
-                        from that acq_id.
+                        Click an acquisition to view and edit only the highlights.
+                   
                       </p>
                       {acqCards.length > 0 && (
                         <div className="flex flex-col items-end gap-1">
@@ -859,8 +857,8 @@ const CollectionDetails: React.FC = () => {
                               {formatAcqId(card.acq_id)}
                             </p>
                             <p className="text-gray-300 text-xs mt-1">
-                              {card.secsCount} seconds · {card.imagesCount}{" "}
-                              images
+                             {card.imagesCount}{" "}
+                              Highlights
                             </p>
                           </button>
 
@@ -893,7 +891,7 @@ const CollectionDetails: React.FC = () => {
                               }
                               className="mt-3 text-[11px] px-2 py-1 rounded-full border border-red-500 text-red-300 hover:bg-red-900/40"
                             >
-                              Remove all photos from this acquisition
+                              Remove this acquisition
                             </button>
                           )}
                         </div>
@@ -914,9 +912,9 @@ const CollectionDetails: React.FC = () => {
                               page: 1,
                             })
                           }
-                          className="text-xs text-gray-300 hover:underline"
+                           className="inline-flex items-center text-[11px] sm:text-xs px-2 py-1 rounded-full border border-zinc-700 bg-zinc-800 hover:bg-zinc-800 text-gray-200 mb-3"
                         >
-                          ← Back to acquisitions
+                          ← Back to Acquisitions
                         </button>
                         <h2 className="text-xl text-yellow-200 mt-1">
                           Acquisition {formatAcqId(selectedAcq)}
@@ -1021,7 +1019,7 @@ const CollectionDetails: React.FC = () => {
                                   {formatAcqId(p.acq_id)}
                                 </p>
                                 <p className="text-[10px] text-gray-300">
-                                  sec {p.sec}
+                                  second: {p.sec}
                                 </p>
                               </div>
                             </button>
@@ -1048,7 +1046,7 @@ const CollectionDetails: React.FC = () => {
                 <span className="font-semibold">
                   {formatAcqId(viewerList[viewerIndex].acq_id)}
                 </span>{" "}
-                · sec {viewerList[viewerIndex].sec} · {viewerIndex + 1} /{" "}
+                · second: {viewerList[viewerIndex].sec} · {viewerIndex + 1} /{" "}
                 {viewerList.length}
               </div>
               {editMode && viewerContext === "acq" && (
@@ -1100,7 +1098,7 @@ const CollectionDetails: React.FC = () => {
                 src={fullImageUrl(viewerList[viewerIndex].imageLink)}
                 alt={`${formatAcqId(
                   viewerList[viewerIndex].acq_id
-                )} · sec ${viewerList[viewerIndex].sec}`}
+                )} · second: ${viewerList[viewerIndex].sec}`}
                 className="max-w-full max-h-[80vh] object-contain rounded border border-zinc-700 bg-black"
               />
             </div>
