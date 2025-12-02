@@ -1,3 +1,4 @@
+// src/Components/MyAccount.tsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
@@ -149,7 +150,7 @@ const MyAccount: React.FC = () => {
           )}
 
           {loading ? (
-            <p className="text-gray-200">Loading...</p>
+            <p className="text-gray-200">Loading.</p>
           ) : (
             <>
               {/* User info */}
@@ -240,7 +241,7 @@ const MyAccount: React.FC = () => {
                             onClick={() => navigate(`/collections/${c.id}`)}
                             className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-1 px-3 rounded text-sm"
                           >
-                            View items
+                            View collection
                           </button>
 
                           <button
