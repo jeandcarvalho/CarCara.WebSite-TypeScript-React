@@ -12,7 +12,7 @@ import MyAccount from "./Components/MyAccount";
 import Acquisition from "./Components/Acquisition/Acquisition";
 import CollectionDetails from "./Components/CollectionDetails";
 import LLMResult from "./Components/LLMResult";
-import TestHandler from "./Components/TestHandler";
+import TestHandler from "./Components/Evaluation/TestHandler";
 
 
 export const Routes = createHashRouter([

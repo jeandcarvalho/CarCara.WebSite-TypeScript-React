@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
+import loadgif from "./img/gif.gif"; // ajusta se o path for diferente
 
 const API_BASE = "https://carcara-web-api.onrender.com";
 
@@ -37,6 +38,20 @@ type LLMResultDocsResponse = {
   prompt?: string | null;
 };
 
+type LLMTestEval = {
+  id?: string;
+  collectionId: string;
+  acq_id: string;
+  sec: number;
+  test1: number;
+  test2: number;
+  test3: number;
+  test4: number;
+  test5: number;
+};
+
+type EvalMap = Record<string, LLMTestEval>;
+
 const formatDateTime = (iso?: string | null) => {
   if (!iso) return "-";
   const d = new Date(iso);
@@ -44,12 +59,18 @@ const formatDateTime = (iso?: string | null) => {
   return d.toLocaleString();
 };
 
+const makeKey = (acq_id: string, sec: number) => `${acq_id}__${sec}`;
+
 const TestHandler: React.FC = () => {
   const { collectionId } = useParams<{ collectionId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const token = localStorage.getItem("token");
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("token")
+      : null;
+  const isAuthenticated = !!token;
 
   const [errorMsg, setErrorMsg] = useState("");
   const [globalLoading, setGlobalLoading] = useState(true);
@@ -69,25 +90,30 @@ const TestHandler: React.FC = () => {
     null
   );
 
+  const [evalsByKey, setEvalsByKey] = useState<EvalMap>({});
+  const [evalsLoading, setEvalsLoading] = useState(false);
+  const [savingEval, setSavingEval] = useState(false);
+
+  const [currentEval, setCurrentEval] = useState<{
+    test1: number;
+    test2: number;
+    test3: number;
+    test4: number;
+    test5: number;
+  } | null>(null);
+
   const testNameParam = searchParams.get("testName") ?? "";
   const llmModelParam = searchParams.get("llmModel") ?? "";
   const promptTypeParam = searchParams.get("promptType") ?? "";
 
-  // meta efetiva (mistura query + resposta da API)
-  const effectiveTestName =
-    docsResp?.testName ?? testNameParam;
-  const effectiveLlmModel =
-    docsResp?.llmModel ?? llmModelParam;
+  const effectiveTestName = docsResp?.testName ?? testNameParam;
+  const effectiveLlmModel = docsResp?.llmModel ?? llmModelParam;
   const effectivePromptType =
     docsResp?.promptType ?? promptTypeParam;
   const effectivePrompt = docsResp?.prompt ?? null;
 
+  // 1) carrega docs do teste (LLMResult)
   useEffect(() => {
-    if (!token) {
-      navigate("/auth");
-      return;
-    }
-
     if (!collectionId) {
       setErrorMsg("Collection id missing.");
       setGlobalLoading(false);
@@ -117,11 +143,12 @@ const TestHandler: React.FC = () => {
 
         console.log("[TestHandler] fetching:", url);
 
-        const res = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const headers: HeadersInit = {};
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+
+        const res = await fetch(url, { headers });
 
         const data = await res.json().catch(() => null);
 
@@ -168,54 +195,33 @@ const TestHandler: React.FC = () => {
         console.log("[TestHandler] items array:", items);
 
         const metaTestName: string =
-          data?.testName ??
-          data?.test_name ??
-          testNameParam;
+          data?.testName ?? data?.test_name ?? testNameParam;
 
         const metaLlmModel: string =
-          data?.llmModel ??
-          data?.llm_model ??
-          llmModelParam;
+          data?.llmModel ?? data?.llm_model ?? llmModelParam;
 
         const metaPromptType: string =
-          data?.promptType ??
-          data?.prompt_type ??
-          promptTypeParam;
+          data?.promptType ?? data?.prompt_type ?? promptTypeParam;
 
         const metaPrompt: string | null =
-          data?.prompt ??
-          data?.prompt_text ??
-          null;
+          data?.prompt ?? data?.prompt_text ?? null;
 
-        const mappedItems: LLMResultDoc[] = items.map((d: any) => ({
+        let mappedItems: LLMResultDoc[] = items.map((d: any) => ({
           id:
             d.id ??
             d._id ??
             `${d.acq_id}-${d.sec ?? d.center_sec ?? 0}`,
           acq_id: d.acq_id,
           sec: d.sec ?? d.center_sec ?? 0,
-          testName:
-            d.testName ??
-            d.test_name ??
-            metaTestName,
-          llmModel:
-            d.llmModel ??
-            d.llm_model ??
-            metaLlmModel,
+          testName: d.testName ?? d.test_name ?? metaTestName,
+          llmModel: d.llmModel ?? d.llm_model ?? metaLlmModel,
           promptType:
-            d.promptType ??
-            d.prompt_type ??
-            metaPromptType,
-          prompt:
-            d.prompt ??
-            d.prompt_text ??
-            metaPrompt,
+            d.promptType ?? d.prompt_type ?? metaPromptType,
+          prompt: d.prompt ?? d.prompt_text ?? metaPrompt,
           response: d.response ?? d.answer ?? null,
           promptTokens: d.promptTokens ?? d.prompt_tokens ?? null,
           completionTokens:
-            d.completionTokens ??
-            d.completion_tokens ??
-            null,
+            d.completionTokens ?? d.completion_tokens ?? null,
           totalTokens: d.totalTokens ?? d.total_tokens ?? null,
           latencyMs:
             d.latencyMs ??
@@ -230,6 +236,13 @@ const TestHandler: React.FC = () => {
               : new Date().toISOString(),
         }));
 
+        // ordena por acq_id e depois por sec
+        mappedItems = mappedItems.sort((a, b) => {
+          const acqCmp = a.acq_id.localeCompare(b.acq_id);
+          if (acqCmp !== 0) return acqCmp;
+          return a.sec - b.sec;
+        });
+
         console.log("[TestHandler] mapped items:", mappedItems);
 
         setDocsResp({
@@ -242,6 +255,12 @@ const TestHandler: React.FC = () => {
           promptType: metaPromptType,
           prompt: metaPrompt,
         });
+
+        // auto-seleciona o primeiro doc (serve tanto pra modo público quanto logado)
+        if (!selectedDoc && mappedItems.length > 0) {
+          setSelectedDoc(mappedItems[0]);
+        }
+
         setGlobalLoading(false);
       } catch (err) {
         console.error("[TestHandler] fetch error:", err);
@@ -257,13 +276,130 @@ const TestHandler: React.FC = () => {
     loadDocs();
   }, [
     token,
-    navigate,
     collectionId,
     testNameParam,
     llmModelParam,
     promptTypeParam,
     page,
+    selectedDoc,
   ]);
+
+  // 2) carrega avaliações se autenticado
+  useEffect(() => {
+    if (
+      !isAuthenticated ||
+      !collectionId ||
+      !effectiveTestName ||
+      !effectiveLlmModel ||
+      !effectivePromptType
+    ) {
+      setEvalsByKey({});
+      return;
+    }
+
+    const loadEvals = async () => {
+      try {
+        setEvalsLoading(true);
+        const params = new URLSearchParams({
+          collectionId,
+          testName: effectiveTestName,
+          llmModel: effectiveLlmModel,
+          promptType: effectivePromptType,
+        });
+
+        const url = `${API_BASE}/api/llm/eval?${params.toString()}`;
+
+        console.log("[TestHandler] fetching evals:", url);
+
+        const res = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json().catch(() => null);
+        console.log("[TestHandler] evals raw:", data);
+
+        if (!res.ok) {
+          console.warn(
+            "[TestHandler] error loading evals:",
+            data?.error || data
+          );
+          return;
+        }
+
+        let items: any[] = [];
+        if (Array.isArray(data)) {
+          items = data;
+        } else if (data && Array.isArray(data.items)) {
+          items = data.items;
+        } else if (data && Array.isArray(data.data)) {
+          items = data.data;
+        }
+
+        const mapped: EvalMap = {};
+        items.forEach((e: any) => {
+          if (!e.acq_id || e.sec == null) return;
+          const key = makeKey(String(e.acq_id), Number(e.sec));
+          mapped[key] = {
+            id: e.id ?? e._id,
+            collectionId: String(e.collectionId ?? collectionId),
+            acq_id: String(e.acq_id),
+            sec: Number(e.sec),
+            test1: Number(e.test1 ?? 0),
+            test2: Number(e.test2 ?? 0),
+            test3: Number(e.test3 ?? 0),
+            test4: Number(e.test4 ?? 0),
+            test5: Number(e.test5 ?? 0),
+          };
+        });
+
+        setEvalsByKey(mapped);
+      } catch (err) {
+        console.error("[TestHandler] error loading evals:", err);
+      } finally {
+        setEvalsLoading(false);
+      }
+    };
+
+    loadEvals();
+  }, [
+    isAuthenticated,
+    token,
+    collectionId,
+    effectiveTestName,
+    effectiveLlmModel,
+    effectivePromptType,
+  ]);
+
+  // 3) atualiza currentEval quando muda doc ou evals
+  useEffect(() => {
+    if (!isAuthenticated || !selectedDoc) {
+      setCurrentEval(null);
+      return;
+    }
+
+    const key = makeKey(selectedDoc.acq_id, selectedDoc.sec);
+    const existing = evalsByKey[key];
+
+    if (existing) {
+      setCurrentEval({
+        test1: existing.test1,
+        test2: existing.test2,
+        test3: existing.test3,
+        test4: existing.test4,
+        test5: existing.test5,
+      });
+    } else {
+      setCurrentEval({
+        test1: 0,
+        test2: 0,
+        test3: 0,
+        test4: 0,
+        test5: 0,
+      });
+    }
+  }, [isAuthenticated, selectedDoc, evalsByKey]);
 
   const totalPages =
     docsResp && docsResp.pageSize > 0
@@ -277,10 +413,144 @@ const TestHandler: React.FC = () => {
 
   const handleChangePage = (newPage: number) => {
     setPage(newPage);
-    // Mantém a página atual também na query string
     const newParams = new URLSearchParams(searchParams);
     newParams.set("page", String(newPage));
     setSearchParams(newParams);
+  };
+
+  const getRowEvalStatus = (doc: LLMResultDoc) => {
+    if (!isAuthenticated) return "none";
+    const key = makeKey(doc.acq_id, doc.sec);
+    const ev = evalsByKey[key];
+    if (!ev) return "none";
+    const vals = [ev.test1, ev.test2, ev.test3, ev.test4, ev.test5];
+    const positiveCount = vals.filter((v) => v > 0).length;
+    if (positiveCount === 0) return "none";
+    if (positiveCount === vals.length) return "full";
+    return "partial";
+  };
+
+  const rowStatusClass = (status: string) => {
+    if (status === "partial") {
+      return "bg-yellow-900/40";
+    }
+    if (status === "full") {
+      return "bg-emerald-900/30";
+    }
+    return "";
+  };
+
+  const rowStatusLabel = (status: string) => {
+    if (status === "partial") return "Partial";
+    if (status === "full") return "Done";
+    return "—";
+  };
+
+  const handleSetScore = (
+    field: keyof NonNullable<typeof currentEval>,
+    value: number
+  ) => {
+    if (!isAuthenticated || !currentEval) return;
+    const clamped = Math.max(1, Math.min(5, value)); // 1..5
+    setCurrentEval((prev) => {
+      if (!prev) return prev;
+      const currentVal = prev[field] as number;
+      const newVal = currentVal === clamped ? 0 : clamped; // desmarca se clicar de novo
+      return {
+        ...prev,
+        [field]: newVal,
+      };
+    });
+  };
+
+  const handleSaveEval = async () => {
+    if (
+      !isAuthenticated ||
+      !token ||
+      !collectionId ||
+      !selectedDoc ||
+      !currentEval ||
+      !effectiveTestName ||
+      !effectiveLlmModel ||
+      !effectivePromptType
+    ) {
+      return;
+    }
+
+    try {
+      setSavingEval(true);
+      setErrorMsg("");
+
+      const body = {
+        collectionId,
+        acq_id: selectedDoc.acq_id,
+        sec: selectedDoc.sec,
+        testName: effectiveTestName,
+        llmModel: effectiveLlmModel,
+        promptType: effectivePromptType,
+        test1: currentEval.test1,
+        test2: currentEval.test2,
+        test3: currentEval.test3,
+        test4: currentEval.test4,
+        test5: currentEval.test5,
+      };
+
+      const res = await fetch(`${API_BASE}/api/llm/eval`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+      });
+
+      const data = await res.json().catch(() => null);
+      console.log("[TestHandler] save eval result:", data);
+
+      if (!res.ok) {
+        setErrorMsg(
+          data?.error ||
+            data?.message ||
+            "Error saving evaluation."
+        );
+        return;
+      }
+
+      const key = makeKey(selectedDoc.acq_id, selectedDoc.sec);
+      setEvalsByKey((prev) => ({
+        ...prev,
+        [key]: {
+          id: data?.id ?? data?._id ?? prev[key]?.id,
+          collectionId,
+          acq_id: selectedDoc.acq_id,
+          sec: selectedDoc.sec,
+          test1: currentEval.test1,
+          test2: currentEval.test2,
+          test3: currentEval.test3,
+          test4: currentEval.test4,
+          test5: currentEval.test5,
+        },
+      }));
+    } catch (err) {
+      console.error("[TestHandler] error saving eval:", err);
+      setErrorMsg("Connection error while saving evaluation.");
+    } finally {
+      setSavingEval(false);
+    }
+  };
+
+  const handlePrevNext = (direction: "prev" | "next") => {
+    if (!docsResp || !selectedDoc) return;
+    const items = docsResp.items;
+    const idx = items.findIndex(
+      (d) =>
+        d.id === selectedDoc.id ||
+        (d.acq_id === selectedDoc.acq_id && d.sec === selectedDoc.sec)
+    );
+    if (idx === -1) return;
+    const newIdx = direction === "prev" ? idx - 1 : idx + 1;
+    if (newIdx < 0 || newIdx >= items.length) return;
+    setSelectedDoc(items[newIdx]);
   };
 
   return (
@@ -293,12 +563,15 @@ const TestHandler: React.FC = () => {
             <h1 className="text-3xl font-medium text-yellow-300">
               LLM Test Handler
             </h1>
-            <button
-              onClick={handleBackToTests}
-              className="bg-zinc-800 hover:bg-zinc-700 text-gray-100 text-sm font-semibold py-1 px-3 rounded"
-            >
-              Back to tests
-            </button>
+
+            {isAuthenticated && (
+              <button
+                onClick={handleBackToTests}
+                className="bg-zinc-800 hover:bg-zinc-700 text-gray-100 text-sm font-semibold py-2 px-4 rounded-lg"
+              >
+                Back to tests
+              </button>
+            )}
           </div>
 
           {collectionId && (
@@ -348,198 +621,488 @@ const TestHandler: React.FC = () => {
           )}
 
           {globalLoading ? (
-            <p className="text-gray-200">Loading documents...</p>
+            <div className="flex flex-col items-center justify-center py-10">
+              <img
+                src={loadgif}
+                alt="Loading..."
+                className="w-24 h-24 mb-3"
+              />
+              <p className="text-gray-200 text-sm">
+                Loading documents...
+              </p>
+            </div>
           ) : !docsResp || docsResp.items.length === 0 ? (
             <p className="text-gray-300 text-sm">
               No documents for this test (or unable to load them).
             </p>
           ) : (
             <>
-              <section className="bg-zinc-900 border border-zinc-800 rounded p-4">
-                <h2 className="text-xl text-yellow-200 mb-2">
-                  Documents ({docsResp.total})
-                </h2>
+              {isAuthenticated ? (
+                // ===================== MODO LOGADO =====================
+                <div className="flex flex-col gap-4 lg:grid lg:grid-cols-2 lg:gap-4">
+                  {/* DETAIL PANEL - topo full width */}
+                  <section className="bg-zinc-900 border border-zinc-800 rounded p-4 order-1 lg:order-1 lg:col-span-2">
+                    <div className="flex items-center justify-between mb-3">
+                      <h2 className="text-xl text-yellow-200">
+                        Detail
+                      </h2>
 
-                {docsLoading && (
-                  <p className="text-gray-400 text-xs mb-1">
-                    Updating page...
-                  </p>
-                )}
-
-                <div className="overflow-x-auto max-h-[60vh] overflow-y-auto border border-zinc-800 rounded">
-                  <table className="min-w-full text-xs">
-                    <thead className="bg-zinc-800">
-                      <tr>
-                        <th className="px-2 py-1 text-left text-gray-200">
-                          acq_id
-                        </th>
-                        <th className="px-2 py-1 text-left text-gray-200">
-                          sec
-                        </th>
-                        <th className="px-2 py-1 text-left text-gray-200">
-                          latency (ms)
-                        </th>
-                        <th className="px-2 py-1 text-left text-gray-200">
-                          tokens
-                        </th>
-                        <th className="px-2 py-1 text-left text-gray-200">
-                          created at
-                        </th>
-                        <th className="px-2 py-1 text-right text-gray-200">
-                          actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {docsResp.items.map((d) => (
-                        <tr
-                          key={d.id}
-                          className="border-t border-zinc-800 hover:bg-zinc-800/60"
+                      <div className="flex gap-3 text-sm">
+                        <button
+                          onClick={() => handlePrevNext("prev")}
+                          className="py-2 px-4 rounded-lg border border-zinc-700 text-gray-100 hover:bg-zinc-800 font-medium"
                         >
-                          <td className="px-2 py-1 text-gray-100">
-                            {d.acq_id}
-                          </td>
-                          <td className="px-2 py-1 text-gray-100">
-                            {d.sec}
-                          </td>
-                          <td className="px-2 py-1 text-gray-100">
-                            {d.latencyMs != null ? d.latencyMs : "-"}
-                          </td>
-                          <td className="px-2 py-1 text-gray-100">
-                            {d.totalTokens != null ? d.totalTokens : "-"}
-                          </td>
-                          <td className="px-2 py-1 text-gray-400">
-                            {formatDateTime(d.createdAt)}
-                          </td>
-                          <td className="px-2 py-1 text-right">
-                            <button
-                              onClick={() => setSelectedDoc(d)}
-                              className="bg-yellow-500 hover:bg-yellow-400 text-black font-semibold py-0.5 px-2 rounded"
-                            >
-                              View
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                          ← Prev
+                        </button>
+                        <button
+                          onClick={() => handlePrevNext("next")}
+                          className="py-2 px-4 rounded-lg border border-zinc-700 text-gray-100 hover:bg-zinc-800 font-medium"
+                        >
+                          Next →
+                        </button>
+                      </div>
+                    </div>
+
+                    {!selectedDoc ? (
+                      <p className="text-sm text-gray-300">
+                        Select a document to view details.
+                      </p>
+                    ) : (
+                      <div className="space-y-3 text-sm">
+                        <div>
+                          <p className="text-[11px] text-gray-400 mb-1">
+                            Prompt (raw)
+                          </p>
+                          <div className="bg-zinc-800 border border-zinc-700 rounded p-3 whitespace-pre-wrap text-gray-100 text-[12px] max-h-48 overflow-y-auto">
+                            {selectedDoc.prompt ||
+                              "(no prompt saved)"}
+                          </div>
+                        </div>
+
+                        <div>
+                          <p className="text-[11px] text-gray-400 mb-1">
+                            Response
+                          </p>
+                          <div className="bg-zinc-800 border border-zinc-700 rounded p-3 whitespace-pre-wrap text-gray-100 text-[12px] max-h-48 overflow-y-auto">
+                            {selectedDoc.response ||
+                              "(no response saved)"}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </section>
+
+                  {/* EVALUATION PANEL */}
+                  <section className="bg-zinc-900 border border-zinc-800 rounded p-4 order-2 lg:order-3">
+                    <h2 className="text-xl text-yellow-200 mb-3">
+                      Evaluation
+                    </h2>
+
+                    {!selectedDoc ? (
+                      <p className="text-sm text-gray-300">
+                        Select a document to rate.
+                      </p>
+                    ) : (
+                      <>
+                        <p className="text-xs text-gray-300 mb-2">
+                          Give scores (1 to 5) for this second.{" "}
+                          <span className="text-gray-400">
+                            Click again on the same value to clear.
+                          </span>
+                        </p>
+
+                        {currentEval && (
+                          <div className="space-y-3 text-[12px] text-gray-200 mb-4">
+                            {(
+                              [
+                                "test1",
+                                "test2",
+                                "test3",
+                                "test4",
+                                "test5",
+                              ] as const
+                            ).map((field, idx) => (
+                              <div key={field}>
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="font-semibold text-yellow-200">
+                                    Test {idx + 1}
+                                  </span>
+                                  <span className="text-gray-400">
+                                    current:{" "}
+                                    {currentEval[
+                                      field as keyof typeof currentEval
+                                    ] === 0
+                                      ? "-"
+                                      : currentEval[
+                                          field as keyof typeof currentEval
+                                        ]}
+                                  </span>
+                                </div>
+                                <div className="flex gap-2 flex-wrap">
+                                  {[1, 2, 3, 4, 5].map((val) => (
+                                    <button
+                                      key={val}
+                                      onClick={() =>
+                                        handleSetScore(field, val)
+                                      }
+                                      className={`py-1.5 px-3 rounded-lg border text-sm ${
+                                        currentEval[
+                                          field as keyof typeof currentEval
+                                        ] === val
+                                          ? "bg-yellow-400 text-black border-yellow-300"
+                                          : "bg-zinc-800 text-gray-100 border-zinc-600 hover:bg-zinc-700"
+                                      }`}
+                                    >
+                                      {val}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        <button
+                          onClick={handleSaveEval}
+                          disabled={savingEval || !currentEval}
+                          className={`w-full py-2 rounded-lg font-semibold text-sm ${
+                            savingEval
+                              ? "bg-yellow-700 text-black cursor-wait"
+                              : "bg-yellow-500 hover:bg-yellow-400 text-black"
+                          }`}
+                        >
+                          {savingEval
+                            ? "Saving evaluation..."
+                            : "Save evaluation"}
+                        </button>
+
+                        {evalsLoading && (
+                          <p className="text-[11px] text-gray-400 mt-2">
+                            Loading evaluations...
+                          </p>
+                        )}
+                      </>
+                    )}
+                  </section>
+
+                  {/* DOCUMENTS PANEL */}
+                  <section className="bg-zinc-900 border border-zinc-800 rounded p-4 order-3 lg:order-2">
+                    <div className="flex items-center justify-between mb-2">
+                      <h2 className="text-xl text-yellow-200">
+                        Documents ({docsResp.total})
+                      </h2>
+                    </div>
+
+                    {docsLoading && (
+                      <p className="text-gray-400 text-xs mb-1">
+                        Updating page...
+                      </p>
+                    )}
+
+                    <div className="overflow-x-auto max-h-[60vh] overflow-y-auto border border-zinc-800 rounded">
+                      <table className="min-w-full text-xs">
+                        <thead className="bg-zinc-800">
+                          <tr>
+                            <th className="px-2 py-1 text-left text-gray-200">
+                              acq_id
+                            </th>
+                            <th className="px-2 py-1 text-left text-gray-200">
+                              sec
+                            </th>
+                            <th className="px-2 py-1 text-left text-gray-200">
+                              status
+                            </th>
+                            <th className="px-2 py-1 text-right text-gray-200">
+                              actions
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {docsResp.items.map((d) => {
+                            const status = getRowEvalStatus(d);
+                            const isSelected =
+                              selectedDoc &&
+                              selectedDoc.acq_id === d.acq_id &&
+                              selectedDoc.sec === d.sec;
+                            return (
+                              <tr
+                                key={d.id}
+                                className={`border-t border-zinc-800 hover:bg-zinc-800/60 cursor-pointer ${rowStatusClass(
+                                  status
+                                )} ${
+                                  isSelected
+                                    ? "bg-yellow-900/70 border-l-4 border-yellow-400"
+                                    : ""
+                                }`}
+                                onClick={() => setSelectedDoc(d)}
+                              >
+                                <td className="px-2 py-1 text-gray-100">
+                                  {d.acq_id}
+                                </td>
+                                <td className="px-2 py-1 text-gray-100">
+                                  {d.sec}
+                                </td>
+                                <td className="px-2 py-1 text-gray-100">
+                                  {rowStatusLabel(status)}
+                                </td>
+                                <td className="px-2 py-1 text-right">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedDoc(d);
+                                    }}
+                                    className="bg-yellow-500 hover:bg-yellow-400 text-black font-semibold py-1 px-3 rounded-md text-[11px]"
+                                  >
+                                    View
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {totalPages > 1 && (
+                      <div className="flex items-center justify-between mt-3 text-xs text-gray-300">
+                        <span>
+                          Page {page} of {totalPages} — {docsResp.total} docs
+                        </span>
+                        <div className="flex gap-2">
+                          <button
+                            disabled={page <= 1}
+                            onClick={() =>
+                              handleChangePage(Math.max(1, page - 1))
+                            }
+                            className={`py-1.5 px-3 rounded-lg border border-zinc-700 ${
+                              page <= 1
+                                ? "text-gray-500 cursor-not-allowed"
+                                : "text-gray-100 hover:bg-zinc-800"
+                            }`}
+                          >
+                            Prev
+                          </button>
+                          <button
+                            disabled={page >= totalPages}
+                            onClick={() =>
+                              handleChangePage(
+                                Math.min(totalPages, page + 1)
+                              )
+                            }
+                            className={`py-1.5 px-3 rounded-lg border border-zinc-700 ${
+                              page >= totalPages
+                                ? "text-gray-500 cursor-not-allowed"
+                                : "text-gray-100 hover:bg-zinc-800"
+                            }`}
+                          >
+                            Next
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </section>
                 </div>
+              ) : (
+                // ===================== MODO PÚBLICO (SEM LOGIN) =====================
+                <div className="flex flex-col gap-4">
+                  {/* DETAIL EM CIMA (FULL) */}
+                  <section className="bg-zinc-900 border border-zinc-800 rounded p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h2 className="text-xl text-yellow-200">
+                        Detail
+                      </h2>
 
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-between mt-2 text-xs text-gray-300">
-                    <span>
-                      Page {page} of {totalPages} — {docsResp.total} docs
-                    </span>
-                    <div className="flex gap-2">
-                      <button
-                        disabled={page <= 1}
-                        onClick={() =>
-                          handleChangePage(Math.max(1, page - 1))
-                        }
-                        className={`py-1 px-2 rounded border border-zinc-700 ${
-                          page <= 1
-                            ? "text-gray-500 cursor-not-allowed"
-                            : "text-gray-100 hover:bg-zinc-800"
-                        }`}
-                      >
-                        Prev
-                      </button>
-                      <button
-                        disabled={page >= totalPages}
-                        onClick={() =>
-                          handleChangePage(
-                            Math.min(totalPages, page + 1)
-                          )
-                        }
-                        className={`py-1 px-2 rounded border border-zinc-700 ${
-                          page >= totalPages
-                            ? "text-gray-500 cursor-not-allowed"
-                            : "text-gray-100 hover:bg-zinc-800"
-                        }`}
-                      >
-                        Next
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </section>
-
-              {selectedDoc && (
-                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-                  <div className="bg-zinc-900 border border-zinc-700 rounded-xl max-w-4xl w-full max-h-[85vh] overflow-hidden flex flex-col">
-                    <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-700">
-                      <div>
-                        <p className="text-sm text-yellow-100 font-semibold">
-                          LLM Result Detail
-                        </p>
-                        <p className="text-[11px] text-gray-400">
-                          acq_id: {selectedDoc.acq_id} — sec:{" "}
-                          {selectedDoc.sec} — {selectedDoc.llmModel}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => setSelectedDoc(null)}
-                        className="text-gray-300 hover:text-white text-sm font-semibold"
-                      >
-                        Close
-                      </button>
-                    </div>
-
-                    <div className="flex-1 overflow-y-auto p-4 space-y-4 text-sm">
-                      <div>
-                        <p className="text-xs text-gray-400 mb-1">
-                          Prompt (raw)
-                        </p>
-                        <div className="bg-zinc-800 border border-zinc-700 rounded p-2 whitespace-pre-wrap text-gray-100 text-xs">
-                          {selectedDoc.prompt || "(no prompt saved)"}
-                        </div>
-                      </div>
-
-                      <div>
-                        <p className="text-xs text-gray-400 mb-1">
-                          Response
-                        </p>
-                        <div className="bg-zinc-800 border border-zinc-700 rounded p-2 whitespace-pre-wrap text-gray-100 text-xs">
-                          {selectedDoc.response || "(no response saved)"}
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px] text-gray-300">
-                        <div>
-                          <span className="font-semibold text-yellow-200">
-                            latency:
-                          </span>{" "}
-                          {selectedDoc.latencyMs != null
-                            ? `${selectedDoc.latencyMs} ms`
-                            : "-"}
-                        </div>
-                        <div>
-                          <span className="font-semibold text-yellow-200">
-                            prompt tokens:
-                          </span>{" "}
-                          {selectedDoc.promptTokens ?? "-"}
-                        </div>
-                        <div>
-                          <span className="font-semibold text-yellow-200">
-                            completion tokens:
-                          </span>{" "}
-                          {selectedDoc.completionTokens ?? "-"}
-                        </div>
-                        <div>
-                          <span className="font-semibold text-yellow-200">
-                            total tokens:
-                          </span>{" "}
-                          {selectedDoc.totalTokens ?? "-"}
-                        </div>
-                        <div className="col-span-2">
-                          <span className="font-semibold text-yellow-200">
-                            created at:
-                          </span>{" "}
-                          {formatDateTime(selectedDoc.createdAt)}
-                        </div>
+                      <div className="flex gap-3 text-sm">
+                        <button
+                          onClick={() => handlePrevNext("prev")}
+                          className="py-2 px-4 rounded-lg border border-zinc-700 text-gray-100 hover:bg-zinc-800 font-medium"
+                        >
+                          ← Prev
+                        </button>
+                        <button
+                          onClick={() => handlePrevNext("next")}
+                          className="py-2 px-4 rounded-lg border border-zinc-700 text-gray-100 hover:bg-zinc-800 font-medium"
+                        >
+                          Next →
+                        </button>
                       </div>
                     </div>
-                  </div>
+
+                    {!selectedDoc ? (
+                      <p className="text-sm text-gray-300">
+                        Select a document to view details.
+                      </p>
+                    ) : (
+                      <div className="space-y-3 text-sm">
+                        <div>
+                          <p className="text-[11px] text-gray-400 mb-1">
+                            Prompt (raw)
+                          </p>
+                          <div className="bg-zinc-800 border border-zinc-700 rounded p-3 whitespace-pre-wrap text-gray-100 text-[12px] max-h-48 overflow-y-auto">
+                            {selectedDoc.prompt ||
+                              "(no prompt saved)"}
+                          </div>
+                        </div>
+
+                        <div>
+                          <p className="text-[11px] text-gray-400 mb-1">
+                            Response
+                          </p>
+                          <div className="bg-zinc-800 border border-zinc-700 rounded p-3 whitespace-pre-wrap text-gray-100 text-[12px] max-h-48 overflow-y-auto">
+                            {selectedDoc.response ||
+                              "(no response saved)"}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px] text-gray-300">
+                          <div>
+                            <span className="font-semibold text-yellow-200">
+                              latency:
+                            </span>{" "}
+                            {selectedDoc.latencyMs != null
+                              ? `${selectedDoc.latencyMs} ms`
+                              : "-"}
+                          </div>
+                          <div>
+                            <span className="font-semibold text-yellow-200">
+                              tokens:
+                            </span>{" "}
+                            {selectedDoc.totalTokens ?? "-"}
+                          </div>
+                          <div className="col-span-2">
+                            <span className="font-semibold text-yellow-200">
+                              created at:
+                            </span>{" "}
+                            {formatDateTime(selectedDoc.createdAt)}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </section>
+
+                  {/* DOCUMENTS EMBAIXO (FULL) */}
+                  <section className="bg-zinc-900 border border-zinc-800 rounded p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h2 className="text-xl text-yellow-200">
+                        Documents ({docsResp.total})
+                      </h2>
+                    </div>
+
+                    {docsLoading && (
+                      <p className="text-gray-400 text-xs mb-1">
+                        Updating page...
+                      </p>
+                    )}
+
+                    <div className="overflow-x-auto max-h-[60vh] overflow-y-auto border border-zinc-800 rounded">
+                      <table className="min-w-full text-xs">
+                        <thead className="bg-zinc-800">
+                          <tr>
+                            <th className="px-2 py-1 text-left text-gray-200">
+                              acq_id
+                            </th>
+                            <th className="px-2 py-1 text-left text-gray-200">
+                              sec
+                            </th>
+                            <th className="px-2 py-1 text-left text-gray-200">
+                              latency (ms)
+                            </th>
+                            <th className="px-2 py-1 text-left text-gray-200">
+                              tokens
+                            </th>
+                            <th className="px-2 py-1 text-right text-gray-200">
+                              actions
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {docsResp.items.map((d) => {
+                            const isSelected =
+                              selectedDoc &&
+                              selectedDoc.acq_id === d.acq_id &&
+                              selectedDoc.sec === d.sec;
+                            return (
+                              <tr
+                                key={d.id}
+                                className={`border-t border-zinc-800 hover:bg-zinc-800/60 cursor-pointer ${
+                                  isSelected
+                                    ? "bg-yellow-900/70 border-l-4 border-yellow-400"
+                                    : ""
+                                }`}
+                                onClick={() => setSelectedDoc(d)}
+                              >
+                                <td className="px-2 py-1 text-gray-100">
+                                  {d.acq_id}
+                                </td>
+                                <td className="px-2 py-1 text-gray-100">
+                                  {d.sec}
+                                </td>
+                                <td className="px-2 py-1 text-gray-100">
+                                  {d.latencyMs != null
+                                    ? d.latencyMs
+                                    : "-"}
+                                </td>
+                                <td className="px-2 py-1 text-gray-100">
+                                  {d.totalTokens != null
+                                    ? d.totalTokens
+                                    : "-"}
+                                </td>
+                                <td className="px-2 py-1 text-right">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedDoc(d);
+                                    }}
+                                    className="bg-yellow-500 hover:bg-yellow-400 text-black font-semibold py-1 px-3 rounded-md text-[11px]"
+                                  >
+                                    View
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {totalPages > 1 && (
+                      <div className="flex items-center justify-between mt-3 text-xs text-gray-300">
+                        <span>
+                          Page {page} of {totalPages} — {docsResp.total} docs
+                        </span>
+                        <div className="flex gap-2">
+                          <button
+                            disabled={page <= 1}
+                            onClick={() =>
+                              handleChangePage(Math.max(1, page - 1))
+                            }
+                            className={`py-1.5 px-3 rounded-lg border border-zinc-700 ${
+                              page <= 1
+                                ? "text-gray-500 cursor-not-allowed"
+                                : "text-gray-100 hover:bg-zinc-800"
+                            }`}
+                          >
+                            Prev
+                          </button>
+                          <button
+                            disabled={page >= totalPages}
+                            onClick={() =>
+                              handleChangePage(
+                                Math.min(totalPages, page + 1)
+                              )
+                            }
+                            className={`py-1.5 px-3 rounded-lg border border-zinc-700 ${
+                              page >= totalPages
+                                ? "text-gray-500 cursor-not-allowed"
+                                : "text-gray-100 hover:bg-zinc-800"
+                            }`}
+                          >
+                            Next
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </section>
                 </div>
               )}
             </>
