@@ -1,5 +1,5 @@
 // src/Components/LLMTestDetailPanel.tsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import type {
   LLMResultDoc,
   LLMResultContextResponse,
@@ -27,6 +27,17 @@ const formatNumber = (val: number | null | undefined, digits = 1) => {
   return val.toFixed(digits);
 };
 
+// Converte link do Google Drive `.../file/d/ID/view?...` para
+// `https://drive.google.com/uc?export=view&id=ID` para usar em <img />
+const getDriveImageSrc = (url: string) => {
+  if (!url) return url;
+  const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (match && match[1]) {
+    return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+  }
+  return url;
+};
+
 export const LLMTestDetailPanel: React.FC<Props> = ({
   selectedDoc,
   onPrev,
@@ -36,6 +47,8 @@ export const LLMTestDetailPanel: React.FC<Props> = ({
   contextLoading,
   contextError,
 }) => {
+  const [focusedSec, setFocusedSec] = useState<number | null>(null);
+
   if (!selectedDoc) {
     return (
       <div className="text-sm text-gray-400">
@@ -49,16 +62,28 @@ export const LLMTestDetailPanel: React.FC<Props> = ({
   const ctxCenter = contextData?.center_context;
 
   const centerSec = ctxMeta?.center_sec ?? selectedDoc.sec;
-  const centerItem =
-    ctxTimeline.find((t) => t.sec === centerSec) ?? ctxTimeline[0] ?? null;
+
+  // sempre que trocar de doc ou de center_sec, resetar o foco
+  useEffect(() => {
+    setFocusedSec(centerSec);
+  }, [selectedDoc.id, centerSec]);
+
+  const effectiveSec = focusedSec ?? centerSec;
+  const focusedItem =
+    ctxTimeline.find((t) => t.sec === effectiveSec) ??
+    ctxTimeline.find((t) => t.sec === centerSec) ??
+    ctxTimeline[0] ??
+    null;
+
   const otherItems = ctxTimeline
-    .filter((t) => t !== centerItem)
+    .filter((t) => t !== focusedItem)
     .sort((a, b) => a.sec - b.sec);
 
-  const centerImage =
-    centerItem && centerItem.links && centerItem.links.length > 0
-      ? centerItem.links[0]
-      : null;
+  const mainLink = focusedItem?.links && focusedItem.links[0]
+    ? focusedItem.links[0].link
+    : null;
+
+  const mainImgSrc = mainLink ? getDriveImageSrc(mainLink) : undefined;
 
   const allSecsStr =
     ctxMeta?.secs && ctxMeta.secs.length > 0
@@ -88,6 +113,47 @@ export const LLMTestDetailPanel: React.FC<Props> = ({
       ? (ctxMeta!.response_time_s as number) * 1000
       : selectedDoc.latencyMs ?? null;
 
+  // ========= Agrupamento YOLO por track_id =========
+  type YoloEntry = {
+    sec: number;
+    dist_m: number;
+    conf: number;
+    rel_to_ego: string;
+  };
+
+  type YoloTrackGroup = {
+    track_id: number;
+    className: string;
+    entries: YoloEntry[];
+  };
+
+  const yoloMap = new Map<number, YoloTrackGroup>();
+
+  for (const item of ctxTimeline) {
+    if (!item.yolo) continue;
+    for (const det of item.yolo) {
+      const id = det.track_id;
+      if (!yoloMap.has(id)) {
+        yoloMap.set(id, {
+          track_id: id,
+          className: det.class,
+          entries: [],
+        });
+      }
+      const group = yoloMap.get(id)!;
+      group.entries.push({
+        sec: item.sec,
+        dist_m: det.dist_m,
+        conf: det.conf,
+        rel_to_ego: det.rel_to_ego,
+      });
+    }
+  }
+
+  const yoloGroups = Array.from(yoloMap.values()).sort(
+    (a, b) => a.track_id - b.track_id
+  );
+
   return (
     <>
       {/* HEADER */}
@@ -112,10 +178,7 @@ export const LLMTestDetailPanel: React.FC<Props> = ({
               {selectedDoc.sec}
               {ctxMeta?.center_sec !== undefined &&
                 ctxMeta.center_sec !== selectedDoc.sec && (
-                  <>
-                    {" "}
-                    (center sec: {ctxMeta.center_sec})
-                  </>
+                  <> (center sec: {ctxMeta.center_sec})</>
                 )}
             </div>
             {ctxMeta?.createdAt && (
@@ -166,48 +229,60 @@ export const LLMTestDetailPanel: React.FC<Props> = ({
           {/* Frames */}
           <div className="bg-zinc-950/60 border border-zinc-800 rounded p-3">
             <p className="text-[11px] text-gray-400 mb-2">
-              Scene frames (secs {allSecsStr || centerSec})
+              Scene frames (secs {allSecsStr || effectiveSec})
             </p>
 
-            {centerImage ? (
+            {mainLink ? (
               <div className="space-y-2">
                 <div className="w-full overflow-hidden rounded-md border border-zinc-800 bg-black">
                   <a
-                    href={centerImage.link}
+                    href={mainLink}
                     target="_blank"
                     rel="noreferrer"
                     className="block"
                   >
                     <img
-                      src={centerImage.link}
-                      alt={`sec ${centerItem?.sec}`}
+                      src={mainImgSrc}
+                      alt={`sec ${focusedItem?.sec ?? effectiveSec}`}
                       className="w-full max-h-64 object-contain"
                     />
                   </a>
                 </div>
 
-                {otherItems.length > 0 && (
+                {ctxTimeline.length > 1 && (
                   <div className="flex gap-2 overflow-x-auto pt-1">
-                    {otherItems.map((item) =>
-                      item.links && item.links.length > 0 ? (
-                        <a
-                          key={item.sec}
-                          href={item.links[0].link}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex-shrink-0 block"
-                        >
-                          <div className="text-[10px] text-gray-300 mb-0.5 text-center">
-                            sec {item.sec}
-                          </div>
-                          <img
-                            src={item.links[0].link}
-                            alt={`sec ${item.sec}`}
-                            className="h-16 w-28 object-cover rounded border border-zinc-800"
-                          />
-                        </a>
-                      ) : null
-                    )}
+                    {ctxTimeline
+                      .sort((a, b) => a.sec - b.sec)
+                      .map((item) => {
+                        const link =
+                          item.links && item.links[0]
+                            ? item.links[0].link
+                            : null;
+                        if (!link) return null;
+                        const thumbSrc = getDriveImageSrc(link);
+                        const isActive = item.sec === effectiveSec;
+                        return (
+                          <button
+                            key={item.sec}
+                            type="button"
+                            onClick={() => setFocusedSec(item.sec)}
+                            className={`flex-shrink-0 border rounded overflow-hidden ${
+                              isActive
+                                ? "border-yellow-300"
+                                : "border-zinc-700 hover:border-zinc-400"
+                            }`}
+                          >
+                            <div className="text-[10px] text-gray-300 mb-0.5 text-center bg-zinc-900/80 px-1 py-0.5">
+                              sec {item.sec}
+                            </div>
+                            <img
+                              src={thumbSrc}
+                              alt={`sec ${item.sec}`}
+                              className="h-16 w-28 object-cover"
+                            />
+                          </button>
+                        );
+                      })}
                   </div>
                 )}
               </div>
@@ -307,13 +382,12 @@ export const LLMTestDetailPanel: React.FC<Props> = ({
             )}
           </div>
 
-          {/* CAN + YOLO timeline */}
+          {/* CAN timeline */}
           <div className="bg-zinc-950/60 border border-zinc-800 rounded p-3 space-y-2">
             <p className="text-[11px] text-gray-400 mb-1">
-              CAN and YOLO per second
+              CAN per second
             </p>
 
-            {/* CAN table */}
             {ctxTimeline.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="min-w-full text-[11px] text-gray-200 border border-zinc-800 rounded">
@@ -334,34 +408,39 @@ export const LLMTestDetailPanel: React.FC<Props> = ({
                     </tr>
                   </thead>
                   <tbody>
-                    {ctxTimeline.map((item) => (
-                      <tr
-                        key={item.sec}
-                        className={
-                          item.sec === centerSec
-                            ? "bg-zinc-900/70"
-                            : "bg-zinc-950"
-                        }
-                      >
-                        <td className="px-2 py-1 border-b border-zinc-800">
-                          {item.sec}
-                        </td>
-                        <td className="px-2 py-1 border-b border-zinc-800">
-                          {item.can &&
-                            formatNumber(item.can.VehicleSpeed ?? 0, 1)}
-                        </td>
-                        <td className="px-2 py-1 border-b border-zinc-800">
-                          {item.can &&
-                            formatNumber(
-                              item.can.SteeringWheelAngle ?? 0,
-                              1
-                            )}
-                        </td>
-                        <td className="px-2 py-1 border-b border-zinc-800">
-                          {item.can?.BrakeInfoStatus || "-"}
-                        </td>
-                      </tr>
-                    ))}
+                    {ctxTimeline
+                      .sort((a, b) => a.sec - b.sec)
+                      .map((item) => (
+                        <tr
+                          key={item.sec}
+                          className={
+                            item.sec === centerSec
+                              ? "bg-zinc-900/70"
+                              : "bg-zinc-950"
+                          }
+                        >
+                          <td className="px-2 py-1 border-b border-zinc-800">
+                            {item.sec}
+                          </td>
+                          <td className="px-2 py-1 border-b border-zinc-800">
+                            {item.can &&
+                              formatNumber(
+                                item.can.VehicleSpeed ?? 0,
+                                1
+                              )}
+                          </td>
+                          <td className="px-2 py-1 border-b border-zinc-800">
+                            {item.can &&
+                              formatNumber(
+                                item.can.SteeringWheelAngle ?? 0,
+                                1
+                              )}
+                          </td>
+                          <td className="px-2 py-1 border-b border-zinc-800">
+                            {item.can?.BrakeInfoStatus || "-"}
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>
@@ -370,39 +449,82 @@ export const LLMTestDetailPanel: React.FC<Props> = ({
                 No CAN data stored for this window.
               </p>
             )}
+          </div>
 
-            {/* YOLO detections */}
-            <div className="mt-2 max-h-40 overflow-y-auto pr-1">
-              {ctxTimeline.length > 0 ? (
-                ctxTimeline.map((item) => (
-                  <div key={item.sec} className="mb-1.5">
-                    <div className="text-[11px] text-gray-300 font-semibold mb-0.5">
-                      sec {item.sec}
-                    </div>
-                    {item.yolo && item.yolo.length > 0 ? (
-                      <ul className="text-[11px] text-gray-300 ml-3 list-disc space-y-0.5">
-                        {item.yolo.map((det) => (
-                          <li key={det.track_id}>
-                            {det.class} · dist{" "}
-                            {formatNumber(det.dist_m, 1)} m · conf{" "}
-                            {formatNumber(det.conf, 2)} · lane{" "}
-                            {det.rel_to_ego || "—"}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <div className="text-[11px] text-gray-500 ml-1">
-                        (no detections)
+          {/* YOLO por objeto (track_id) */}
+          <div className="bg-zinc-950/60 border border-zinc-800 rounded p-3 space-y-2">
+            <p className="text-[11px] text-gray-400 mb-1">
+              YOLO objects (grouped by track)
+            </p>
+
+            {yoloGroups.length === 0 ? (
+              <p className="text-[11px] text-gray-400">
+                No YOLO detections stored for this window.
+              </p>
+            ) : (
+              <div className="overflow-x-auto">
+                <div className="flex gap-3 min-w-full">
+                  {yoloGroups.map((group) => {
+                    const sortedEntries = [...group.entries].sort(
+                      (a, b) => a.sec - b.sec
+                    );
+                    return (
+                      <div
+                        key={group.track_id}
+                        className="min-w-[210px] bg-zinc-950 border border-zinc-800 rounded p-2"
+                      >
+                        <div className="text-[11px] font-semibold text-yellow-200 mb-1">
+                          track #{group.track_id} · {group.className}
+                        </div>
+                        <table className="w-full text-[11px] text-gray-200">
+                          <thead>
+                            <tr className="border-b border-zinc-800">
+                              <th className="text-left px-1 py-0.5">
+                                sec
+                              </th>
+                              <th className="text-left px-1 py-0.5">
+                                dist (m)
+                              </th>
+                              <th className="text-left px-1 py-0.5">
+                                conf
+                              </th>
+                              <th className="text-left px-1 py-0.5">
+                                lane
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {sortedEntries.map((e) => (
+                              <tr
+                                key={`${group.track_id}-${e.sec}`}
+                                className={
+                                  e.sec === centerSec
+                                    ? "bg-zinc-900/60"
+                                    : ""
+                                }
+                              >
+                                <td className="px-1 py-0.5">
+                                  {e.sec}
+                                </td>
+                                <td className="px-1 py-0.5">
+                                  {formatNumber(e.dist_m, 1)}
+                                </td>
+                                <td className="px-1 py-0.5">
+                                  {formatNumber(e.conf, 2)}
+                                </td>
+                                <td className="px-1 py-0.5">
+                                  {e.rel_to_ego || "—"}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
                       </div>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <p className="text-[11px] text-gray-400">
-                  No YOLO detections stored for this window.
-                </p>
-              )}
-            </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
