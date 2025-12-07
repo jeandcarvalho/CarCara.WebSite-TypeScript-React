@@ -28,7 +28,7 @@ const formatNumber = (val: number | null | undefined, digits = 1) => {
 };
 
 // Converte link do Google Drive `.../file/d/ID/view?...` para
-// `https://drive.google.com/uc?export=view&id=ID` para usar em <img />
+// `https://drive.google.com/uc?export=view&id=ID` para uso em <img />
 const getDriveImageSrc = (url: string) => {
   if (!url) return url;
   const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
@@ -75,14 +75,10 @@ export const LLMTestDetailPanel: React.FC<Props> = ({
     ctxTimeline[0] ??
     null;
 
-  const otherItems = ctxTimeline
-    .filter((t) => t !== focusedItem)
-    .sort((a, b) => a.sec - b.sec);
-
-  const mainLink = focusedItem?.links && focusedItem.links[0]
-    ? focusedItem.links[0].link
-    : null;
-
+  const mainLink =
+    focusedItem?.links && focusedItem.links[0]
+      ? focusedItem.links[0].link
+      : null;
   const mainImgSrc = mainLink ? getDriveImageSrc(mainLink) : undefined;
 
   const allSecsStr =
@@ -222,9 +218,9 @@ export const LLMTestDetailPanel: React.FC<Props> = ({
         </div>
       )}
 
-      {/* MAIN GRID: LEFT = frames + CAN/YOLO, RIGHT = prompt + answer */}
+      {/* GRID SUPERIOR: ESQUERDA (fotos+contexto+CAN+prompt) / DIREITA (answer) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* LEFT COLUMN */}
+        {/* COLUNA ESQUERDA */}
         <div className="space-y-3">
           {/* Frames */}
           <div className="bg-zinc-950/60 border border-zinc-800 rounded p-3">
@@ -293,7 +289,7 @@ export const LLMTestDetailPanel: React.FC<Props> = ({
             )}
           </div>
 
-          {/* Center second context (without CAN / YOLO) */}
+          {/* Center second context (sem CAN/YOLO) */}
           <div className="bg-zinc-950/60 border border-zinc-800 rounded p-3 text-xs text-gray-200 space-y-1.5">
             <p className="text-[11px] text-gray-400 mb-1">
               Center second context (excluding CAN / YOLO)
@@ -382,7 +378,7 @@ export const LLMTestDetailPanel: React.FC<Props> = ({
             )}
           </div>
 
-          {/* CAN timeline */}
+          {/* CAN per second */}
           <div className="bg-zinc-950/60 border border-zinc-800 rounded p-3 space-y-2">
             <p className="text-[11px] text-gray-400 mb-1">
               CAN per second
@@ -451,101 +447,24 @@ export const LLMTestDetailPanel: React.FC<Props> = ({
             )}
           </div>
 
-          {/* YOLO por objeto (track_id) */}
-          <div className="bg-zinc-950/60 border border-zinc-800 rounded p-3 space-y-2">
-            <p className="text-[11px] text-gray-400 mb-1">
-              YOLO objects (grouped by track)
-            </p>
-
-            {yoloGroups.length === 0 ? (
-              <p className="text-[11px] text-gray-400">
-                No YOLO detections stored for this window.
-              </p>
-            ) : (
-              <div className="overflow-x-auto">
-                <div className="flex gap-3 min-w-full">
-                  {yoloGroups.map((group) => {
-                    const sortedEntries = [...group.entries].sort(
-                      (a, b) => a.sec - b.sec
-                    );
-                    return (
-                      <div
-                        key={group.track_id}
-                        className="min-w-[210px] bg-zinc-950 border border-zinc-800 rounded p-2"
-                      >
-                        <div className="text-[11px] font-semibold text-yellow-200 mb-1">
-                          track #{group.track_id} · {group.className}
-                        </div>
-                        <table className="w-full text-[11px] text-gray-200">
-                          <thead>
-                            <tr className="border-b border-zinc-800">
-                              <th className="text-left px-1 py-0.5">
-                                sec
-                              </th>
-                              <th className="text-left px-1 py-0.5">
-                                dist (m)
-                              </th>
-                              <th className="text-left px-1 py-0.5">
-                                conf
-                              </th>
-                              <th className="text-left px-1 py-0.5">
-                                lane
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {sortedEntries.map((e) => (
-                              <tr
-                                key={`${group.track_id}-${e.sec}`}
-                                className={
-                                  e.sec === centerSec
-                                    ? "bg-zinc-900/60"
-                                    : ""
-                                }
-                              >
-                                <td className="px-1 py-0.5">
-                                  {e.sec}
-                                </td>
-                                <td className="px-1 py-0.5">
-                                  {formatNumber(e.dist_m, 1)}
-                                </td>
-                                <td className="px-1 py-0.5">
-                                  {formatNumber(e.conf, 2)}
-                                </td>
-                                <td className="px-1 py-0.5">
-                                  {e.rel_to_ego || "—"}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* RIGHT COLUMN: prompt + answer */}
-        <div className="space-y-3">
-          {/* Prompt used */}
+          {/* Prompt sent to LLM */}
           <div className="bg-zinc-950/60 border border-zinc-800 rounded p-3">
             <p className="text-[11px] text-gray-400 mb-1">
               Prompt sent to LLM
             </p>
-            <div className="bg-zinc-900 border border-zinc-800 rounded p-3 text-[12px] text-gray-100 whitespace-pre-wrap max-h-64 overflow-y-auto">
+            <div className="bg-zinc-900 border border-zinc-800 rounded p-3 text-[12px] text-gray-100 whitespace-pre-wrap max-h-56 overflow-y-auto">
               {combinedPrompt ||
                 selectedDoc.prompt ||
                 "(no prompt text available)"}
             </div>
           </div>
+        </div>
 
-          {/* Answer */}
-          <div className="bg-zinc-950/60 border border-zinc-800 rounded p-3">
+        {/* COLUNA DIREITA: LLM answer com mais espaço vertical */}
+        <div className="flex flex-col">
+          <div className="bg-zinc-950/60 border border-zinc-800 rounded p-3 flex-1 flex flex-col">
             <p className="text-[11px] text-gray-400 mb-1">LLM answer</p>
-            <div className="bg-zinc-900 border border-zinc-800 rounded p-3 text-[12px] text-gray-100 whitespace-pre-wrap max-h-80 overflow-y-auto">
+            <div className="bg-zinc-900 border border-zinc-800 rounded p-3 text-[12px] text-gray-100 whitespace-pre-wrap flex-1 overflow-y-auto max-h-[520px]">
               {answerText}
             </div>
 
@@ -556,7 +475,7 @@ export const LLMTestDetailPanel: React.FC<Props> = ({
                     <span className="font-semibold text-yellow-200">
                       total tokens:
                     </span>{" "}
-                    {totalTokens}
+                      {totalTokens}
                   </div>
                 )}
                 {latencyMs !== null && (
@@ -577,6 +496,68 @@ export const LLMTestDetailPanel: React.FC<Props> = ({
             )}
           </div>
         </div>
+      </div>
+
+      {/* PAINEL YOLO OBJECTS – FULL WIDTH, 2 TABELAS POR LINHA */}
+      <div className="mt-4 bg-zinc-950/60 border border-zinc-800 rounded p-3 space-y-2">
+        <p className="text-[11px] text-gray-400 mb-1">
+          YOLO objects (grouped by track)
+        </p>
+
+        {yoloGroups.length === 0 ? (
+          <p className="text-[11px] text-gray-400">
+            No YOLO detections stored for this window.
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {yoloGroups.map((group) => {
+              const sortedEntries = [...group.entries].sort(
+                (a, b) => a.sec - b.sec
+              );
+              return (
+                <div
+                  key={group.track_id}
+                  className="bg-zinc-950 border border-zinc-800 rounded p-2"
+                >
+                  <div className="text-[11px] font-semibold text-yellow-200 mb-1">
+                    track #{group.track_id} · {group.className}
+                  </div>
+                  <table className="w-full text-[11px] text-gray-200">
+                    <thead>
+                      <tr className="border-b border-zinc-800">
+                        <th className="text-left px-1 py-0.5">sec</th>
+                        <th className="text-left px-1 py-0.5">dist (m)</th>
+                        <th className="text-left px-1 py-0.5">conf</th>
+                        <th className="text-left px-1 py-0.5">lane</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sortedEntries.map((e) => (
+                        <tr
+                          key={`${group.track_id}-${e.sec}`}
+                          className={
+                            e.sec === centerSec ? "bg-zinc-900/60" : ""
+                          }
+                        >
+                          <td className="px-1 py-0.5">{e.sec}</td>
+                          <td className="px-1 py-0.5">
+                            {formatNumber(e.dist_m, 1)}
+                          </td>
+                          <td className="px-1 py-0.5">
+                            {formatNumber(e.conf, 2)}
+                          </td>
+                          <td className="px-1 py-0.5">
+                            {e.rel_to_ego || "—"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </>
   );
