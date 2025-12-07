@@ -44,8 +44,8 @@ const getDriveImageSrc = (url: string) => {
     }
 
     if (id) {
-      // embed padrão de visualização
-      return `https://drive.google.com/uc?export=view&id=${id}`;
+      // tenta usar o endpoint de imagem do Google
+      return `https://lh3.googleusercontent.com/d/${id}=s2048`;
     }
   } catch {
     // se der erro no URL, cai no fallback
@@ -283,7 +283,7 @@ export const LLMTestDetailPanel: React.FC<Props> = ({
       )}
 
       {/* GRID SUPERIOR:
-          ESQUERDA: fotos + context + CAN + prompt
+          ESQUERDA: fotos + context + CAN
           DIREITA: YOLO objects
       */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -513,18 +513,6 @@ export const LLMTestDetailPanel: React.FC<Props> = ({
               </p>
             )}
           </div>
-
-          {/* Prompt sent to LLM */}
-          <div className="bg-zinc-950/60 border border-zinc-800 rounded p-3">
-            <p className="text-[11px] text-gray-400 mb-1">
-              Prompt sent to LLM
-            </p>
-            <div className="bg-zinc-900 border border-zinc-800 rounded p-3 text-[12px] text-gray-100 whitespace-pre-wrap max-h-56 overflow-y-auto">
-              {combinedPrompt ||
-                selectedDoc.prompt ||
-                "(no prompt text available)"}
-            </div>
-          </div>
         </div>
 
         {/* COLUNA DIREITA: YOLO objects em cards/quadradinhos */}
@@ -539,7 +527,7 @@ export const LLMTestDetailPanel: React.FC<Props> = ({
                 No YOLO detections stored for this window.
               </p>
             ) : (
-              <div className="grid grid-cols-1 gap-3 overflow-y-auto max-h-[520px]">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 items-stretch overflow-y-auto max-h-[640px]">
                 {yoloGroups.map((group) => {
                   const sortedEntries = [...group.entries].sort(
                     (a, b) => a.sec - b.sec
@@ -555,21 +543,26 @@ export const LLMTestDetailPanel: React.FC<Props> = ({
                   return (
                     <div
                       key={group.track_id}
-                      className="bg-zinc-950 border border-zinc-800 rounded p-2 flex flex-col gap-1"
+                      className="bg-zinc-950 border border-zinc-800 rounded p-2 flex flex-col min-h-[160px] justify-between"
                     >
-                      <div className="flex justify-between items-center">
-                        <div className="text-[11px] font-semibold text-yellow-200 capitalize">
-                          {group.className}
-                        </div>
-                        {last && (
-                          <div className="text-[10px] text-gray-200">
-                            {formatNumber(last.dist_m, 1)} m{" "}
-                            {trend.arrow} {trend.label}
+                      {/* HEADER */}
+                      <div>
+                        <div className="flex justify-between items-center">
+                          <div className="text-[11px] font-semibold text-yellow-200 capitalize">
+                            {group.className}
                           </div>
-                        )}
+                          {last && (
+                            <div className="text-[10px] text-gray-200">
+                              {formatNumber(last.dist_m, 1)} m{" "}
+                              {trend.arrow} {trend.label}
+                            </div>
+                          )}
+                        </div>
+                        <div className="border-b border-zinc-800 mt-1 mb-2" />
                       </div>
 
-                      <div className="flex justify-between text-[10px] text-gray-300">
+                      {/* MEIO DIVIDIDO */}
+                      <div className="grid grid-cols-2 text-[11px] text-gray-300 gap-x-2 mb-2">
                         <div>
                           <span className="font-semibold text-yellow-200">
                             lane:
@@ -629,7 +622,19 @@ export const LLMTestDetailPanel: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* LLM ANSWER – AGORA FULL WIDTH EMBAIXO */}
+      {/* PROMPT SENT TO LLM – FULL WIDTH, ACIMA DA RESPOSTA */}
+      <div className="mt-4 bg-zinc-950/60 border border-zinc-800 rounded p-3">
+        <p className="text-[11px] text-gray-400 mb-1">
+          Prompt sent to LLM
+        </p>
+        <div className="bg-zinc-900 border border-zinc-800 rounded p-3 text-[12px] text-gray-100 whitespace-pre-wrap max-h-64 overflow-y-auto">
+          {combinedPrompt ||
+            selectedDoc.prompt ||
+            "(no prompt text available)"}
+        </div>
+      </div>
+
+      {/* LLM ANSWER – FULL WIDTH EMBAIXO */}
       <div className="mt-4 bg-zinc-950/60 border border-zinc-800 rounded p-3 flex flex-col">
         <p className="text-[11px] text-gray-400 mb-1">LLM answer</p>
         <div className="bg-zinc-900 border border-zinc-800 rounded p-3 text-[12px] text-gray-100 whitespace-pre-wrap max-h-[320px] overflow-y-auto">
@@ -651,7 +656,7 @@ export const LLMTestDetailPanel: React.FC<Props> = ({
                 <span className="font-semibold text-yellow-200">
                   latency:
                 </span>{" "}
-                {latencyMs.toFixed(0)} ms
+                  {latencyMs.toFixed(0)} ms
               </div>
             )}
             <div>
