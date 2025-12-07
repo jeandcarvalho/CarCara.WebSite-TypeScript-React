@@ -27,13 +27,28 @@ const formatNumber = (val: number | null | undefined, digits = 1) => {
   return val.toFixed(digits);
 };
 
-// Converte link do Google Drive `.../file/d/ID/view?...` para
-// `https://drive.google.com/uc?export=view&id=ID` para uso em <img />
+// Converte link do Google Drive em algo usável em <img />
 const getDriveImageSrc = (url: string) => {
   if (!url) return url;
-  const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  if (match && match[1]) {
-    return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+  try {
+    const u = new URL(url);
+    // tenta pegar id=? se existir
+    let id = u.searchParams.get("id") || undefined;
+
+    // senão, tenta /d/ID/
+    if (!id) {
+      const m = u.pathname.match(/\/d\/([^/]+)/);
+      if (m && m[1]) {
+        id = m[1];
+      }
+    }
+
+    if (id) {
+      // embed padrão de visualização
+      return `https://drive.google.com/uc?export=view&id=${id}`;
+    }
+  } catch {
+    // se der erro no URL, cai no fallback
   }
   return url;
 };
@@ -150,6 +165,55 @@ export const LLMTestDetailPanel: React.FC<Props> = ({
     (a, b) => a.track_id - b.track_id
   );
 
+  // helpers visuais YOLO
+  const laneColor: Record<string, string> = {
+    EGO: "bg-yellow-600",
+    "L-1": "bg-emerald-600",
+    "R+1": "bg-sky-600",
+    "R-out": "bg-sky-900",
+    "L-out": "bg-emerald-900",
+  };
+
+  const laneLabel = (lane: string) => lane || "—";
+
+  const getTrendInfo = (entries: YoloEntry[]) => {
+    if (entries.length === 0) return { label: "stable", arrow: "→" };
+    const sorted = [...entries].sort((a, b) => a.sec - b.sec);
+    const first = sorted[0];
+    const last = sorted[sorted.length - 1];
+    const delta = first.dist_m - last.dist_m;
+
+    if (delta < -2) {
+      return { label: "approaching", arrow: "↘" };
+    }
+    if (delta > 2) {
+      return { label: "moving away", arrow: "↗" };
+    }
+    return { label: "stable", arrow: "→" };
+  };
+
+  const getLaneChangeLabel = (entries: YoloEntry[]) => {
+    if (entries.length === 0) return "—";
+    const sorted = [...entries].sort((a, b) => a.sec - b.sec);
+    const first = sorted[0].rel_to_ego || "—";
+    const last = sorted[sorted.length - 1].rel_to_ego || "—";
+    if (first === last) return first;
+    return `${first} → ${last}`;
+  };
+
+  const getAvgConf = (entries: YoloEntry[]) => {
+    if (entries.length === 0) return null;
+    const sum = entries.reduce((acc, e) => acc + e.conf, 0);
+    return sum / entries.length;
+  };
+
+  const getConfLabel = (avg: number | null) => {
+    if (avg === null) return "–";
+    if (avg >= 0.8) return "high";
+    if (avg >= 0.5) return "medium";
+    return "low";
+  };
+
   return (
     <>
       {/* HEADER */}
@@ -218,7 +282,10 @@ export const LLMTestDetailPanel: React.FC<Props> = ({
         </div>
       )}
 
-      {/* GRID SUPERIOR: ESQUERDA (fotos+contexto+CAN+prompt) / DIREITA (answer) */}
+      {/* GRID SUPERIOR:
+          ESQUERDA: fotos + context + CAN + prompt
+          DIREITA: YOLO objects
+      */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* COLUNA ESQUERDA */}
         <div className="space-y-3">
@@ -460,102 +527,139 @@ export const LLMTestDetailPanel: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* COLUNA DIREITA: LLM answer com mais espaço vertical */}
+        {/* COLUNA DIREITA: YOLO objects em cards/quadradinhos */}
         <div className="flex flex-col">
           <div className="bg-zinc-950/60 border border-zinc-800 rounded p-3 flex-1 flex flex-col">
-            <p className="text-[11px] text-gray-400 mb-1">LLM answer</p>
-            <div className="bg-zinc-900 border border-zinc-800 rounded p-3 text-[12px] text-gray-100 whitespace-pre-wrap flex-1 overflow-y-auto max-h-[520px]">
-              {answerText}
-            </div>
+            <p className="text-[11px] text-gray-400 mb-1">
+              YOLO objects (grouped by track)
+            </p>
 
-            {(showMetrics || !!totalTokens || !!latencyMs) && (
-              <div className="mt-2 flex flex-wrap gap-3 text-[11px] text-gray-300">
-                {totalTokens !== null && (
-                  <div>
-                    <span className="font-semibold text-yellow-200">
-                      total tokens:
-                    </span>{" "}
-                      {totalTokens}
-                  </div>
-                )}
-                {latencyMs !== null && (
-                  <div>
-                    <span className="font-semibold text-yellow-200">
-                      latency:
-                    </span>{" "}
-                    {latencyMs.toFixed(0)} ms
-                  </div>
-                )}
-                <div>
-                  <span className="font-semibold text-yellow-200">
-                    created at:
-                  </span>{" "}
-                  {formatDateTime(selectedDoc.createdAt)}
-                </div>
+            {yoloGroups.length === 0 ? (
+              <p className="text-[11px] text-gray-400">
+                No YOLO detections stored for this window.
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 gap-3 overflow-y-auto max-h-[520px]">
+                {yoloGroups.map((group) => {
+                  const sortedEntries = [...group.entries].sort(
+                    (a, b) => a.sec - b.sec
+                  );
+                  const last =
+                    sortedEntries[sortedEntries.length - 1];
+                  const trend = getTrendInfo(sortedEntries);
+                  const laneChangeLabel =
+                    getLaneChangeLabel(sortedEntries);
+                  const avgConf = getAvgConf(sortedEntries);
+                  const confLabel = getConfLabel(avgConf);
+
+                  return (
+                    <div
+                      key={group.track_id}
+                      className="bg-zinc-950 border border-zinc-800 rounded p-2 flex flex-col gap-1"
+                    >
+                      <div className="flex justify-between items-center">
+                        <div className="text-[11px] font-semibold text-yellow-200 capitalize">
+                          {group.className}
+                        </div>
+                        {last && (
+                          <div className="text-[10px] text-gray-200">
+                            {formatNumber(last.dist_m, 1)} m{" "}
+                            {trend.arrow} {trend.label}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex justify-between text-[10px] text-gray-300">
+                        <div>
+                          <span className="font-semibold text-yellow-200">
+                            lane:
+                          </span>{" "}
+                          {laneChangeLabel}
+                        </div>
+                        <div>
+                          <span className="font-semibold text-yellow-200">
+                            conf:
+                          </span>{" "}
+                          {confLabel}
+                        </div>
+                      </div>
+
+                      {/* mini timeline de barrinhas fixas (esquerda → direita = tempo) */}
+                      <div className="mt-1 flex gap-1 overflow-x-auto">
+                        {sortedEntries.map((e) => {
+                          const color =
+                            laneColor[e.rel_to_ego] || "bg-zinc-700";
+                          const opacity =
+                            e.conf < 0.5
+                              ? "opacity-40"
+                              : e.conf < 0.8
+                              ? "opacity-70"
+                              : "opacity-100";
+
+                          return (
+                            <div
+                              key={`${group.track_id}-${e.sec}`}
+                              className="flex flex-col items-center text-[9px] text-gray-200"
+                            >
+                              <div
+                                className={`w-4 h-5 rounded ${color} ${opacity} ${
+                                  e.sec === centerSec
+                                    ? "ring-1 ring-yellow-300"
+                                    : ""
+                                }`}
+                                title={`sec ${e.sec} · ${e.dist_m.toFixed(
+                                  1
+                                )}m · lane ${
+                                  e.rel_to_ego
+                                } · conf ${e.conf.toFixed(2)}`}
+                              />
+                              <span className="text-[9px] mt-0.5">
+                                {laneLabel(e.rel_to_ego)}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* PAINEL YOLO OBJECTS – FULL WIDTH, 2 TABELAS POR LINHA */}
-      <div className="mt-4 bg-zinc-950/60 border border-zinc-800 rounded p-3 space-y-2">
-        <p className="text-[11px] text-gray-400 mb-1">
-          YOLO objects (grouped by track)
-        </p>
+      {/* LLM ANSWER – AGORA FULL WIDTH EMBAIXO */}
+      <div className="mt-4 bg-zinc-950/60 border border-zinc-800 rounded p-3 flex flex-col">
+        <p className="text-[11px] text-gray-400 mb-1">LLM answer</p>
+        <div className="bg-zinc-900 border border-zinc-800 rounded p-3 text-[12px] text-gray-100 whitespace-pre-wrap max-h-[320px] overflow-y-auto">
+          {answerText}
+        </div>
 
-        {yoloGroups.length === 0 ? (
-          <p className="text-[11px] text-gray-400">
-            No YOLO detections stored for this window.
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {yoloGroups.map((group) => {
-              const sortedEntries = [...group.entries].sort(
-                (a, b) => a.sec - b.sec
-              );
-              return (
-                <div
-                  key={group.track_id}
-                  className="bg-zinc-950 border border-zinc-800 rounded p-2"
-                >
-                  <div className="text-[11px] font-semibold text-yellow-200 mb-1">
-                    track #{group.track_id} · {group.className}
-                  </div>
-                  <table className="w-full text-[11px] text-gray-200">
-                    <thead>
-                      <tr className="border-b border-zinc-800">
-                        <th className="text-left px-1 py-0.5">sec</th>
-                        <th className="text-left px-1 py-0.5">dist (m)</th>
-                        <th className="text-left px-1 py-0.5">conf</th>
-                        <th className="text-left px-1 py-0.5">lane</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {sortedEntries.map((e) => (
-                        <tr
-                          key={`${group.track_id}-${e.sec}`}
-                          className={
-                            e.sec === centerSec ? "bg-zinc-900/60" : ""
-                          }
-                        >
-                          <td className="px-1 py-0.5">{e.sec}</td>
-                          <td className="px-1 py-0.5">
-                            {formatNumber(e.dist_m, 1)}
-                          </td>
-                          <td className="px-1 py-0.5">
-                            {formatNumber(e.conf, 2)}
-                          </td>
-                          <td className="px-1 py-0.5">
-                            {e.rel_to_ego || "—"}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              );
-            })}
+        {(showMetrics || !!totalTokens || !!latencyMs) && (
+          <div className="mt-2 flex flex-wrap gap-3 text-[11px] text-gray-300">
+            {totalTokens !== null && (
+              <div>
+                <span className="font-semibold text-yellow-200">
+                  total tokens:
+                </span>{" "}
+                {totalTokens}
+              </div>
+            )}
+            {latencyMs !== null && (
+              <div>
+                <span className="font-semibold text-yellow-200">
+                  latency:
+                </span>{" "}
+                {latencyMs.toFixed(0)} ms
+              </div>
+            )}
+            <div>
+              <span className="font-semibold text-yellow-200">
+                created at:
+              </span>{" "}
+              {formatDateTime(selectedDoc.createdAt)}
+            </div>
           </div>
         )}
       </div>
