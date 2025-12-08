@@ -100,6 +100,11 @@ const TestHandler: React.FC = () => {
     null
   );
 
+    // BOTÃO BACK TO MY ACCOUNT: ir direto pra /account com estilo do Back to View
+  const goBackToAccount = () => {
+    navigate("/account");
+  };
+
   const testNameParam = searchParams.get("testName") ?? "";
   const llmModelParam = searchParams.get("llmModel") ?? "";
   const promptTypeParam = searchParams.get("promptType") ?? "";
@@ -396,10 +401,7 @@ const TestHandler: React.FC = () => {
     }
   }, [isAuthenticated, selectedDoc, evalsByKey]);
 
-  const handleBackToTests = () => {
-    if (!collectionId) return;
-    navigate(`/collections/${collectionId}/llm-tests`);
-  };
+
 
   const handleChangePage = (newPage: number) => {
     setPage(newPage);
@@ -573,12 +575,13 @@ const TestHandler: React.FC = () => {
             </h1>
 
             {isAuthenticated && (
-              <button
-                onClick={handleBackToTests}
-                className="bg-zinc-800 hover:bg-zinc-700 text-gray-100 text-sm font-semibold py-2 px-4 rounded-lg"
-              >
-                Back to tests
-              </button>
+          <button
+            type="button"
+            onClick={goBackToAccount}
+            className="inline-flex items-center text-[11px] sm:text-xs px-2 py-1 rounded-full border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-gray-200 mb-3"
+          >
+            ← Back to My Account
+          </button>
             )}
           </div>
 
@@ -678,7 +681,7 @@ const TestHandler: React.FC = () => {
                                   status
                                 )} ${
                                   isSelected
-                                    ? "bg-yellow-900/70 border-l-4 border-yellow-400"
+                                    ? "bg-gray-700/70 border-l-4 border-yellow-400"
                                     : ""
                                 }`}
                                 onClick={() => {
