@@ -138,12 +138,6 @@ function fullImageUrl(link: string): string {
     : link;
 }
 
-function getDrivePreviewUrl(link: string | null): string | null {
-  if (!link) return null;
-  const id = extractDriveId(link);
-  if (!id) return null;
-  return `https://drive.google.com/file/d/${id}/preview?vq=hd1080`;
-}
 
 function getDriveThumbUrl(link: string | null): string | null {
   if (!link) return null;
