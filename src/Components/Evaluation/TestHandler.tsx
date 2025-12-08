@@ -396,10 +396,7 @@ const TestHandler: React.FC = () => {
     }
   }, [isAuthenticated, selectedDoc, evalsByKey]);
 
-  const totalPages =
-    docsResp && docsResp.pageSize > 0
-      ? Math.max(1, Math.ceil(docsResp.total / docsResp.pageSize))
-      : 1;
+
 
   const handleBackToTests = () => {
     if (!collectionId) return;
