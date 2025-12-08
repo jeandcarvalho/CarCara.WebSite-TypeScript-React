@@ -548,12 +548,25 @@ const TestHandler: React.FC = () => {
       ? Math.max(1, Math.ceil(docsResp.total / docsResp.pageSize))
       : 1;
 
+  const isBusy =
+    globalLoading || docsLoading || evalsLoading || savingEval;
+
   return (
     <div className="bg-zinc-950 min-h-screen flex flex-col">
       <Header />
 
       <div className="flex-grow flex justify-center px-4">
         <main className="w-full max-w-6xl py-4">
+          {isBusy && (
+            <div className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-black/70">
+              <img
+                src={loadgif}
+                alt="Loading..."
+                className="w-24 h-24 mb-3"
+              />
+              <p className="text-gray-200 text-sm">Loading...</p>
+            </div>
+          )}
           <div className="flex items-center justify-between mb-4 gap-2">
             <h1 className="text-3xl font-medium text-yellow-300">
               LLM Test Handler
@@ -569,14 +582,6 @@ const TestHandler: React.FC = () => {
             )}
           </div>
 
-          {collectionId && (
-            <p className="text-gray-300 mb-2 text-sm">
-              <span className="font-semibold text-yellow-200">
-                Collection ID:
-              </span>{" "}
-              {collectionId}
-            </p>
-          )}
 
           <div className="mb-3 text-sm text-gray-300">
             <p>
@@ -597,16 +602,7 @@ const TestHandler: React.FC = () => {
               </span>{" "}
               {effectivePromptType || "(unknown)"}
             </p>
-            {promptForPreview && (
-              <p className="text-xs text-gray-400 mt-2">
-                <span className="font-semibold text-yellow-200">
-                  Prompt preview:
-                </span>{" "}
-                {promptForPreview.length > 220
-                  ? `${promptForPreview.slice(0, 220)}…`
-                  : promptForPreview}
-              </p>
-            )}
+
           </div>
 
           {errorMsg && (
@@ -615,18 +611,7 @@ const TestHandler: React.FC = () => {
             </div>
           )}
 
-          {globalLoading ? (
-            <div className="flex flex-col items-center justify-center py-10">
-              <img
-                src={loadgif}
-                alt="Loading..."
-                className="w-24 h-24 mb-3"
-              />
-              <p className="text-gray-200 text-sm">
-                Loading documents...
-              </p>
-            </div>
-          ) : !docsResp || docsResp.items.length === 0 ? (
+          {!docsResp || docsResp.items.length === 0 ? (
             <p className="text-gray-300 text-sm">
               No documents for this test (or unable to load them).
             </p>
@@ -635,7 +620,7 @@ const TestHandler: React.FC = () => {
               {/* PROMPT RAW NO TOPO */}
               <section className="bg-zinc-900 border border-zinc-800 rounded p-4 mb-4">
                 <h2 className="text-xl text-yellow-200 mb-3">
-                  Prompt (raw)
+                  Tested prompt
                 </h2>
                 <div className="bg-zinc-950 border border-zinc-800 rounded p-3 whitespace-pre-wrap text-gray-100 text-[12px] max-h-60 overflow-y-auto">
                   {promptForPreview || "(no prompt saved)"}
@@ -644,135 +629,11 @@ const TestHandler: React.FC = () => {
 
               {isAuthenticated ? (
                 // LOGADO
-                <div className="flex flex-col gap-4 lg:grid lg:grid-cols-2 lg:gap-4">
-                  {/* DETAIL */}
-                  <section className="bg-zinc-900 border border-zinc-800 rounded p-4 order-1 lg:order-1 lg:col-span-2">
-                    <div className="flex items-center justify-between mb-3">
-                      <h2 className="text-xl text-yellow-200">
-                        Detail
-                      </h2>
-
-                      <div className="flex gap-3 text-sm">
-                        <button
-                          onClick={() => handlePrevNext("prev")}
-                          className="py-2 px-4 rounded-lg border border-zinc-700 text-gray-100 hover:bg-zinc-800 font-medium"
-                        >
-                          ← Prev
-                        </button>
-                        <button
-                          onClick={() => handlePrevNext("next")}
-                          className="py-2 px-4 rounded-lg border border-zinc-700 text-gray-100 hover:bg-zinc-800 font-medium"
-                        >
-                          Next →
-                        </button>
-                      </div>
-                    </div>
-
-                    <LLMTestDetailPanel
-                      selectedDoc={selectedDoc}
-                      collectionId={collectionId}
-                      testName={effectiveTestName}
-                      llmModel={effectiveLlmModel}
-                      promptType={effectivePromptType}
-                      onPromptChange={setDetailPrompt}
-                    />
-                  </section>
-
-                  {/* EVALUATION */}
-                  <section className="bg-zinc-900 border border-zinc-800 rounded p-4 order-2 lg:order-3">
-                    <h2 className="text-xl text-yellow-200 mb-3">
-                      Evaluation
-                    </h2>
-
-                    {!selectedDoc ? (
-                      <p className="text-sm text-gray-300">
-                        Select a document to rate.
-                      </p>
-                    ) : (
-                      <>
-                        <p className="text-xs text-gray-300 mb-2">
-                          Give scores (1 to 5) for this second.{" "}
-                          <span className="text-gray-400">
-                            Click again on the same value to clear.
-                          </span>
-                        </p>
-
-                        {currentEval && (
-                          <div className="space-y-3 text-[12px] text-gray-200 mb-4">
-                            {(
-                              [
-                                "test1",
-                                "test2",
-                                "test3",
-                                "test4",
-                                "test5",
-                              ] as const
-                            ).map((field, idx) => (
-                              <div key={field}>
-                                <div className="flex items-center justify-between mb-1">
-                                  <span className="font-semibold text-yellow-200">
-                                    Test {idx + 1}
-                                  </span>
-                                  <span className="text-gray-400">
-                                    current:{" "}
-                                    {currentEval[
-                                      field as keyof typeof currentEval
-                                    ] === 0
-                                      ? "-"
-                                      : currentEval[
-                                          field as keyof typeof currentEval
-                                        ]}
-                                  </span>
-                                </div>
-                                <div className="flex gap-2 flex-wrap">
-                                  {[1, 2, 3, 4, 5].map((val) => (
-                                    <button
-                                      key={val}
-                                      onClick={() =>
-                                        handleSetScore(field, val)
-                                      }
-                                      className={`py-1.5 px-3 rounded-lg border text-sm ${
-                                        currentEval[
-                                          field as keyof typeof currentEval
-                                        ] === val
-                                          ? "bg-yellow-400 text-black border-yellow-300"
-                                          : "bg-zinc-800 text-gray-100 border-zinc-600 hover:bg-zinc-700"
-                                      }`}
-                                    >
-                                      {val}
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        <button
-                          onClick={handleSaveEval}
-                          disabled={savingEval || !currentEval}
-                          className={`w-full py-2 rounded-lg font-semibold text-sm ${
-                            savingEval
-                              ? "bg-yellow-700 text-black cursor-wait"
-                              : "bg-yellow-500 hover:bg-yellow-400 text-black"
-                          }`}
-                        >
-                          {savingEval
-                            ? "Saving evaluation..."
-                            : "Save evaluation"}
-                        </button>
-
-                        {evalsLoading && (
-                          <p className="text-[11px] text-gray-400 mt-2">
-                            Loading evaluations...
-                          </p>
-                        )}
-                      </>
-                    )}
-                  </section>
-
+                <>
+                {/* LOGGED IN: Documents + Evaluation first, then Detail */}
+                <div className="flex flex-col gap-4 lg:grid lg:grid-cols-2 lg:gap-4 mb-4">
                   {/* DOCUMENTS */}
-                  <section className="bg-zinc-900 border border-zinc-800 rounded p-4 order-3 lg:order-2">
+                  <section className="bg-zinc-900 border border-zinc-800 rounded p-4">
                     <div className="flex items-center justify-between mb-2">
                       <h2 className="text-xl text-yellow-200">
                         Documents ({docsResp.total})
@@ -893,42 +754,137 @@ const TestHandler: React.FC = () => {
                       </div>
                     )}
                   </section>
+
+                  {/* EVALUATION */}
+                  <section className="bg-zinc-900 border border-zinc-800 rounded p-4">
+                    <h2 className="text-xl text-yellow-200 mb-3">
+                      Evaluation
+                    </h2>
+
+                    {!selectedDoc ? (
+                      <p className="text-sm text-gray-300">
+                        Select a document to rate.
+                      </p>
+                    ) : (
+                      <>
+                        <p className="text-xs text-gray-300 mb-2">
+                          Give scores (1 to 5) for this second.{" "}
+                          <span className="text-gray-400">
+                            Click again on the same value to clear.
+                          </span>
+                        </p>
+
+                        {currentEval && (
+                          <div className="space-y-3 text-[12px] text-gray-200 mb-4">
+                            {(
+                              [
+                                "test1",
+                                "test2",
+                                "test3",
+                                "test4",
+                                "test5",
+                              ] as const
+                            ).map((field, idx) => (
+                              <div key={field}>
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="font-semibold text-yellow-200">
+                                    Test {idx + 1}
+                                  </span>
+                                  <span className="text-gray-400">
+                                    current:{" "}
+                                    {currentEval[
+                                      field as keyof typeof currentEval
+                                    ] === 0
+                                      ? "-"
+                                      : currentEval[
+                                          field as keyof typeof currentEval
+                                        ]}
+                                  </span>
+                                </div>
+                                <div className="flex gap-2 flex-wrap">
+                                  {[1, 2, 3, 4, 5].map((val) => (
+                                    <button
+                                      key={val}
+                                      onClick={() =>
+                                        handleSetScore(field, val)
+                                      }
+                                      className={`py-1.5 px-3 rounded-lg border text-sm ${
+                                        currentEval[
+                                          field as keyof typeof currentEval
+                                        ] === val
+                                          ? "bg-yellow-400 text-black border-yellow-300"
+                                          : "bg-zinc-800 text-gray-100 border-zinc-600 hover:bg-zinc-700"
+                                      }`}
+                                    >
+                                      {val}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        <button
+                          onClick={handleSaveEval}
+                          disabled={savingEval || !currentEval}
+                          className={`w-full py-2 rounded-lg font-semibold text-sm ${
+                            savingEval
+                              ? "bg-yellow-700 text-black cursor-wait"
+                              : "bg-yellow-500 hover:bg-yellow-400 text-black"
+                          }`}
+                        >
+                          {savingEval
+                            ? "Saving evaluation..."
+                            : "Save evaluation"}
+                        </button>
+
+                        {evalsLoading && (
+                          <p className="text-[11px] text-gray-400 mt-2">
+                            Loading evaluations...
+                          </p>
+                        )}
+                      </>
+                    )}
+                  </section>
                 </div>
+
+                {/* DETAIL */}
+                <section className="bg-zinc-900 border border-zinc-800 rounded p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-xl text-yellow-200">
+                      Test data
+                    </h2>
+
+                    <div className="flex gap-3 text-sm">
+                      <button
+                        onClick={() => handlePrevNext("prev")}
+                        className="py-2 px-4 rounded-lg border border-zinc-700 text-gray-100 hover:bg-zinc-800 font-medium"
+                      >
+                        ← Prev
+                      </button>
+                      <button
+                        onClick={() => handlePrevNext("next")}
+                        className="py-2 px-4 rounded-lg border border-zinc-700 text-gray-100 hover:bg-zinc-800 font-medium"
+                      >
+                        Next →
+                      </button>
+                    </div>
+                  </div>
+
+                  <LLMTestDetailPanel
+                    selectedDoc={selectedDoc}
+                    collectionId={collectionId}
+                    testName={effectiveTestName}
+                    llmModel={effectiveLlmModel}
+                    promptType={effectivePromptType}
+                    onPromptChange={setDetailPrompt}
+                  />
+                </section>
+              </>
               ) : (
                 // PÚBLICO
                 <div className="flex flex-col gap-4">
-                  <section className="bg-zinc-900 border border-zinc-800 rounded p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h2 className="text-xl text-yellow-200">
-                        Detail
-                      </h2>
-
-                      <div className="flex gap-3 text-sm">
-                        <button
-                          onClick={() => handlePrevNext("prev")}
-                          className="py-2 px-4 rounded-lg border border-zinc-700 text-gray-100 hover:bg-zinc-800 font-medium"
-                        >
-                          ← Prev
-                        </button>
-                        <button
-                          onClick={() => handlePrevNext("next")}
-                          className="py-2 px-4 rounded-lg border border-zinc-700 text-gray-100 hover:bg-zinc-800 font-medium"
-                        >
-                          Next →
-                        </button>
-                      </div>
-                    </div>
-
-                    <LLMTestDetailPanel
-                      selectedDoc={selectedDoc}
-                      collectionId={collectionId}
-                      testName={effectiveTestName}
-                      llmModel={effectiveLlmModel}
-                      promptType={effectivePromptType}
-                      onPromptChange={setDetailPrompt}
-                    />
-                  </section>
-
                   <section className="bg-zinc-900 border border-zinc-800 rounded p-4">
                     <div className="flex items-center justify-between mb-2">
                       <h2 className="text-xl text-yellow-200">
@@ -951,12 +907,6 @@ const TestHandler: React.FC = () => {
                             </th>
                             <th className="px-2 py-1 text-left text-gray-200">
                               sec
-                            </th>
-                            <th className="px-2 py-1 text-left text-gray-200">
-                              latency (ms)
-                            </th>
-                            <th className="px-2 py-1 text-left text-gray-200">
-                              tokens
                             </th>
                             <th className="px-2 py-1 text-right text-gray-200">
                               actions
@@ -988,16 +938,7 @@ const TestHandler: React.FC = () => {
                                 <td className="px-2 py-1 text-gray-100">
                                   {d.sec}
                                 </td>
-                                <td className="px-2 py-1 text-gray-100">
-                                  {d.latencyMs != null
-                                    ? d.latencyMs
-                                    : "-"}
-                                </td>
-                                <td className="px-2 py-1 text-gray-100">
-                                  {d.totalTokens != null
-                                    ? d.totalTokens
-                                    : "-"}
-                                </td>
+
                                 <td className="px-2 py-1 text-right">
                                   <button
                                     onClick={(e) => {
@@ -1055,6 +996,38 @@ const TestHandler: React.FC = () => {
                         </div>
                       </div>
                     )}
+                  </section>
+
+<section className="bg-zinc-900 border border-zinc-800 rounded p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h2 className="text-xl text-yellow-200">
+                        Detail
+                      </h2>
+
+                      <div className="flex gap-3 text-sm">
+                        <button
+                          onClick={() => handlePrevNext("prev")}
+                          className="py-2 px-4 rounded-lg border border-zinc-700 text-gray-100 hover:bg-zinc-800 font-medium"
+                        >
+                          ← Prev
+                        </button>
+                        <button
+                          onClick={() => handlePrevNext("next")}
+                          className="py-2 px-4 rounded-lg border border-zinc-700 text-gray-100 hover:bg-zinc-800 font-medium"
+                        >
+                          Next →
+                        </button>
+                      </div>
+                    </div>
+
+                    <LLMTestDetailPanel
+                      selectedDoc={selectedDoc}
+                      collectionId={collectionId}
+                      testName={effectiveTestName}
+                      llmModel={effectiveLlmModel}
+                      promptType={effectivePromptType}
+                      onPromptChange={setDetailPrompt}
+                    />
                   </section>
                 </div>
               )}

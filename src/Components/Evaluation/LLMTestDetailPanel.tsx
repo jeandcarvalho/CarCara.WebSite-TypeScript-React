@@ -94,23 +94,68 @@ const formatDateTime = (iso?: string | null) => {
   return d.toLocaleString();
 };
 
-const googleDriveToDirect = (url: string): string => {
-  // Links tipo: https://drive.google.com/file/d/<ID>/view?...
-  const fileMatch = url.match(/\/file\/d\/([^/?]+)(?:[/?]|$)/);
-  if (fileMatch && fileMatch[1]) {
-    const id = fileMatch[1];
-    return `https://drive.google.com/uc?export=view&id=${id}`;
-  }
+/* ===================== Drive / Images ===================== */
 
-  // Links tipo: https://drive.google.com/open?id=<ID>
-  const idMatch = url.match(/[?&]id=([^&]+)/);
-  if (idMatch && idMatch[1]) {
-    const id = idMatch[1];
-    return `https://drive.google.com/uc?export=view&id=${id}`;
-  }
+function extractDriveId(link: string): string | null {
+  try {
+    if (!link) return null;
 
-  return url;
-};
+    if (link.includes("lh3.googleusercontent.com/d/")) {
+      const m = link.match(/lh3\.googleusercontent\.com\/d\/([^=\/#]+)/);
+      return m?.[1] ?? null;
+    }
+
+    const patterns = [
+      /\/file\/d\/([^/]+)\//,
+      /\/d\/([^/]+)\//,
+      /[?&]id=([^&]+)/,
+      /\/uc\?[^#]*\bid=([^&]+)/i,
+    ];
+
+    for (const re of patterns) {
+      const m = link.match(re);
+      if (m?.[1]) return m[1];
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function thumbUrl(link: string): string {
+  const id = extractDriveId(link);
+  return id
+    ? `https://lh3.googleusercontent.com/d/${id}=w640-h360-n`
+    : link;
+}
+
+function fullImageUrl(link: string): string {
+  const id = extractDriveId(link);
+  // Higher resolution to look good in the main panel
+  return id
+    ? `https://lh3.googleusercontent.com/d/${id}=w1920-h1080-n`
+    : link;
+}
+
+function getDrivePreviewUrl(link: string | null): string | null {
+  if (!link) return null;
+  const id = extractDriveId(link);
+  if (!id) return null;
+  return `https://drive.google.com/file/d/${id}/preview?vq=hd1080`;
+}
+
+function getDriveThumbUrl(link: string | null): string | null {
+  if (!link) return null;
+  return thumbUrl(link);
+}
+
+function getDriveImageUrl(link: string | null): string | null {
+  if (!link) return null;
+  return fullImageUrl(link);
+}
+
+/* ========================================================= */
 
 type AggregatedYOLO = {
   track_id: number;
@@ -196,7 +241,8 @@ export const LLMTestDetailPanel: React.FC<LLMTestDetailPanelProps> = ({
 
         if (centerTimelineItem && centerTimelineItem.links?.length) {
           const firstLink = centerTimelineItem.links[0].link;
-          setSelectedImageUrl(googleDriveToDirect(firstLink));
+          const img = getDriveImageUrl(firstLink);
+          setSelectedImageUrl(img);
         } else {
           setSelectedImageUrl(null);
         }
@@ -215,7 +261,8 @@ export const LLMTestDetailPanel: React.FC<LLMTestDetailPanelProps> = ({
   const handleSelectFrame = (sec: number, url?: string) => {
     setSelectedFrameSec(sec);
     if (url) {
-      setSelectedImageUrl(googleDriveToDirect(url));
+      const img = getDriveImageUrl(url);
+      setSelectedImageUrl(img);
     } else {
       setSelectedImageUrl(null);
     }
@@ -363,7 +410,7 @@ export const LLMTestDetailPanel: React.FC<LLMTestDetailPanelProps> = ({
   return (
     <div className="space-y-4 text-sm text-gray-100">
       {/* PRIMEIRA LINHA: Scene viewer + Response */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         {/* Scene viewer (esquerda) */}
         <section>
           <h3 className="text-base font-semibold text-yellow-200 mb-2">
@@ -407,9 +454,10 @@ export const LLMTestDetailPanel: React.FC<LLMTestDetailPanelProps> = ({
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {timeline.map((t) => {
                   const hasImage = !!t.links?.length;
-                  const thumbUrl = hasImage
-                    ? googleDriveToDirect(t.links![0].link)
-                    : null;
+                  const thumb =
+                    hasImage && t.links
+                      ? getDriveThumbUrl(t.links[0].link)
+                      : null;
                   const isActive =
                     (selectedFrameSec ?? centerSec) === t.sec;
 
@@ -430,10 +478,10 @@ export const LLMTestDetailPanel: React.FC<LLMTestDetailPanelProps> = ({
                           : "border-zinc-700 bg-zinc-900 hover:bg-zinc-800"
                       }`}
                     >
-                      {thumbUrl ? (
+                      {thumb ? (
                         <div className="w-20 h-12 mb-1 rounded overflow-hidden bg-black/60">
                           <img
-                            src={thumbUrl}
+                            src={thumb}
                             alt={`sec ${t.sec}`}
                             className="w-full h-full object-cover"
                           />
@@ -485,7 +533,7 @@ export const LLMTestDetailPanel: React.FC<LLMTestDetailPanelProps> = ({
               <div className="text-[11px] text-gray-400 mb-1">
                 Answer
               </div>
-              <div className="bg-zinc-900 border border-zinc-800 rounded-md p-3 h-64 lg:h-72 overflow-y-auto text-[12px] whitespace-pre-wrap">
+              <div className="bg-zinc-900 border border-zinc-800 rounded-md p-3 max-h-64 lg:max-h-96 overflow-y-auto text-[12px] whitespace-pre-wrap">
                 {ctx.meta.answer || "(no answer saved)"}
               </div>
             </div>
@@ -494,8 +542,8 @@ export const LLMTestDetailPanel: React.FC<LLMTestDetailPanelProps> = ({
       </div>
 
       {/* SEGUNDA LINHA: CAN per second (agora logo abaixo de Scene/LLM) */}
-      <section>
-        <h3 className="text-base font-semibold text-yellow-200 mb-2">
+      <section className="mt-4">
+        <h3 className="text-base font-semibold text-yellow-200 mb-2 mt-11">
           CAN per second
         </h3>
         <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-3 overflow-x-auto">
@@ -542,11 +590,60 @@ export const LLMTestDetailPanel: React.FC<LLMTestDetailPanelProps> = ({
       </section>
 
       {/* TERCEIRA LINHA: Center context + YOLO summary */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Center second context + meta (esquerda) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        {/* YOLO summary (direita) */}
         <section>
           <h3 className="text-base font-semibold text-yellow-200 mb-2">
-            Center second context (excluding CAN / YOLO)
+            YOLO objects (window summary)
+          </h3>
+          <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-[13px] space-y-2">
+            {aggregatedYOLO.length === 0 ? (
+              <p className="text-gray-400 text-sm">
+                No YOLO objects in this window.
+              </p>
+            ) : (
+              <>
+                <p className="text-[11px] text-gray-500 mb-1">
+                  Lane codes:
+                  {" "}
+                  EGO = Ego lane · R+1 = Right lane · L-1 = Left lane ·
+                  R-out = Right side · L-out = Left side
+                </p>
+                {aggregatedYOLO.map((obj) => (
+                  <div
+                    key={obj.track_id}
+                    className="flex items-start justify-between gap-2 border-b border-zinc-800 pb-1 last:border-0 last:pb-0"
+                  >
+                    <div>
+                      <p>
+                        <span className="font-semibold capitalize">
+                          {obj.clazz}
+                        </span>{" "}
+                        <span className="text-gray-400">
+                          @ {obj.avgDist.toFixed(1)} m
+                        </span>
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {trendLabel(obj.trend)}{" "}
+                        <span className="text-gray-500">
+                          ({niceRel(obj.dominantRel)})
+                        </span>
+                      </p>
+                    </div>
+                    <div className="text-right text-[11px] text-gray-400">
+                      <div>track #{obj.track_id}</div>
+                      <div>conf {obj.maxConf.toFixed(3)}</div>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+        </section>
+
+        <section>
+          <h3 className="text-base font-semibold text-yellow-200 mb-2">
+            Center second context
           </h3>
           <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-3 space-y-3 text-[13px]">
             {/* Vehicle & weather */}
@@ -643,97 +740,6 @@ export const LLMTestDetailPanel: React.FC<LLMTestDetailPanelProps> = ({
                 </span>
               </p>
             </div>
-
-            {/* Meta extra (acq, sec, latency, tokens, createdAt) */}
-            <div className="pt-2 border-t border-zinc-800 mt-2">
-              <p className="text-xs text-gray-400 mb-1">
-                Meta
-              </p>
-              <p>
-                <span className="text-gray-400">acq_id:</span>{" "}
-                <span className="font-mono text-gray-100">
-                  {ctx.meta.acq_id}
-                </span>
-              </p>
-              <p>
-                <span className="text-gray-400">second:</span>{" "}
-                <span className="font-semibold text-yellow-200">
-                  {centerSec}
-                </span>
-              </p>
-              <p>
-                <span className="text-gray-400">latency:</span>{" "}
-                <span className="font-mono">
-                  {metaLatencyMs != null
-                    ? `${metaLatencyMs} ms`
-                    : "-"}
-                </span>
-              </p>
-              <p>
-                <span className="text-gray-400">tokens:</span>{" "}
-                <span className="font-mono">
-                  {metaTokens != null ? metaTokens : "-"}
-                </span>
-              </p>
-              <p>
-                <span className="text-gray-400">
-                  created at:
-                </span>{" "}
-                <span className="font-mono">
-                  {formatDateTime(metaCreatedAt)}
-                </span>
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* YOLO summary (direita) */}
-        <section>
-          <h3 className="text-base font-semibold text-yellow-200 mb-2">
-            YOLO objects (window summary)
-          </h3>
-          <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-[13px] space-y-2">
-            {aggregatedYOLO.length === 0 ? (
-              <p className="text-gray-400 text-sm">
-                No YOLO objects in this window.
-              </p>
-            ) : (
-              <>
-                <p className="text-[11px] text-gray-500 mb-1">
-                  Lane codes:
-                  {" "}
-                  EGO = Ego lane · R+1 = Right lane · L-1 = Left lane ·
-                  R-out = Right side · L-out = Left side
-                </p>
-                {aggregatedYOLO.map((obj) => (
-                  <div
-                    key={obj.track_id}
-                    className="flex items-start justify-between gap-2 border-b border-zinc-800 pb-1 last:border-0 last:pb-0"
-                  >
-                    <div>
-                      <p>
-                        <span className="font-semibold capitalize">
-                          {obj.clazz}
-                        </span>{" "}
-                        <span className="text-gray-400">
-                          @ {obj.avgDist.toFixed(1)} m
-                        </span>
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {trendLabel(obj.trend)}{" "}
-                        <span className="text-gray-500">
-                          ({niceRel(obj.dominantRel)})
-                        </span>
-                      </p>
-                    </div>
-                    <div className="text-right text-[11px] text-gray-400">
-                      <div>track #{obj.track_id}</div>
-                      <div>conf {obj.maxConf.toFixed(3)}</div>
-                    </div>
-                  </div>
-                ))}
-              </>
-            )}
           </div>
         </section>
       </div>
