@@ -1,4 +1,4 @@
-// src/Components/LLMTestDetailPanel.tsx
+// src/Components/Evaluation/LLMTestDetailPanel.tsx
 import React, { useEffect, useMemo, useState } from "react";
 
 const API_BASE = "https://carcara-web-api.onrender.com";
@@ -95,14 +95,14 @@ const formatDateTime = (iso?: string | null) => {
 };
 
 const googleDriveToDirect = (url: string): string => {
-  // Trata links do tipo: https://drive.google.com/file/d/<ID>/view?...
-  const fileMatch = url.match(/\/file\/d\/([^/]+)\//);
+  // Links tipo: https://drive.google.com/file/d/<ID>/view?...
+  const fileMatch = url.match(/\/file\/d\/([^/?]+)(?:[/?]|$)/);
   if (fileMatch && fileMatch[1]) {
     const id = fileMatch[1];
     return `https://drive.google.com/uc?export=view&id=${id}`;
   }
 
-  // Trata links do tipo: https://drive.google.com/open?id=<ID>
+  // Links tipo: https://drive.google.com/open?id=<ID>
   const idMatch = url.match(/[?&]id=([^&]+)/);
   if (idMatch && idMatch[1]) {
     const id = idMatch[1];
@@ -305,9 +305,17 @@ export const LLMTestDetailPanel: React.FC<LLMTestDetailPanelProps> = ({
     return out.sort((a, b) => a.avgDist - b.avgDist);
   }, [ctx]);
 
+  const REL_LABELS: Record<string, string> = {
+    "R+1": "Right lane",
+    "L-1": "Left lane",
+    EGO: "Ego lane",
+    "R-out": "Right side",
+    "L-out": "Left side",
+  };
+
   const niceRel = (rel: string) => {
     if (!rel) return "-";
-    return rel;
+    return REL_LABELS[rel] ?? rel;
   };
 
   const trendLabel = (t: AggregatedYOLO["trend"]) => {
@@ -477,7 +485,7 @@ export const LLMTestDetailPanel: React.FC<LLMTestDetailPanelProps> = ({
               <div className="text-[11px] text-gray-400 mb-1">
                 Answer
               </div>
-              <div className="bg-zinc-900 border border-zinc-800 rounded-md p-3 h-64 overflow-y-auto text-[12px] whitespace-pre-wrap">
+              <div className="bg-zinc-900 border border-zinc-800 rounded-md p-3 h-64 lg:h-72 overflow-y-auto text-[12px] whitespace-pre-wrap">
                 {ctx.meta.answer || "(no answer saved)"}
               </div>
             </div>
@@ -485,7 +493,55 @@ export const LLMTestDetailPanel: React.FC<LLMTestDetailPanelProps> = ({
         </section>
       </div>
 
-      {/* SEGUNDA LINHA: Center context + YOLO summary */}
+      {/* SEGUNDA LINHA: CAN per second (agora logo abaixo de Scene/LLM) */}
+      <section>
+        <h3 className="text-base font-semibold text-yellow-200 mb-2">
+          CAN per second
+        </h3>
+        <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-3 overflow-x-auto">
+          <table className="min-w-full text-[12px]">
+            <thead>
+              <tr className="border-b border-zinc-800 text-gray-300">
+                <th className="text-left py-1 pr-3">sec</th>
+                <th className="text-left py-1 pr-3">speed (km/h)</th>
+                <th className="text-left py-1 pr-3">
+                  steering (deg)
+                </th>
+                <th className="text-left py-1 pr-3">brake</th>
+              </tr>
+            </thead>
+            <tbody>
+              {timeline.map((t) => (
+                <tr
+                  key={t.sec}
+                  className={`border-t border-zinc-900 ${
+                    t.sec === centerSec
+                      ? "bg-yellow-900/30"
+                      : ""
+                  }`}
+                >
+                  <td className="py-1 pr-3">{t.sec}</td>
+                  <td className="py-1 pr-3">
+                    {t.can?.VehicleSpeed != null
+                      ? t.can.VehicleSpeed.toFixed(2)
+                      : "-"}
+                  </td>
+                  <td className="py-1 pr-3">
+                    {t.can?.SteeringWheelAngle != null
+                      ? t.can.SteeringWheelAngle.toFixed(1)
+                      : "-"}
+                  </td>
+                  <td className="py-1 pr-3">
+                    {t.can?.BrakeInfoStatus ?? "-"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* TERCEIRA LINHA: Center context + YOLO summary */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Center second context + meta (esquerda) */}
         <section>
@@ -642,85 +698,45 @@ export const LLMTestDetailPanel: React.FC<LLMTestDetailPanelProps> = ({
                 No YOLO objects in this window.
               </p>
             ) : (
-              aggregatedYOLO.map((obj) => (
-                <div
-                  key={obj.track_id}
-                  className="flex items-start justify-between gap-2 border-b border-zinc-800 pb-1 last:border-0 last:pb-0"
-                >
-                  <div>
-                    <p>
-                      <span className="font-semibold capitalize">
-                        {obj.clazz}
-                      </span>{" "}
-                      <span className="text-gray-400">
-                        @ {obj.avgDist.toFixed(1)} m
-                      </span>
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      {trendLabel(obj.trend)}{" "}
-                      <span className="text-gray-500">
-                        ({niceRel(obj.dominantRel)})
-                      </span>
-                    </p>
+              <>
+                <p className="text-[11px] text-gray-500 mb-1">
+                  Lane codes:
+                  {" "}
+                  EGO = Ego lane · R+1 = Right lane · L-1 = Left lane ·
+                  R-out = Right side · L-out = Left side
+                </p>
+                {aggregatedYOLO.map((obj) => (
+                  <div
+                    key={obj.track_id}
+                    className="flex items-start justify-between gap-2 border-b border-zinc-800 pb-1 last:border-0 last:pb-0"
+                  >
+                    <div>
+                      <p>
+                        <span className="font-semibold capitalize">
+                          {obj.clazz}
+                        </span>{" "}
+                        <span className="text-gray-400">
+                          @ {obj.avgDist.toFixed(1)} m
+                        </span>
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {trendLabel(obj.trend)}{" "}
+                        <span className="text-gray-500">
+                          ({niceRel(obj.dominantRel)})
+                        </span>
+                      </p>
+                    </div>
+                    <div className="text-right text-[11px] text-gray-400">
+                      <div>track #{obj.track_id}</div>
+                      <div>conf {obj.maxConf.toFixed(3)}</div>
+                    </div>
                   </div>
-                  <div className="text-right text-[11px] text-gray-400">
-                    <div>track #{obj.track_id}</div>
-                    <div>conf {obj.maxConf.toFixed(3)}</div>
-                  </div>
-                </div>
-              ))
+                ))}
+              </>
             )}
           </div>
         </section>
       </div>
-
-      {/* TERCEIRA LINHA: CAN per second */}
-      <section>
-        <h3 className="text-base font-semibold text-yellow-200 mb-2">
-          CAN per second
-        </h3>
-        <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-3 overflow-x-auto">
-          <table className="min-w-full text-[12px]">
-            <thead>
-              <tr className="border-b border-zinc-800 text-gray-300">
-                <th className="text-left py-1 pr-3">sec</th>
-                <th className="text-left py-1 pr-3">speed (km/h)</th>
-                <th className="text-left py-1 pr-3">
-                  steering (deg)
-                </th>
-                <th className="text-left py-1 pr-3">brake</th>
-              </tr>
-            </thead>
-            <tbody>
-              {timeline.map((t) => (
-                <tr
-                  key={t.sec}
-                  className={`border-t border-zinc-900 ${
-                    t.sec === centerSec
-                      ? "bg-yellow-900/30"
-                      : ""
-                  }`}
-                >
-                  <td className="py-1 pr-3">{t.sec}</td>
-                  <td className="py-1 pr-3">
-                    {t.can?.VehicleSpeed != null
-                      ? t.can.VehicleSpeed.toFixed(2)
-                      : "-"}
-                  </td>
-                  <td className="py-1 pr-3">
-                    {t.can?.SteeringWheelAngle != null
-                      ? t.can.SteeringWheelAngle.toFixed(1)
-                      : "-"}
-                  </td>
-                  <td className="py-1 pr-3">
-                    {t.can?.BrakeInfoStatus ?? "-"}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
 
       {loading && (
         <p className="text-[11px] text-gray-500">

@@ -1,4 +1,4 @@
-// src/Components/TestHandler.tsx
+// src/Components/Evaluation/TestHandler.tsx
 import { useEffect, useState } from "react";
 import {
   useNavigate,
@@ -395,8 +395,6 @@ const TestHandler: React.FC = () => {
       });
     }
   }, [isAuthenticated, selectedDoc, evalsByKey]);
-
-
 
   const handleBackToTests = () => {
     if (!collectionId) return;
