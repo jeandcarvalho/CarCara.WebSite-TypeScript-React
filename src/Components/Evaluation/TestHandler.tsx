@@ -649,7 +649,7 @@ const TestHandler: React.FC = () => {
                       </p>
                     )}
 
-                    <div className="overflow-x-auto max-h-[60vh] overflow-y-auto border border-zinc-800 rounded">
+                    <div className="overflow-x-auto max-h-[40vh] overflow-y-auto border border-zinc-800 rounded">
                       <table className="min-w-full text-xs">
                         <thead className="bg-zinc-800">
                           <tr>
@@ -901,7 +901,7 @@ const TestHandler: React.FC = () => {
                       </p>
                     )}
 
-                    <div className="overflow-x-auto max-h-[60vh] overflow-y-auto border border-zinc-800 rounded">
+                    <div className="overflow-x-auto max-h-[30vh] overflow-y-auto border border-zinc-800 rounded">
                       <table className="min-w-full text-xs">
                         <thead className="bg-zinc-800">
                           <tr>
