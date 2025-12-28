@@ -1,5 +1,5 @@
 // src/Components/CollectionLLMTests.tsx
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
@@ -29,6 +29,7 @@ const CollectionLLMTests: React.FC = () => {
   const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
+  const isLoggedIn = useMemo(() => !!token, [token]);
 
   const [tests, setTests] = useState<LLMTestSummary[]>([]);
   const [testsLoading, setTestsLoading] = useState(false);
@@ -36,13 +37,7 @@ const CollectionLLMTests: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [globalLoading, setGlobalLoading] = useState(true);
 
-  // Carrega lista de testes assim que token + collectionId existirem
   useEffect(() => {
-    if (!token) {
-      navigate("/auth");
-      return;
-    }
-
     if (!collectionId) {
       setErrorMsg("Collection id missing.");
       setGlobalLoading(false);
@@ -54,45 +49,35 @@ const CollectionLLMTests: React.FC = () => {
         setTestsLoading(true);
         setErrorMsg("");
 
-        console.log(
-          "[LLM TESTS] fetching:",
-          `${API_BASE}/api/llm/tests/${collectionId}`
-        );
+        const url = `${API_BASE}/api/llm/tests/${collectionId}`;
+        console.log("[LLM TESTS] fetching:", url);
 
-        const res = await fetch(
-          `${API_BASE}/api/llm/tests/${collectionId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const headers: Record<string, string> = {};
+        if (token) headers.Authorization = `Bearer ${token}`; // <- só manda se tiver
 
+        const res = await fetch(url, { headers });
         const data = await res.json().catch(() => null);
 
         console.log("[LLM TESTS] raw response status:", res.status);
         console.log("[LLM TESTS] raw response body:", data);
 
         if (!res.ok) {
-          setErrorMsg(
+          // Se o backend ainda exigir auth, aqui vai cair 401 no modo público
+          // e você mostra uma mensagem amigável.
+          const msg =
             (data && (data.error || data.message)) ||
-              "Error loading LLM tests."
-          );
+            (res.status === 401
+              ? "This page is public, but this endpoint requires authentication."
+              : "Error loading LLM tests.");
+          setErrorMsg(msg);
           setTests([]);
           return;
         }
 
         let rawTests: any[] = [];
-
-        if (Array.isArray(data)) {
-          rawTests = data;
-        } else if (data && Array.isArray(data.data)) {
-          rawTests = data.data;
-        } else if (data && Array.isArray(data.tests)) {
-          rawTests = data.tests;
-        }
-
-        console.log("[LLM TESTS] rawTests array:", rawTests);
+        if (Array.isArray(data)) rawTests = data;
+        else if (data && Array.isArray(data.data)) rawTests = data.data;
+        else if (data && Array.isArray(data.tests)) rawTests = data.tests;
 
         const mapped: LLMTestSummary[] = rawTests.map((t: any) => ({
           testName: t.testName ?? t.test_name ?? "",
@@ -105,14 +90,8 @@ const CollectionLLMTests: React.FC = () => {
             t._count ??
             0,
           firstCreatedAt:
-            t.firstCreatedAt ??
-            t.createdAt ??
-            t._min?.createdAt ??
-            null,
-          lastCreatedAt:
-            t.lastCreatedAt ??
-            t._max?.createdAt ??
-            null,
+            t.firstCreatedAt ?? t.createdAt ?? t._min?.createdAt ?? null,
+          lastCreatedAt: t.lastCreatedAt ?? t._max?.createdAt ?? null,
           avgLatencyMs:
             t.avgLatencyMs ??
             (t._avg?.response_time_s != null
@@ -124,8 +103,6 @@ const CollectionLLMTests: React.FC = () => {
               ? Math.round(t._avg.total_tokens)
               : null),
         }));
-
-        console.log("[LLM TESTS] mapped tests:", mapped);
 
         setTests(mapped);
       } catch (err) {
@@ -140,7 +117,7 @@ const CollectionLLMTests: React.FC = () => {
 
     setGlobalLoading(true);
     fetchTests();
-  }, [token, navigate, collectionId]);
+  }, [token, collectionId]);
 
   const handleBackToCollection = () => {
     if (!collectionId) return;
@@ -157,13 +134,16 @@ const CollectionLLMTests: React.FC = () => {
     });
 
     const url = `/collections/${collectionId}/llm-tests/handler?${params.toString()}`;
-
     console.log("[UI] navigating to TestHandler:", url);
     navigate(url);
   };
 
   const handleDeleteTest = async (t: LLMTestSummary) => {
     if (!collectionId) return;
+    if (!token) {
+      setErrorMsg("You must be logged in to delete tests.");
+      return;
+    }
 
     const confirmDelete = window.confirm(
       "Are you sure you want to DELETE ALL RESULTS for this test?\n\nThis action cannot be undone."
@@ -180,14 +160,11 @@ const CollectionLLMTests: React.FC = () => {
       });
 
       const url = `${API_BASE}/api/llm/tests/${collectionId}?${params.toString()}`;
-
       console.log("[LLM DELETE] calling:", url);
 
       const res = await fetch(url, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       let data: any = null;
@@ -201,13 +178,11 @@ const CollectionLLMTests: React.FC = () => {
 
       if (!res.ok && res.status !== 204) {
         setErrorMsg(
-          (data && (data.error || data.message)) ||
-            "Error deleting LLM test."
+          (data && (data.error || data.message)) || "Error deleting LLM test."
         );
         return;
       }
 
-      // Remove do estado local
       setTests((prev) =>
         prev.filter(
           (x) =>
@@ -246,12 +221,11 @@ const CollectionLLMTests: React.FC = () => {
 
           {collectionId && (
             <p className="text-gray-300 mb-4 text-sm">
-              <span className="font-semibold text-yellow-200">
-                Collection ID:
-              </span>{" "}
+              <span className="font-semibold text-yellow-200">Collection ID:</span>{" "}
               {collectionId}
             </p>
           )}
+
 
           {errorMsg && (
             <div className="bg-red-900 text-red-100 p-2 rounded mb-4">
@@ -263,13 +237,10 @@ const CollectionLLMTests: React.FC = () => {
             <p className="text-gray-200">Loading.</p>
           ) : (
             <section className="bg-zinc-900 border border-zinc-800 rounded p-4">
-              <h2 className="text-xl text-yellow-200 mb-2">
-                LLM Test Runs
-              </h2>
+              <h2 className="text-xl text-yellow-200 mb-2">LLM Test Runs</h2>
               <p className="text-gray-400 text-sm mb-3">
-                Each row represents one LLM test configuration
-                (testName + model + promptType) and aggregates all
-                documents evaluated with that setup.
+                Each row represents one LLM test configuration (testName + model + promptType)
+                and aggregates all documents evaluated with that setup.
               </p>
 
               {testsLoading ? (
@@ -287,42 +258,28 @@ const CollectionLLMTests: React.FC = () => {
                     >
                       <div className="flex justify-between gap-2">
                         <div className="flex-1">
-                          <p className="text-sm text-yellow-100 font-semibold">
-                            {t.testName}
-                          </p>
+                          <p className="text-sm text-yellow-100 font-semibold">{t.testName}</p>
                           <p className="text-xs text-gray-300 mt-1">
-                            <span className="font-semibold">Model:</span>{" "}
-                            {t.llmModel}
+                            <span className="font-semibold">Model:</span> {t.llmModel}
                           </p>
                           <p className="text-xs text-gray-300">
-                            <span className="font-semibold">
-                              Prompt type:
-                            </span>{" "}
-                            {t.promptType}
+                            <span className="font-semibold">Prompt type:</span> {t.promptType}
                           </p>
                           <p className="text-xs text-gray-400 mt-1">
-                            <span className="font-semibold">
-                              Docs evaluated:
-                            </span>{" "}
-                            {t.docsCount}
+                            <span className="font-semibold">Docs evaluated:</span> {t.docsCount}
                           </p>
 
-                          {(t.avgLatencyMs != null ||
-                            t.avgTotalTokens != null) && (
+                          {(t.avgLatencyMs != null || t.avgTotalTokens != null) && (
                             <p className="text-xs text-gray-400">
                               {t.avgLatencyMs != null && (
                                 <>
-                                  <span className="font-semibold">
-                                    avg latency:
-                                  </span>{" "}
+                                  <span className="font-semibold">avg latency:</span>{" "}
                                   {t.avgLatencyMs} ms{" "}
                                 </>
                               )}
                               {t.avgTotalTokens != null && (
                                 <>
-                                  <span className="font-semibold">
-                                    avg tokens:
-                                  </span>{" "}
+                                  <span className="font-semibold">avg tokens:</span>{" "}
                                   {t.avgTotalTokens}
                                 </>
                               )}
@@ -333,17 +290,13 @@ const CollectionLLMTests: React.FC = () => {
                             <p className="text-[11px] text-gray-500 mt-1">
                               {t.firstCreatedAt && (
                                 <>
-                                  <span className="font-semibold">
-                                    first:
-                                  </span>{" "}
+                                  <span className="font-semibold">first:</span>{" "}
                                   {formatDateTime(t.firstCreatedAt)}{" "}
                                 </>
                               )}
                               {t.lastCreatedAt && (
                                 <>
-                                  <span className="font-semibold">
-                                    last:
-                                  </span>{" "}
+                                  <span className="font-semibold">last:</span>{" "}
                                   {formatDateTime(t.lastCreatedAt)}
                                 </>
                               )}
@@ -358,12 +311,16 @@ const CollectionLLMTests: React.FC = () => {
                           >
                             View docs
                           </button>
-                          <button
-                            onClick={() => handleDeleteTest(t)}
-                            className="bg-red-600 hover:bg-red-500 text-white font-semibold text-xs py-1 px-3 rounded"
-                          >
-                            Delete test
-                          </button>
+
+                          {/* Só aparece logado */}
+                          {isLoggedIn && (
+                            <button
+                              onClick={() => handleDeleteTest(t)}
+                              className="bg-red-600 hover:bg-red-500 text-white font-semibold text-xs py-1 px-3 rounded"
+                            >
+                              Delete test
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
