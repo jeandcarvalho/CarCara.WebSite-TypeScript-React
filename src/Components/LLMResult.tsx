@@ -266,7 +266,7 @@ const CollectionLLMTests: React.FC = () => {
                             <span className="font-semibold">Prompt type:</span> {t.promptType}
                           </p>
                           <p className="text-xs text-gray-400 mt-1">
-                            <span className="font-semibold">Docs evaluated:</span> {t.docsCount}
+                            <span className="font-semibold">Scenarios evaluated:</span> {t.docsCount}
                           </p>
 
                           {(t.avgLatencyMs != null || t.avgTotalTokens != null) && (
@@ -309,7 +309,7 @@ const CollectionLLMTests: React.FC = () => {
                             onClick={() => handleViewDocs(t)}
                             className="bg-blue-500 hover:bg-blue-400 text-white font-semibold text-xs py-1 px-3 rounded"
                           >
-                            View docs
+                            View scenarios
                           </button>
 
                           {/* Só aparece logado */}
