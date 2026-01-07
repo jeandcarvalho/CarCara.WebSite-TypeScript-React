@@ -1,125 +1,277 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import loadgif from "../Components/img/gif.gif";
-import Header from './Header';
-import Footer from './Footer';
-import { formatString } from '../Utils/StringUtilsVideos';
+// src/Pages/ExploreAcquisitions.tsx
+import React from "react";
+import { Link } from "react-router-dom";
+import Header from "./Header";
+import Footer from "./Footer";
 
-interface VideoFile {
-  id: string;
-  FileName: string;
-  Timestamp: string;
-  GPS_x: string;
-  GPS_y: string;
-  City: string;
-  Country: string;
-  District: string;
-  State: string;
-  Street: string;
-  IMU: string;
-  OBII: string;
-  Radar: string;
-  Csv: string;
-  Mf4: string;
-  VIEW360: string; // Correspondendo ao campo "360VIEW" do Prisma
-  CAM_Front_Center: string;
-  CAM_Front_Left: string;
-  CAM_Front_Right: string;
-  CAM_Rear_Center: string;
-  CAM_Rear_Left: string;
-  CAM_Rear_Right: string;
-  Area: string;
-  Misc: string;
-  Period: string;
-  RoadType: string; // Correspondendo ao campo "Road Type" do Prisma
-  Traffic: string;
-  Weather: string;
+type IconKey =
+  | "visual"
+  | "detection"
+  | "telemetry"
+  | "localization"
+  | "weather"
+  | "road"
+  | "semseg"
+  | "scenario"
+  | "search"
+  | "night_moto"
+  | "tree"
+  | "cloud"
+  | "car"
+  | "signpost";
+
+type Preset = {
+  title: string;
+  to: string;
+  badge?: string;
+  icons: [IconKey, IconKey]; // always 2
+};
+
+const ICON_BASE = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons";
+
+const ICONS: Record<IconKey, { label: string; filename: string; hint: string }> =
+  {
+    visual: {
+      label: "Visual Perception",
+      filename: "camera-video.svg",
+      hint: "Cameras / video streams / 360 view",
+    },
+    detection: {
+      label: "Object Detection",
+      filename: "bounding-box.svg",
+      hint: "YOLO detections, boxes, tracking overlays",
+    },
+    telemetry: {
+      label: "Vehicle Telemetry",
+      filename: "speedometer2.svg",
+      hint: "CAN / OBD / speed / steering / dynamics",
+    },
+    localization: {
+      label: "Localization & Motion",
+      filename: "geo-alt.svg",
+      hint: "GPS / IMU / trajectory / ego motion",
+    },
+    weather: {
+      label: "Environmental Context",
+      filename: "cloud-rain.svg",
+      hint: "Weather / lighting / visibility conditions",
+    },
+    road: {
+      label: "Road & Map Semantics",
+      filename: "map.svg",
+      hint: "OSM / lanes / road type / map context",
+    },
+    semseg: {
+      label: "Semantic Segmentation",
+      filename: "palette.svg",
+      hint: "Scene parsing (vegetation, sidewalk, buildings...)",
+    },
+    scenario: {
+      label: "Scenario",
+      filename: "layers.svg",
+      hint: "Curated scenario slices / higher-level filters",
+    },
+    search: {
+      label: "Open Search",
+      filename: "funnel.svg",
+      hint: "Go to Search and build custom filters",
+    },
+
+    // extras
+    night_moto: {
+      label: "Night",
+      filename: "moon-stars.svg",
+      hint: "Night scenes",
+    },
+    tree: {
+      label: "Vegetation",
+      filename: "tree.svg",
+      hint: "Vegetation / greenery",
+    },
+    cloud: {
+      label: "Cloud",
+      filename: "cloud.svg",
+      hint: "Cloudy conditions",
+    },
+    car: {
+      label: "Car",
+      filename: "car-front-fill.svg",
+      hint: "Vehicles / traffic",
+    },
+    signpost: {
+      label: "Urban / Signage",
+      filename: "signpost-2-fill.svg",
+      hint: "Urban driving / signs / intersections",
+    },
+  };
+
+function iconUrl(key: IconKey) {
+  return `${ICON_BASE}/${ICONS[key].filename}`;
 }
 
-const City: React.FC = () => {
-  const [filesData, setFilesData] = useState<VideoFile[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+const presets: Preset[] = [
+  {
+    title: "Overcast + High Vegetation",
+    to: "/view?b.condition=Overcast&s.vegetation=50.41",
+    badge: "Environment",
+    icons: ["weather", "tree"],
+  },
+  {
+    title: "Night + Motorcycle + distance ≤ 15 m",
+    to: "/view?b.period=night&y.class=motorcycle&y.conf=0.66&y.dist_m=15",
+    badge: "Perception",
+    icons: ["night_moto", "detection"],
+  },
+  {
+    title: "Partly Cloudy + Speed ≈ 90 km/h",
+    to: "/view?b.condition=Partly+cloudy&c.v=90",
+    badge: "Telemetry",
+    icons: ["cloud", "telemetry"],
+  },
+  {
+    title: "Urban Daytime + Dense Traffic",
+    to: "/view?b.period=day&o.highway=local%2Csecondary_link%2Csecondary&s.building=28.72..&y.class=car&y.rel=EGO%2CR-out%2CL-1%2CR%2B1&y.conf=0.66..&y.dist_m=..10",
+    badge: "Scenario",
+    icons: [ "signpost","detection"],
+  },
+  {
+    title: "Rainy / Wet Road",
+    to: "/view?b.condition=Drizzle%3A+light%2CDrizzle%3A+moderate%2CDrizzle%3A+dense",
+    badge: "Weather",
+    icons: ["weather", "road"],
+  },
+  {
+    title: "Highway + Higher Speed + Night" ,
+    to: "/view?b.period=night&c.v=110..&o.highway=primary%2Cprimary_link",
+    badge: "Road",
+    icons: ["road", "telemetry"],
+  },
+];
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch('https://carcara-web-api.onrender.com/videofiles');
-        const data = await response.json();
-        setFilesData(data);
-      } catch (error) {
-        console.error('Error fetching video files:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
+const ExploreAcquisitions: React.FC = () => {
   return (
-    <div className='bg-zinc-950 min-h-screen flex flex-col'>
+    <div className="bg-zinc-950 min-h-screen flex flex-col">
       <Header />
-        <div className="my-3 ml-3">
-                                          <Link to="/">
-                                              <button className="bg-gray-700 text-white hover:bg-gray-600 text-base md:text-lg font-bold py-1 px-3 rounded-full transition duration-300 text-roboto">
-                                                  ← Home
-                                              </button>
-                                          </Link>
-                                      </div>
+
+
+
       <div className="flex-grow flex justify-center px-4">
-        <main className=" w-full max-w-7xl h-full">
-          <div className="text-left">
-            <h1 className="text-4xl font-medium mb-4 text-orange-100">
-              <span className='font-medium text-yellow-300'>v4 Acquisitions</span>
+        <main className="w-full max-w-7xl h-full">
+          {/* Title */}
+          <div className="text-left px-2">
+            <h1 className="text-4xl font-medium mb-2 text-orange-100">
+              <span className="font-medium text-yellow-300">
+                Explore Acquisitions
+              </span>
             </h1>
+            <p className="text-zinc-300 text-base md:text-lg max-w-3xl">
+              Start with curated presets (fast discovery) or jump into the full
+              Search to build advanced filters.
+            </p>
           </div>
-          {isLoading ? (
-            <div className="w-full mt-11 flex justify-center items-center">
-              <img src={loadgif} alt="Loading" className='w-32 h-32 mt-11 mb-11' />
-            </div>
-          ) : (
-            <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 p-2">
-              {filesData
-                .filter(file => file.City !== "Not Found" && file.District !== "Not Found")
-                .map(file => (
-                  <Link to={`/FullVideo/${file.FileName}`} key={file.id}>
-                    <article className="bg-zinc-800 rounded p-2 relative hover:scale-105 transition-transform duration-200 h-full">
-                    <div className="w-full h-36 overflow-hidden"> {/* altura ainda mais reduzida */}
+
+          {/* Main CTA */}
+          <section className="mt-6 px-2">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 md:p-5">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                  <h2 className="text-xl md:text-2xl font-semibold text-zinc-100">
+                    Full Search
+                  </h2>
+                  <p className="text-zinc-300 mt-1">
+                    Go to Search and combine advanced filters (condition,
+                    period, YOLO, semseg, CAN, OSM, etc.).
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Link to="/Search" className="w-full sm:w-auto">
+                    <button className="w-full bg-yellow-400 hover:bg-yellow-300 text-zinc-950 font-extrabold px-5 py-3 rounded-xl transition duration-200 shadow-lg flex items-center justify-center gap-2">
                       <img
-                        className="w-full h-full object-cover rounded-t"
-                       src={`https://drive.google.com/thumbnail?id=${file.VIEW360?.match(/[-\w]{25,}/)?.[0] || ''}`}
-                       alt="Video Thumbnail"
-                     />
-                    </div>
-                      <div className="p-2">                  
-                        <article className="bg-zinc-900 my-2 rounded p-1 max-w-fit inline-block"> 
-                        <span className="font-medium text-yellow-200 text-xl">{file.City} - {file.State}</span>
-                        <br /> 
-                         <span className="font-medium text-yellow-100 text-md">{file.Street} - {file.District}</span>
-                        </article>     
-                              
-                        <article className="bg-gray-800 rounded mt-2 p-1 max-w-fit inline-block">
-                          <span className='font-medium text-gray-100 text-md'>{formatString(file.RoadType)} Road</span>                       
-                        </article>
-                        <br />
-                        <article className="bg-sky-950 my-2 rounded p-1 max-w-fit inline-block">
-                          <span className='font-medium text-sky-100 text-md'>{formatString(file.Weather)} - {formatString(file.Period)}</span>                     
-                        </article>
-                        <br />
-                        <article className="bg-teal-950 rounded p-1 max-w-fit inline-block">
-                          <span className='font-medium text-teal-100 text-md'>{formatString(file.Area)}</span>
-                        </article>
-                      </div>
-                    </article>
+                        src={iconUrl("search")}
+                        alt="Search"
+                        className="w-5 h-5"
+                      />
+                      Open Search
+                    </button>
                   </Link>
-                ))}
-            </section>
-          )}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Presets */}
+          <section className="mt-6 px-2">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xl md:text-2xl font-semibold text-zinc-100">
+                Quick Presets
+              </h3>
+              <div className="text-zinc-400 text-sm">(click to open in Search)</div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-6">
+              {presets.map((p) => (
+                <Link
+                  key={p.title}
+                  to={p.to}
+                  className="group"
+                  title={`${ICONS[p.icons[0]].hint} • ${ICONS[p.icons[1]].hint}`}
+                >
+                  <div className="h-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 hover:scale-[1.02] transition-transform duration-200">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        {/* Two icons (side-by-side, no overlap) */}
+                        <div className="shrink-0 flex items-center gap-2">
+                          <div className="w-10 h-10 rounded-xl bg-zinc-950/40 border border-zinc-800 flex items-center justify-center">
+                            <img
+                              src={iconUrl(p.icons[0])}
+                              alt={ICONS[p.icons[0]].label}
+                              className="w-5 h-5 invert opacity-90"
+                              loading="lazy"
+                            />
+                          </div>
+
+                          <div className="w-10 h-10 rounded-xl bg-zinc-950/40 border border-zinc-800 flex items-center justify-center">
+                            <img
+                              src={iconUrl(p.icons[1])}
+                              alt={ICONS[p.icons[1]].label}
+                              className="w-5 h-5 invert opacity-90"
+                              loading="lazy"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col">
+                          <div className="text-zinc-100 font-bold text-lg leading-snug">
+                            {p.title}
+                          </div>
+
+                          {/* Tag back */}
+                          {p.badge ? (
+                            <div className="mt-2">
+                              <span className="inline-flex bg-zinc-800 text-zinc-100 text-xs font-bold px-2 py-1 rounded-full border border-zinc-700">
+                                {p.badge}
+                              </span>
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
+
+                      <div className="text-zinc-500 group-hover:text-zinc-300 transition-colors select-none text-xl">
+                        →
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
         </main>
       </div>
+
       <Footer />
     </div>
   );
 };
 
-export default City;
+export default ExploreAcquisitions;
