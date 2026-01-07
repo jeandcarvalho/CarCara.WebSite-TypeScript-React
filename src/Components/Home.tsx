@@ -52,19 +52,36 @@ const Home: React.FC = () => {
             assistance research.
           </p>
         </div>
+        {/* Mini highlights */}
+<div className="flex flex-wrap gap-2 mt-2 mb-4 justify-center md:justify-start">
+  <span className="px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs">
+    Dataset
+  </span>
 
-        {/* Mini highlights (opcional, mas deixa mais “site de verdade”) */}
-        <div className="flex flex-wrap gap-2 mt-2 mb-4 justify-center md:justify-start">
-          <span className="px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs">
-            Multimodal Driving Data
-          </span>
-          <span className="px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs">
-            Vision + Language
-          </span>
-          <span className="px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs">
-            Transformer-Based Perception
-          </span>
-        </div>
+  <span className="px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs">
+    Signal Processing
+  </span>
+
+  <span className="px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs">
+    Environment Perception
+  </span>
+
+  <span className="px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs">
+    Object Recognition
+  </span>
+
+  <span className="px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs">
+    Language Processing
+  </span>
+
+  <span className="px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs">
+    Intelligent Data for Smarter Driving (IDSD)
+  </span>
+</div>
+
+
+
+
 
         {/* Botão melhor que "Start Here" */}
         <Link to="/fullfiles">
@@ -190,7 +207,6 @@ import molhado from "../Components/img/molhado.png";
 </div>
 
 
-
 {/* Sessão Announcements */}
 <div className="bg-zinc-900 text-white py-6 px-4">
   <div className="max-w-5xl mx-auto text-center">
@@ -200,33 +216,8 @@ import molhado from "../Components/img/molhado.png";
 
     <ul className="text-base md:text-sm space-y-3 leading-relaxed">
       <li>
-        <b>July 2024</b> — CarCara was officially launched, featuring the v3 datasets and dynamic
-        filtering by classifications.
-      </li>
-
-      <li>
-        <b>October–December 2024</b> — Dataset enrichment phase: expanded semantic metadata,
-        reverse geocoding, and road and environmental context integration.
-      </li>
-
-      <li>
-        <b>February 2025</b> — New acquisitions v4 are now available, including complete 360-degree
-        camera data and all associated measurements.
-      </li>
-
-      <li>
-        <b>March 2025</b> — Improved website fluidity, new “Architecture” page covering the three
-        instrumented vehicles, and a redesigned homepage.
-      </li>
-
-      <li>
-        <b>June 2025</b> — Data normalization milestone: migration toward a unified 1 Hz
-        structure across sensors and perception streams.
-      </li>
-
-      <li>
-        <b>September 2025</b> — Backend and frontend adaptation to normalized collections:
-        API restructuring, query optimization, and support for workflows over curated data.
+        <b>December 2025</b> — AI analysis layer introduced, allowing curated
+        collections to be processed and interpreted through language-model–based reasoning and reporting.
       </li>
 
       <li>
@@ -235,8 +226,33 @@ import molhado from "../Components/img/molhado.png";
       </li>
 
       <li>
-        <b>December 2025</b> — AI analysis layer introduced, allowing curated
-        collections to be processed and interpreted through language-model–based reasoning and reporting.
+        <b>September 2025</b> — Backend and frontend adaptation to normalized collections:
+        API restructuring, query optimization, and support for workflows over curated data.
+      </li>
+
+      <li>
+        <b>June 2025</b> — Data normalization milestone: migration toward a unified 1 Hz
+        structure across sensors and perception streams.
+      </li>
+
+      <li>
+        <b>March 2025</b> — Improved website fluidity, new “Architecture” page covering the three
+        instrumented vehicles, and a redesigned homepage.
+      </li>
+
+      <li>
+        <b>February 2025</b> — New acquisitions v4 are now available, including complete 360-degree
+        camera data and all associated measurements.
+      </li>
+
+      <li>
+        <b>October–December 2024</b> — Dataset enrichment phase: expanded semantic metadata,
+        reverse geocoding, and road and environmental context integration.
+      </li>
+
+      <li>
+        <b>July 2024</b> — CarCara was officially launched, featuring the v3 datasets and dynamic
+        filtering by classifications.
       </li>
     </ul>
   </div>
