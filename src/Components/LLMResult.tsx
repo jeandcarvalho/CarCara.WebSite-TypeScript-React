@@ -211,12 +211,6 @@ const CollectionLLMTests: React.FC = () => {
             <h1 className="text-3xl font-medium text-yellow-300">
               LLM Tests for Collection
             </h1>
-            <button
-              onClick={handleBackToCollection}
-              className="bg-zinc-800 hover:bg-zinc-700 text-gray-100 text-sm font-semibold py-1 px-3 rounded"
-            >
-              Back to collection
-            </button>
           </div>
 
           {collectionId && (
