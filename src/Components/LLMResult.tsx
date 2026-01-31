@@ -119,10 +119,7 @@ const CollectionLLMTests: React.FC = () => {
     fetchTests();
   }, [token, collectionId]);
 
-  const handleBackToCollection = () => {
-    if (!collectionId) return;
-    navigate(`/collections/${collectionId}`);
-  };
+
 
   const handleViewDocs = (t: LLMTestSummary) => {
     if (!collectionId) return;
