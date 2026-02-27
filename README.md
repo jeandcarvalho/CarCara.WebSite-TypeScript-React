@@ -119,55 +119,6 @@ This supports interpretability benchmarking workflows.
 
 ------------------------------------------------------------------------
 
-## 🔌 API Integration
-
-Environment variable:
-
-    VITE_API_BASE_URL=
-
-Example:
-
-    VITE_API_BASE_URL=https://your-api-domain.com
-
-The Website consumes endpoints such as:
-
-    GET /api/search
-    GET /api/acquisition
-    GET /videofiles
-    POST /auth/login
-    GET /collections
-
-------------------------------------------------------------------------
-
-## 🧱 Project Structure (Simplified)
-
--   `src/pages` -- Main views\
--   `src/components` -- UI components\
--   `src/services/api.ts` -- API integration layer\
--   `src/routes` -- Routing logic
-
-------------------------------------------------------------------------
-
-## 🚀 Running Locally
-
-Install dependencies:
-
-    npm install
-
-Development:
-
-    npm run dev
-
-Production build:
-
-    npm run build
-
-Preview build:
-
-    npm run preview
-
-------------------------------------------------------------------------
-
 ## 🎯 Purpose
 
 The CarCará Website transforms complex multimodal automotive data into
@@ -180,10 +131,3 @@ and download workflows, enabling:
 -   Scenario inspection
 -   Per-second moment retrieval
 -   LLM experiment visualization
-
-------------------------------------------------------------------------
-
-## 📄 License
-
-Define your license (MIT / Apache 2.0) or maintain as research
-infrastructure.
