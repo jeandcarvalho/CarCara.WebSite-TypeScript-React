@@ -20,6 +20,7 @@ import daf4 from "../Components/img/daf4.png";
 import dic from "../Components/img/dic.png";
 import dic2 from "../Components/img/dic2.png";
 import dic3 from "../Components/img/dic3.png";
+import Breadcrumbs from "../Components/Breadcrumbs"; // ajuste o path se necessário
 
 const About = () => {
   useEffect(() => {
@@ -35,7 +36,7 @@ const About = () => {
   return (
     <div className="min-h-screen flex flex-col bg-zinc-900">
       <Header />
-
+      <Breadcrumbs />
 
       {/* Index */}
       <div className="bg-zinc-900 text-white px-4">

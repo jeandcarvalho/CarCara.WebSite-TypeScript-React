@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
-
+import Breadcrumbs from "./Breadcrumbs"; // ajuste o path se necessário
 type IconKey =
   | "visual"
   | "detection"
@@ -265,12 +265,13 @@ const ExploreAcquisitions: React.FC = () => {
   return (
     <div className="bg-zinc-950 min-h-screen flex flex-col">
       <Header />
+      <Breadcrumbs />
 
       <div className="flex-grow flex justify-center px-4">
         <main className="w-full max-w-7xl h-full">
           {/* Title */}
           <div className="text-left px-2">
-            <h1 className="text-4xl font-medium mb-2 text-orange-100">
+            <h1 className="text-4xl font-medium mb-2 mt-4 text-orange-100">
               <span className="font-medium text-yellow-300">
                 Explore Acquisitions
               </span>

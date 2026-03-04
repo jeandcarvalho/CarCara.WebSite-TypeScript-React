@@ -3,7 +3,7 @@ import { createHashRouter } from "react-router-dom";
 import Home from "./Components/Home";
 import App from "./App";
 import About from "./Components/About";
-import FullFiles from "./Components/FullFiles";
+import FullFiles from "./Components/AcqMenu";
 import FullVideo from "./Components/FullVideo";
 import Search from "./Components/Search/Search";
 import View from "./Components/View/View";
@@ -22,7 +22,7 @@ export const Routes = createHashRouter([
     children: [
       { index: true, element: <Home /> },
       { path: "about", element: <About /> },
-      { path: "fullfiles", element: <FullFiles /> },
+      { path: "daqs", element: <FullFiles /> },
       { path: "fullvideo/:video", element: <FullVideo /> },
       { path: "search", element: <Search /> },
       { path: "view", element: <View /> },

@@ -47,7 +47,7 @@ export default function HeroPanel({ acq }: HeroPanelProps) {
               ))}
             </div>
 
-            <Link to="/fullfiles">
+            <Link to="/daqs">
               <button className="bg-yellow-300 text-zinc-900 hover:bg-yellow-200 text-base md:text-lg font-bold py-2 px-6 rounded-full transition duration-300 text-roboto mb-6">
                 Explore Driving Data
               </button>

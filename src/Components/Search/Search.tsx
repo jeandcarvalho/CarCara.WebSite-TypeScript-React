@@ -12,7 +12,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import {useLocation, useNavigate } from "react-router-dom";
 import Header from "../Header";
 import Footer from "../Footer";
-
+import Breadcrumbs from "../Breadcrumbs"; // ajuste o path se necessário
 import SearchVehicleScenePanel from "./SearchVehicleScenePanel";
 import SearchVehicleDynamicsPanel from "./SearchVehicleDynamicsPanel";
 import SearchPerceptionPanel from "./SearchPerceptionPanel";
@@ -535,6 +535,7 @@ const SearchVerticalAnimated: React.FC = () => {
   return (
     <div className="bg-zinc-950 min-h-dvh flex flex-col overflow-x-hidden">
       <Header />
+      <Breadcrumbs/>
 
       <main className="flex-1">
 

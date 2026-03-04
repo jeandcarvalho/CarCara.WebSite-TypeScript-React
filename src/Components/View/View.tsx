@@ -4,7 +4,7 @@ import Header from "../Header";
 import Footer from "../Footer";
 import loadgif from "../img/gif.gif";
 import {useNavigate } from "react-router-dom";
-
+import Breadcrumbs from "../Breadcrumbs"; // ajuste o path se necessário
 import AcqPanel from "./AcqPanel";
 import {
   Counts,
@@ -235,8 +235,9 @@ const View: React.FC = () => {
 
   return (
     <div className="bg-zinc-950 min-h-screen flex flex-col text-white text-base">
+      
       <Header />
-
+       <Breadcrumbs />
 
 
       <div className="p-4 flex flex-col items-center gap-3">
