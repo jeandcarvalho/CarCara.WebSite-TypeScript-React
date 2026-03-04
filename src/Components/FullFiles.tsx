@@ -1,5 +1,5 @@
 // src/Pages/ExploreAcquisitions.tsx
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
@@ -110,15 +110,7 @@ function iconUrl(key: IconKey) {
   return `${ICON_BASE}/${ICONS[key].filename}`;
 }
 
-function isProbablyTouchDevice() {
-  if (typeof window === "undefined") return false;
-  return (
-    "ontouchstart" in window ||
-    navigator.maxTouchPoints > 0 ||
-    // @ts-ignore
-    navigator.msMaxTouchPoints > 0
-  );
-}
+
 
 type ThumbCarouselProps = {
   thumbs: [string, string, string];
@@ -128,7 +120,7 @@ type ThumbCarouselProps = {
 const ThumbCarousel: React.FC<ThumbCarouselProps> = ({ thumbs, title }) => {
   const [idx, setIdx] = useState(0);
   const timerRef = useRef<number | null>(null);
-  const touch = useMemo(() => isProbablyTouchDevice(), []);
+
 
   const stop = () => {
     if (timerRef.current) window.clearInterval(timerRef.current);
