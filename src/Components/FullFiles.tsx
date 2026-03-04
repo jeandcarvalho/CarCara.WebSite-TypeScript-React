@@ -185,10 +185,6 @@ const ThumbCarousel: React.FC<ThumbCarouselProps> = ({ thumbs, title }) => {
         ))}
       </div>
 
-      {/* hint */}
-      <div className="absolute top-2 right-2 text-[11px] font-bold px-2 py-1 rounded-full border border-zinc-700 bg-zinc-950/55 text-zinc-200">
-        hover / touch preview
-      </div>
     </div>
   );
 };
@@ -329,9 +325,6 @@ const ExploreAcquisitions: React.FC = () => {
               <h3 className="text-xl md:text-2xl font-semibold text-zinc-100">
                 Quick Presets
               </h3>
-              <div className="text-zinc-400 text-sm">
-                (hover / touch the preview to cycle)
-              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-6">
