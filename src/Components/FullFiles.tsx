@@ -24,8 +24,8 @@ type Preset = {
   title: string;
   to: string;
   badge?: string;
-  icons: [IconKey, IconKey]; // fallback
-  thumbs?: [string, string, string]; // 3 thumbs
+  icons: [IconKey, IconKey];
+  thumbs?: [string, string, string];
 };
 
 const ICON_BASE = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons";
@@ -77,8 +77,6 @@ const ICONS: Record<IconKey, { label: string; filename: string; hint: string }> 
       filename: "funnel.svg",
       hint: "Go to Search and build custom filters",
     },
-
-    // extras
     night_moto: {
       label: "Night",
       filename: "moon-stars.svg",
@@ -110,17 +108,21 @@ function iconUrl(key: IconKey) {
   return `${ICON_BASE}/${ICONS[key].filename}`;
 }
 
-
-
 type ThumbCarouselProps = {
   thumbs: [string, string, string];
   title: string;
+  active: boolean;
+  onActivate: () => void;
 };
 
-const ThumbCarousel: React.FC<ThumbCarouselProps> = ({ thumbs, title }) => {
+const ThumbCarousel: React.FC<ThumbCarouselProps> = ({
+  thumbs,
+  title,
+  active,
+  onActivate,
+}) => {
   const [idx, setIdx] = useState(0);
   const timerRef = useRef<number | null>(null);
-
 
   const stop = () => {
     if (timerRef.current) window.clearInterval(timerRef.current);
@@ -128,35 +130,36 @@ const ThumbCarousel: React.FC<ThumbCarouselProps> = ({ thumbs, title }) => {
   };
 
   const start = () => {
-    // troca IMEDIATA ao encostar + loop
     stop();
-    setIdx((v) => (v + 1) % 3);
+    setIdx((v) => (v + 1) % 3); // immediate swap
     timerRef.current = window.setInterval(() => {
       setIdx((v) => (v + 1) % 3);
     }, 850);
   };
 
-  useEffect(() => () => stop(), []);
+  // Mobile: keep swapping while active
+  useEffect(() => {
+    if (active) start();
+    else stop();
+    return () => stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active]);
 
   return (
     <div
       className="
         relative w-full h-40 sm:h-44 md:h-48 lg:h-52
         rounded-2xl overflow-hidden border border-zinc-800
-        bg-zinc-950/40
+        bg-zinc-950/40 cursor-pointer
       "
-      // Desktop
+      // Desktop: hover = loop until leave
       onMouseEnter={() => start()}
       onMouseLeave={() => stop()}
-      // Mobile: encostou = começa (sem precisar clicar)
+      // Mobile: tap once = activate and keep looping (global active state)
       onTouchStart={(e) => {
-        // não impede scroll do resto da página, mas evita clique/navegação acidental no link
+        e.preventDefault(); // avoids Link navigation
         e.stopPropagation();
-        start();
-      }}
-      onTouchEnd={(e) => {
-        e.stopPropagation();
-        stop();
+        onActivate();
       }}
       title={title}
       aria-label={title}
@@ -169,10 +172,8 @@ const ThumbCarousel: React.FC<ThumbCarouselProps> = ({ thumbs, title }) => {
         referrerPolicy="no-referrer"
       />
 
-      {/* overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/55 via-zinc-950/10 to-transparent" />
 
-      {/* dots */}
       <div className="absolute bottom-2 left-2 flex gap-1.5">
         {[0, 1, 2].map((d) => (
           <span
@@ -184,13 +185,11 @@ const ThumbCarousel: React.FC<ThumbCarouselProps> = ({ thumbs, title }) => {
           />
         ))}
       </div>
-
     </div>
   );
 };
 
 const presets: Preset[] = [
-  // 1) Overcast + High Vegetation
   {
     title: "Overcast + High Vegetation",
     to: "/view?b.condition=Overcast&s.vegetation=50.41",
@@ -202,8 +201,6 @@ const presets: Preset[] = [
       "https://lh3.googleusercontent.com/d/1CoGFvqpRSzj8ApEjGE_SS3_r2nBWRKVs=w1200-h800-n",
     ],
   },
-
-  // 2) Night + Motorcycle + dist <= 15
   {
     title: "Night + Motorcycle + distance ≤ 15 m",
     to: "/view?b.period=night&y.class=motorcycle&y.conf=0.66&y.dist_m=15",
@@ -215,8 +212,6 @@ const presets: Preset[] = [
       "https://lh3.googleusercontent.com/d/151r6Kmx0-ykd-yJJ3sBelB7Auh6MQIqb=w1200-h800-n",
     ],
   },
-
-  // 3) Partly Cloudy + Speed ≈ 90 km/h
   {
     title: "Partly Cloudy + Speed ≈ 90 km/h",
     to: "/view?b.condition=Partly+cloudy&c.v=90",
@@ -228,8 +223,6 @@ const presets: Preset[] = [
       "https://lh3.googleusercontent.com/d/1RGtx4ZuzQhnb8Q6qXiqNHSclWqV3rMa3=w1200-h800-n",
     ],
   },
-
-  // 4) Urban Daytime + Dense Traffic
   {
     title: "Urban Daytime + Dense Traffic",
     to: "/view?b.period=day&o.highway=local%2Csecondary_link%2Csecondary&s.building=28.72..&y.class=car&y.rel=EGO%2CR-out%2CL-1%2CR%2B1&y.conf=0.66..&y.dist_m=..10",
@@ -241,8 +234,6 @@ const presets: Preset[] = [
       "https://lh3.googleusercontent.com/d/1O0zf91U5MJc5SmMSkp3rzbpwABQoUW4a=w1200-h800-n",
     ],
   },
-
-  // 5) Rainy / Wet Road
   {
     title: "Rainy / Wet Road",
     to: "/view?b.condition=Drizzle%3A+light%2CDrizzle%3A+moderate%2CDrizzle%3A+dense",
@@ -254,8 +245,6 @@ const presets: Preset[] = [
       "https://lh3.googleusercontent.com/d/1aWkB_6bmxnOEbhRVqIpXfRSUV5uaMynx=w1200-h800-n",
     ],
   },
-
-  // 6) Highway + Higher Speed + Night
   {
     title: "Highway + Higher Speed + Night",
     to: "/view?b.period=night&c.v=110..&o.highway=primary%2Cprimary_link",
@@ -270,6 +259,9 @@ const presets: Preset[] = [
 ];
 
 const ExploreAcquisitions: React.FC = () => {
+  // only one carousel active at a time on mobile
+  const [activePreset, setActivePreset] = useState<string | null>(null);
+
   return (
     <div className="bg-zinc-950 min-h-screen flex flex-col">
       <Header />
@@ -337,9 +329,17 @@ const ExploreAcquisitions: React.FC = () => {
                 >
                   <div className="h-full bg-zinc-900 border border-zinc-800 rounded-2xl p-4 hover:scale-[1.02] transition-transform duration-200">
                     <div className="flex flex-col gap-4">
-                      {/* BIG preview */}
                       {p.thumbs ? (
-                        <ThumbCarousel thumbs={p.thumbs} title={p.title} />
+                        <ThumbCarousel
+                          thumbs={p.thumbs}
+                          title={p.title}
+                          active={activePreset === p.title}
+                          onActivate={() =>
+                            setActivePreset((cur) =>
+                              cur === p.title ? null : p.title
+                            )
+                          }
+                        />
                       ) : (
                         <div className="flex items-center gap-2">
                           <div className="w-10 h-10 rounded-xl bg-zinc-950/40 border border-zinc-800 flex items-center justify-center">
@@ -361,7 +361,6 @@ const ExploreAcquisitions: React.FC = () => {
                         </div>
                       )}
 
-                      {/* Text row */}
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex flex-col">
                           <div className="text-zinc-100 font-extrabold text-lg leading-snug">
