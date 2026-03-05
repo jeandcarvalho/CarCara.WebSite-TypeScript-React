@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 type Crumb = { label: string; to?: string };
@@ -7,10 +7,9 @@ type Props = {
   className?: string;
 };
 
-function getHashRoute(): { path: string; search: string } {
-  if (typeof window === "undefined") return { path: "/", search: "" };
+function getHashRouteFromHash(hash: string): { path: string; search: string } {
+  if (!hash) return { path: "/", search: "" };
 
-  const hash = window.location.hash || "";
   const cleaned = hash.startsWith("#") ? hash.slice(1) : hash;
   const qIndex = cleaned.indexOf("?");
 
@@ -64,10 +63,12 @@ function stripParams(search: string, keys: string[]): string {
 }
 
 function stripForSearch(search: string): string {
+  // Search should keep filters, but NOT pagination or acq_id
   return stripParams(search, ["page", "per_page", "acq_id"]);
 }
 
 function stripForView(search: string): string {
+  // View should keep page + filters, but NOT acq_id
   return stripParams(search, ["acq_id"]);
 }
 
@@ -79,7 +80,39 @@ const HOME_TO = "/";
 const ACQ_TO = "/daqs";
 
 const Breadcrumbs: React.FC<Props> = ({ className }) => {
-  const route = useMemo(() => getHashRoute(), []);
+  // ✅ Robust: acompanha QUALQUER mudança de hash (mesmo via replaceState)
+  const [hash, setHash] = useState<string>(() =>
+    typeof window === "undefined" ? "" : window.location.hash || "",
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    let prev = window.location.hash || "";
+    const tick = () => {
+      const h = window.location.hash || "";
+      if (h !== prev) {
+        prev = h;
+        setHash(h);
+      }
+    };
+
+    // polling leve (pega replaceState/pushState que não disparam hashchange)
+    const id = window.setInterval(tick, 150);
+
+    // também pega o caso normal (cliques/anchor)
+    const onHashChange = () => tick();
+    window.addEventListener("hashchange", onHashChange);
+
+    return () => {
+      window.clearInterval(id);
+      window.removeEventListener("hashchange", onHashChange);
+    };
+  }, []);
+
+  const route = useMemo(() => {
+    return getHashRouteFromHash(hash);
+  }, [hash]);
 
   const crumbs: Crumb[] = useMemo(() => {
     const { path, search } = route;
@@ -127,8 +160,10 @@ const Breadcrumbs: React.FC<Props> = ({ className }) => {
       ];
     }
 
+    // ✅ Acquisition details (/acquisition/:id)
     if (/^\/acquisition(\/|$)/.test(lower) && lower !== "/acquisition") {
       const searchTo = `/search${stripForSearch(search || "")}`;
+      // IMPORTANT: usa o search ATUAL (com page atualizada) ✅
       const viewTo = `/View${stripForView(search || "")}`;
 
       return [
@@ -161,11 +196,8 @@ const Breadcrumbs: React.FC<Props> = ({ className }) => {
             const isLast = idx === crumbs.length - 1;
             const isSearch = isSearchCrumb(c.label);
 
-            const normalLink =
-              "hover:text-yellow-300 transition-colors";
-
-            const searchLink =
-  "text-zinc-400 hover:text-yellow-300 transition-colors";
+            const normalLink = "hover:text-yellow-300 transition-colors";
+            const searchLink = "text-zinc-400 hover:text-yellow-300 transition-colors";
 
             return (
               <React.Fragment key={`${c.label}-${idx}`}>

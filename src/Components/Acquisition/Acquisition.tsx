@@ -17,7 +17,7 @@ import {
 const API_BASE = "https://carcara-web-api.onrender.com";
 
 // View pagination size (used to infer which View page the current acquisition belongs to)
-const VIEW_PER_PAGE = 16;
+const VIEW_PER_PAGE = 15;
 
 type LinkDoc = {
   ext: string;
@@ -227,10 +227,6 @@ async function createCollectionApi(
 }
 
 const Acquisition: React.FC = () => {
-    useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "auto" });
-  }, []);
-  
   const { acqId } = useParams<{ acqId: string }>();
   const location = useLocation();
   const navigate = useNavigate();
@@ -572,21 +568,35 @@ const Acquisition: React.FC = () => {
     setActivePhotoIndex(nextIndex);
   };
 
-  const goToAcq = (targetId: string | null) => {
+  const goToAcq = (targetId: string | null, targetIndex0?: number) => {
     if (!targetId) return;
-    navigate(`/acquisition/${targetId}${location.search}`);
+
+    // Keep filters, but ensure `page=` reflects the acquisition ordinal (so breadcrumbs go back correctly).
+    const sp = new URLSearchParams(location.search || "");
+    sp.delete("per_page");
+
+    if (Number.isFinite(targetIndex0 as number)) {
+      const idx0 = Math.max(0, Math.floor(targetIndex0 as number));
+      const inferredPage = Math.floor(idx0 / VIEW_PER_PAGE) + 1;
+      sp.set("page", String(inferredPage));
+    }
+
+    const qs = sp.toString();
+    navigate(`/acquisition/${targetId}${qs ? `?${qs}` : ""}`);
   };
 
   const goPrevAcq = () => {
     if (!hasPrev) return;
-    const targetId = acqList[currentIndex - 1];
-    goToAcq(targetId);
+    const nextIndex0 = currentIndex - 1;
+    const targetId = acqList[nextIndex0];
+    goToAcq(targetId, nextIndex0);
   };
 
   const goNextAcq = () => {
     if (!hasNext) return;
-    const targetId = acqList[currentIndex + 1];
-    goToAcq(targetId);
+    const nextIndex0 = currentIndex + 1;
+    const targetId = acqList[nextIndex0];
+    goToAcq(targetId, nextIndex0);
   };
 
   // Ensure the URL keeps the View pagination, so refresh keeps you in the correct context
