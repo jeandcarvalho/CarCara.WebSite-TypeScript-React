@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Header from "../Header";
 import Footer from "../Footer";
+import Breadcrumbs from "../Breadcrumbs";
 
 import {
   getDrivePreviewUrl,
@@ -14,6 +15,9 @@ import {
 } from "./AcquisitionHelpers";
 
 const API_BASE = "https://carcara-web-api.onrender.com";
+
+// View pagination size (used to infer which View page the current acquisition belongs to)
+const VIEW_PER_PAGE = 16;
 
 type LinkDoc = {
   ext: string;
@@ -44,6 +48,11 @@ type AcqIdsResponse = {
   total_pages?: number;
   acq_ids: string[];
 };
+
+// Some backends paginate the /api/search-acq-ids endpoint by default.
+// We want a *stable* global list for Prev/Next navigation and for
+// "Acquisition X of Y" to work across all View pages.
+const NAV_IDS_PER_PAGE = 500;
 
 type Collection = {
   id: string;
@@ -307,10 +316,14 @@ const Acquisition: React.FC = () => {
       try {
         const params = new URLSearchParams(location.search);
         params.delete("acq_id");
+        // IMPORTANT:
+        // - We want the *global* acquisition list for navigation + index (Acquisition 17 of 29)
+        // - View UI pagination must NOT affect this endpoint, otherwise the index resets and the counter may disappear.
+        params.delete("page");
+        params.delete("per_page");
 
         // evita query gigante sem filtros (match vazio no Mongo)
         const hasFilters = Array.from(params.keys()).some((k) => {
-          if (k === "page" || k === "per_page") return false;
           const v = params.get(k);
           return !!v;
         });
@@ -321,26 +334,70 @@ const Acquisition: React.FC = () => {
           return;
         }
 
-        const url = new URL(`${API_BASE}/api/search-acq-ids`);
-        params.forEach((value, key) => {
-          if (value) url.searchParams.append(key, value);
-        });
-
         const headers: Record<string, string> = {};
         if (token) {
           headers.Authorization = `Bearer ${token}`;
         }
 
-        const res = await fetch(url.toString(), {
-          headers,
-        });
-        const json = await res.json();
+        // 🔒 IMPORTANT: fetch ALL ids across pages so Prev/Next works beyond View page 1.
+        // The endpoint may paginate by default, so we iterate until has_more=false
+        // (or total_pages is reached, if provided).
+        const allIds: string[] = [];
+        let page = 1;
+        let totalPagesFromApi: number | null = null;
 
-        if (!res.ok) {
-          setAcqNavError(json.error || "Error loading acquisitions list.");
-          setAcqNav(null);
-        } else {
-          setAcqNav(json);
+        for (let guard = 0; guard < 300; guard++) {
+          const url = new URL(`${API_BASE}/api/search-acq-ids`);
+          params.forEach((value, key) => {
+            if (value) url.searchParams.append(key, value);
+          });
+
+          // Ask backend for large pages; still safe if it ignores these.
+          url.searchParams.set("page", String(page));
+          url.searchParams.set("per_page", String(NAV_IDS_PER_PAGE));
+
+          const res = await fetch(url.toString(), { headers });
+          const json = await res.json();
+
+          if (!res.ok) {
+            setAcqNavError(json.error || "Error loading acquisitions list.");
+            setAcqNav(null);
+            return;
+          }
+
+          const chunkIds: string[] = Array.isArray(json?.acq_ids)
+            ? json.acq_ids
+            : [];
+
+          if (chunkIds.length) {
+            allIds.push(...chunkIds);
+          }
+
+          // Read pagination hints if present
+          const hasMore: boolean = !!json?.has_more;
+          if (typeof json?.total_pages === "number") {
+            totalPagesFromApi = json.total_pages;
+          }
+
+          const reachedTotalPages =
+            typeof totalPagesFromApi === "number" && page >= totalPagesFromApi;
+
+          if (!hasMore || reachedTotalPages || chunkIds.length === 0) {
+            const total =
+              typeof json?.total === "number" ? json.total : allIds.length;
+
+            setAcqNav({
+              page: 1,
+              per_page: allIds.length,
+              has_more: false,
+              total,
+              total_pages: totalPagesFromApi ?? undefined,
+              acq_ids: allIds,
+            });
+            break;
+          }
+
+          page += 1;
         }
       } catch (err) {
         setAcqNavError("Connection error while loading acquisitions list.");
@@ -528,12 +585,25 @@ const Acquisition: React.FC = () => {
     goToAcq(targetId);
   };
 
-  const goBackToView = () => {
-    const params = new URLSearchParams(location.search);
-    params.delete("acq_id");
-    const qs = params.toString();
-    navigate(`/View${qs ? `?${qs}` : ""}`);
-  };
+  // Ensure the URL keeps the View pagination, so refresh keeps you in the correct context
+  // Example: /acquisition/<id>?page=2&b.condition=Overcast&...
+  useEffect(() => {
+    if (currentIndex < 0) return;
+
+    const sp = new URLSearchParams(location.search);
+    if (sp.get("page")) return;
+
+    const inferredPage = Math.floor(currentIndex / VIEW_PER_PAGE) + 1;
+    sp.set("page", String(inferredPage));
+
+    navigate(
+      {
+        pathname: location.pathname,
+        search: `?${sp.toString()}`,
+      },
+      { replace: true }
+    );
+  }, [currentIndex, location.pathname, location.search, navigate]);
 
   const goToFirstPhoto = () => {
     if (photos.length === 0) return;
@@ -724,6 +794,7 @@ const Acquisition: React.FC = () => {
   return (
     <div className="bg-zinc-950 min-h-screen flex flex-col">
       <Header />
+      <Breadcrumbs />
 
       <div className="flex-1 flex flex-col mt-5">
         {errorMsg && (
@@ -744,16 +815,8 @@ const Acquisition: React.FC = () => {
                 {/* NAV / CONTROLS */}
                 <div className="flex flex-col gap-1 mb-2">
                   <div className="mt-1 flex items-start justify-between text-[11px] sm:text-xs text-gray-200 gap-2">
-                    {/* Left column: Back to View + Previous */}
+                    {/* Left column: Previous */}
                     <div className="flex flex-col gap-1">
-                      <button
-                        type="button"
-                        onClick={goBackToView}
-                        className="inline-flex items-center text-[11px] sm:text-xs px-2 py-1 rounded-full border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-gray-200"
-                      >
-                        ← Back to View
-                      </button>
-
                       {acqList.length > 0 && currentIndex >= 0 && (
                         <button
                           type="button"

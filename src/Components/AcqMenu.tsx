@@ -276,10 +276,6 @@ const ExploreAcquisitions: React.FC = () => {
                 Explore Acquisitions
               </span>
             </h1>
-            <p className="text-zinc-300 text-base md:text-lg max-w-3xl">
-              Start with curated presets (fast discovery) or jump into the full
-              Search to build advanced filters.
-            </p>
           </div>
 
           {/* Main CTA */}

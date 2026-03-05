@@ -36,11 +36,47 @@ function titleizeRoute(path: string): string {
     .join(" ");
 }
 
+function stripPageParams(search: string): string {
+  if (!search) return "";
+  const qs = search.startsWith("?") ? search.slice(1) : search;
+  if (!qs) return "";
+
+  const sp = new URLSearchParams(qs);
+  sp.delete("page");
+  sp.delete("per_page");
+
+  const out = sp.toString();
+  return out ? `?${out}` : "";
+}
+
+function stripParams(search: string, keys: string[]): string {
+  if (!search) return "";
+  const qs = search.startsWith("?") ? search.slice(1) : search;
+  if (!qs) return "";
+
+  const sp = new URLSearchParams(qs);
+  keys.forEach((k) => sp.delete(k));
+
+  const out = sp.toString();
+  return out ? `?${out}` : "";
+}
+
+function stripForSearch(search: string): string {
+  // Search should keep filters, but NOT pagination or acq_id
+  return stripParams(search, ["page", "per_page", "acq_id"]);
+}
+
+function stripForView(search: string): string {
+  // View should keep page + filters, but NOT acq_id
+  return stripParams(search, ["acq_id"]);
+}
+
 const HOME_TO = "/";
 const ACQ_TO = "/daqs";
 
 const Breadcrumbs: React.FC<Props> = ({ className }) => {
   const route = useMemo(() => getHashRoute(), []);
+
   const crumbs: Crumb[] = useMemo(() => {
     const { path, search } = route;
     const lower = path.toLowerCase();
@@ -58,28 +94,56 @@ const Breadcrumbs: React.FC<Props> = ({ className }) => {
       ];
     }
 
-    // ✅ Search (já deixa pronto pra voltar pra Home)
-    // também inclui Acquisitions como “nível”
+    // ✅ Acquisitions page (/daqs)
+    if (
+      lower === "/daqs" ||
+      lower === "/daq" ||
+      lower === "/acquisition" ||
+      lower === "/acquisitions"
+    ) {
+      return [
+        { label: "Home", to: HOME_TO },
+        { label: "Acquisition" },
+      ];
+    }
+
+    // ✅ Search (Home -> Acquisition -> Search)
     if (lower === "/search") {
       return [
         { label: "Home", to: HOME_TO },
-        { label: "Acquisitions", to: ACQ_TO },
+        { label: "Acquisition", to: ACQ_TO },
         { label: "Search" },
       ];
     }
 
-    // ✅ View (Home -> Acquisitions -> Search?query -> View)
+    // ✅ View (Home -> Acquisition -> Search?filters -> View)
     if (lower === "/view") {
-      const searchTo = `/search${search || ""}`;
+      // important: remove page/per_page from View query when going back to Search
+      const searchTo = `/search${stripPageParams(search || "")}`;
+
       return [
         { label: "Home", to: HOME_TO },
-        { label: "Acquisitions", to: ACQ_TO },
+        { label: "Acquisition", to: ACQ_TO },
         { label: "Search", to: searchTo },
         { label: "View" },
       ];
     }
 
-    // ✅ fallback genérico: Home / <Rota>
+    // ✅ Acquisition details (/acquisition/:id)
+    if (/^\/acquisition(\/|$)/.test(lower) && lower !== "/acquisition") {
+      const searchTo = `/search${stripForSearch(search || "")}`;
+      const viewTo = `/View${stripForView(search || "")}`;
+
+      return [
+        { label: "Home", to: HOME_TO },
+        { label: "Acquisition", to: ACQ_TO },
+        { label: "Search", to: searchTo },
+        { label: "View", to: viewTo },
+        { label: "Visualizer" },
+      ];
+    }
+
+    // ✅ fallback genérico
     return [
       { label: "Home", to: HOME_TO },
       { label: titleizeRoute(path) },

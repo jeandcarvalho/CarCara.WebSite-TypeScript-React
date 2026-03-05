@@ -1,5 +1,5 @@
 // src/Components/View.tsx
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Header from "../Header";
 import Footer from "../Footer";
 import loadgif from "../img/gif.gif";
@@ -19,6 +19,9 @@ import {
 
 const View: React.FC = () => {
   const navigate = useNavigate();
+
+  // guarda a página do painel vinda da URL (pra não “resetar” ao buscar)
+  const initialPanelPageRef = useRef<number>(1);
 
   const [counts, setCounts] = useState<Counts>({
     matched_acq_ids: 0,
@@ -40,27 +43,67 @@ const View: React.FC = () => {
     [currentQuery],
   );
 
-  const handleOpenAcquisition = (acqId: string) => {
-    let suffix = "";
+  const stripPaginationFromQuery = (qsWithMaybeQ: string): string => {
+    const raw = (qsWithMaybeQ || "").trim();
+    const qs = raw.startsWith("?") ? raw.slice(1) : raw;
+    if (!qs) return "";
 
+    const sp = new URLSearchParams(qs);
+    sp.delete("page");
+    sp.delete("per_page");
+
+    const out = sp.toString();
+    return out ? `?${out}` : "";
+  };
+
+  const replaceViewHashPage = (page: number) => {
+    if (typeof window === "undefined") return;
+
+    const hash = window.location.hash || "";
+    const base = hash.startsWith("#/View")
+      ? "#/View"
+      : hash.startsWith("#/view")
+      ? "#/view"
+      : "#/View";
+
+    const qIndex = hash.indexOf("?");
+    const existingQs = qIndex >= 0 ? hash.slice(qIndex + 1) : "";
+    const sp = new URLSearchParams(existingQs);
+
+    // paginação do UI (painéis)
+    sp.set("page", String(Math.max(1, page || 1)));
+
+    const nextHash = `${base}?${sp.toString()}`;
+    // não cria history entry (recarregar mantém page=)
+    window.history.replaceState(null, "", nextHash);
+  };
+
+  const handleOpenAcquisition = (acqId: string) => {
+    // Keep filters AND the current UI page in the URL so refresh + breadcrumbs work.
+    // Example: /acquisition/<id>?page=2&b.condition=Overcast&...
+    let raw = "";
     if (currentQuery) {
       const q = currentQuery.trim();
       if (q.startsWith("?")) {
-        suffix = q;
+        raw = q;
       } else if (q.startsWith("http")) {
         try {
           const u = new URL(q);
-          suffix = u.search || "";
-          if (!suffix && u.hash.includes("?")) {
-            suffix = "?" + u.hash.split("?")[1];
-          }
+          raw =
+            u.search || (u.hash.includes("?") ? "?" + u.hash.split("?")[1] : "");
         } catch {
-          suffix = "";
+          raw = "";
         }
       } else if (q.includes("=")) {
-        suffix = "?" + q;
+        raw = "?" + q;
       }
     }
+
+    const sp = new URLSearchParams(raw.startsWith("?") ? raw.slice(1) : raw);
+    // Remove API-level per_page if it exists, keep only UI page.
+    sp.delete("per_page");
+    sp.set("page", String(Math.max(1, panelPage || 1)));
+    const suffix = sp.toString() ? `?${sp.toString()}` : "";
 
     navigate(`/acquisition/${acqId}${suffix}`);
   };
@@ -129,10 +172,6 @@ const View: React.FC = () => {
 
         return sorted;
       });
-
-      if (!append) {
-        setPanelPage(1);
-      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -143,6 +182,7 @@ const View: React.FC = () => {
   // Inicia uma nova busca (reset)
   const startNewSearch = (input: string) => {
     setCurrentQuery(input);
+    setPanelPage(Math.max(1, initialPanelPageRef.current || 1));
     setApiPage(1);
     setApiHasMore(false);
     setGroups([]);
@@ -163,10 +203,38 @@ const View: React.FC = () => {
       const qIndex = hash.indexOf("?");
       if (qIndex >= 0) {
         const paramsWithQ = hash.slice(qIndex); // inclui "?"
+
+        // lê page= (paginação do UI) pra não resetar ao recarregar
+        try {
+          const sp = new URLSearchParams(paramsWithQ.slice(1));
+          const p = Number(sp.get("page") || "1");
+          initialPanelPageRef.current =
+            Number.isFinite(p) && p > 0 ? Math.floor(p) : 1;
+        } catch {
+          initialPanelPageRef.current = 1;
+        }
+
         startNewSearch(paramsWithQ);
       }
     }
   }, []);
+
+  // mantém a URL sincronizada com a página atual (recarregar não volta pra 1)
+  useEffect(() => {
+    if (!currentQuery) return;
+    replaceViewHashPage(panelPage);
+  }, [panelPage, currentQuery]);
+
+  // se o usuário abriu direto numa página alta (ex: page=4), auto-carrega mais páginas da API
+  useEffect(() => {
+    if (!currentQuery) return;
+    if (isLoading) return;
+
+    const needMore = panelPage > loadedPanelPages;
+    if (needMore && apiHasMore) {
+      fetchPageFromApi(currentQuery, apiPage + 1, true);
+    }
+  }, [panelPage, loadedPanelPages, apiHasMore, apiPage, currentQuery, isLoading]);
 
   const visibleGroups = useMemo(() => {
     const start = (panelPage - 1) * PANELS_PER_PAGE;
