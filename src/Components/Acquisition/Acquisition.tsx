@@ -849,12 +849,14 @@ const Acquisition: React.FC = () => {
 
                     {/* Middle: acquisition counter */}
                     {acqList.length > 0 && currentIndex >= 0 && (
-                      <div className="flex-1 text-center mt-4 sm:mt-3">
-                        <span>
-                          Acquisition {currentIndex + 1} of{" "}
-                          {acqNav?.total ?? acqList.length}
-                        </span>
-                      </div>
+<div className="flex-1 text-center mt-4 sm:mt-3">
+  <span className="text-zinc-300">
+    <span className="text-xs px-2.5 py-[2px] rounded-md border border-yellow-500/25 bg-yellow-500/10 text-yellow-200 mr-2">
+      Acq #{currentIndex + 1}
+    </span>
+    of {acqNav?.total ?? acqList.length}
+  </span>
+</div>
                     )}
 
                     {/* Right column: Next */}

@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import Header from "../Header";
 import Footer from "../Footer";
 import loadgif from "../img/gif.gif";
-import {useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Breadcrumbs from "../Breadcrumbs"; // ajuste o path se necessário
 import AcqPanel from "./AcqPanel";
 
@@ -20,10 +20,10 @@ import {
 
 const View: React.FC = () => {
   useEffect(() => {
-  window.scrollTo({ top: 0, behavior: "auto" });
-}, []);
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, []);
+
   const navigate = useNavigate();
-  
 
   // guarda a página do painel vinda da URL (pra não “resetar” ao buscar)
   const initialPanelPageRef = useRef<number>(1);
@@ -43,12 +43,7 @@ const View: React.FC = () => {
   const [apiHasMore, setApiHasMore] = useState(false);
   const [currentQuery, setCurrentQuery] = useState<string | null>(null);
 
-  const filterTags = useMemo(
-    () => parseFilterTags(currentQuery),
-    [currentQuery],
-  );
-
-
+  const filterTags = useMemo(() => parseFilterTags(currentQuery), [currentQuery]);
 
   const replaceViewHashPage = (page: number) => {
     if (typeof window === "undefined") return;
@@ -126,11 +121,7 @@ const View: React.FC = () => {
   }, [panelPage]);
 
   // Busca uma página da API (append ou reset)
-  const fetchPageFromApi = async (
-    input: string,
-    page: number,
-    append: boolean,
-  ) => {
+  const fetchPageFromApi = async (input: string, page: number, append: boolean) => {
     setIsLoading(true);
     try {
       const url = buildSearchUrlFlexible(input, page, 100);
@@ -146,14 +137,11 @@ const View: React.FC = () => {
         const map = new Map<string, Group>();
 
         // Quando append=false, esta chamada deve "resetar" o resultado
-        // (senão mistura resultados de queries diferentes e o linter reclama).
         const base = append ? prev : [];
 
-        // primeiro, tudo que já existia (se append)
         for (const g of base) {
           map.set(g.acq_id, { acq_id: g.acq_id, photos: [...g.photos] });
         }
-        // depois, as novas imagens na ordem que vieram da API
         for (const img of images) {
           const key = img.acq_id;
           if (!map.has(key)) {
@@ -194,11 +182,7 @@ const View: React.FC = () => {
     if (typeof window === "undefined") return;
 
     const hash = window.location.hash || "";
-    if (
-      hash.startsWith("#/View") ||
-      hash.startsWith("#/view") ||
-      hash.startsWith("#/search")
-    ) {
+    if (hash.startsWith("#/View") || hash.startsWith("#/view") || hash.startsWith("#/search")) {
       const qIndex = hash.indexOf("?");
       if (qIndex >= 0) {
         const paramsWithQ = hash.slice(qIndex); // inclui "?"
@@ -207,8 +191,7 @@ const View: React.FC = () => {
         try {
           const sp = new URLSearchParams(paramsWithQ.slice(1));
           const p = Number(sp.get("page") || "1");
-          initialPanelPageRef.current =
-            Number.isFinite(p) && p > 0 ? Math.floor(p) : 1;
+          initialPanelPageRef.current = Number.isFinite(p) && p > 0 ? Math.floor(p) : 1;
         } catch {
           initialPanelPageRef.current = 1;
         }
@@ -247,13 +230,11 @@ const View: React.FC = () => {
   };
 
   const handleNextPanel = async () => {
-    // ainda tem próxima página dentro dos grupos já carregados
     if (canGoNextLoaded) {
       setPanelPage((p) => p + 1);
       return;
     }
 
-    // chegou no fim do que está carregado, mas ainda tem mais páginas globais
     if (hasMoreOverall && apiHasMore && currentQuery && !isLoading) {
       await fetchPageFromApi(currentQuery, apiPage + 1, true);
       setPanelPage((p) => p + 1);
@@ -302,10 +283,8 @@ const View: React.FC = () => {
 
   return (
     <div className="bg-zinc-950 min-h-screen flex flex-col text-white text-base">
-      
       <Header />
-       <Breadcrumbs />
-
+      <Breadcrumbs />
 
       <div className="p-4 flex flex-col items-center gap-3">
         <h2 className="text-2xl md:text-3xl font-bold my-2 text-yellow-300">
@@ -349,9 +328,7 @@ const View: React.FC = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-zinc-500 italic">
-                  No filters applied
-                </p>
+                <p className="text-sm text-zinc-500 italic">No filters applied</p>
               )}
             </div>
           </div>
@@ -368,16 +345,20 @@ const View: React.FC = () => {
             <PaginationBar />
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-              {visibleGroups.map((g) => (
-                <AcqPanel
-                  key={g.acq_id}
-                  group={g}
-                  onOpen={() => handleOpenAcquisition(g.acq_id)}
-                />
-              ))}
+              {visibleGroups.map((g, idx) => {
+                const ordinal = (panelPage - 1) * PANELS_PER_PAGE + (idx + 1);
+
+                return (
+                  <AcqPanel
+                    key={g.acq_id}
+                    group={g}
+                    ordinal={ordinal}
+                    onOpen={() => handleOpenAcquisition(g.acq_id)}
+                  />
+                );
+              })}
             </div>
 
-            {/* Panel pagination + auto load from API */}
             <PaginationBar />
           </>
         ) : (

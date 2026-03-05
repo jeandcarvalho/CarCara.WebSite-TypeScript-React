@@ -11,10 +11,9 @@ import {
   formatSecLabel,
 } from "./viewHelpers";
 
-type AcqPanelProps = { group: Group; onOpen: () => void };
+type AcqPanelProps = { group: Group; onOpen: () => void; ordinal?: number };
 
-const AcqPanel: React.FC<AcqPanelProps> = ({ group, onOpen }) => {
-  
+const AcqPanel: React.FC<AcqPanelProps> = ({ group, onOpen, ordinal }) => {
   const totalSecondsForAcq = useMemo(
     () => new Set(group.photos.map((p) => p.sec ?? -1)).size,
     [group.photos],
@@ -70,8 +69,18 @@ const AcqPanel: React.FC<AcqPanelProps> = ({ group, onOpen }) => {
     >
       <div className="px-4 py-3 flex items-center justify-between bg-zinc-900/70 border-b border-zinc-800">
         <div className="text-base">
-          <div className="font-semibold text-zinc-100">{acqLabel}</div>
+          <div className="font-semibold text-zinc-100 flex items-center gap-2">
+            <span>{acqLabel}</span>
+
+            {/* ✅ Discreto, mas útil: ordinal global na lista do View */}
+            {typeof ordinal === "number" && Number.isFinite(ordinal) && ordinal > 0 && (
+              <span className="text-xs leading-none px-2 py-[2px] rounded-md border border-yellow-500/25 bg-yellow-500/10 text-yellow-200">
+                Acq #{ordinal}
+              </span>
+            )}
+          </div>
         </div>
+
         <div className="text-sm text-yellow-400 font-semibold">{currentLabel}</div>
       </div>
 
