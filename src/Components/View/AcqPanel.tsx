@@ -14,6 +14,7 @@ import {
 type AcqPanelProps = { group: Group; onOpen: () => void };
 
 const AcqPanel: React.FC<AcqPanelProps> = ({ group, onOpen }) => {
+  
   const totalSecondsForAcq = useMemo(
     () => new Set(group.photos.map((p) => p.sec ?? -1)).size,
     [group.photos],

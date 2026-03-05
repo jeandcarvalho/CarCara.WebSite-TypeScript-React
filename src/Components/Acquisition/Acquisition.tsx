@@ -227,6 +227,10 @@ async function createCollectionApi(
 }
 
 const Acquisition: React.FC = () => {
+    useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, []);
+  
   const { acqId } = useParams<{ acqId: string }>();
   const location = useLocation();
   const navigate = useNavigate();

@@ -6,6 +6,7 @@ import loadgif from "../img/gif.gif";
 import {useNavigate } from "react-router-dom";
 import Breadcrumbs from "../Breadcrumbs"; // ajuste o path se necessário
 import AcqPanel from "./AcqPanel";
+
 import {
   Counts,
   Group,
@@ -18,7 +19,11 @@ import {
 /* ===================== Main Component ===================== */
 
 const View: React.FC = () => {
+  useEffect(() => {
+  window.scrollTo({ top: 0, behavior: "auto" });
+}, []);
   const navigate = useNavigate();
+  
 
   // guarda a página do painel vinda da URL (pra não “resetar” ao buscar)
   const initialPanelPageRef = useRef<number>(1);

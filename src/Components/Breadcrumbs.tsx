@@ -10,8 +10,8 @@ type Props = {
 function getHashRoute(): { path: string; search: string } {
   if (typeof window === "undefined") return { path: "/", search: "" };
 
-  const hash = window.location.hash || ""; // "#/View?b.vehicle=Captur"
-  const cleaned = hash.startsWith("#") ? hash.slice(1) : hash; // "/View?..."
+  const hash = window.location.hash || "";
+  const cleaned = hash.startsWith("#") ? hash.slice(1) : hash;
   const qIndex = cleaned.indexOf("?");
 
   const rawPath = (qIndex >= 0 ? cleaned.slice(0, qIndex) : cleaned) || "/";
@@ -26,9 +26,9 @@ function normalizeTo(toPath: string): string {
 }
 
 function titleizeRoute(path: string): string {
-  // "/my-page_name" -> "My Page Name"
   const p = path.replace(/^\//, "");
   if (!p) return "Home";
+
   return p
     .split(/[\/\-_]+/g)
     .filter(Boolean)
@@ -38,6 +38,7 @@ function titleizeRoute(path: string): string {
 
 function stripPageParams(search: string): string {
   if (!search) return "";
+
   const qs = search.startsWith("?") ? search.slice(1) : search;
   if (!qs) return "";
 
@@ -51,6 +52,7 @@ function stripPageParams(search: string): string {
 
 function stripParams(search: string, keys: string[]): string {
   if (!search) return "";
+
   const qs = search.startsWith("?") ? search.slice(1) : search;
   if (!qs) return "";
 
@@ -62,13 +64,15 @@ function stripParams(search: string, keys: string[]): string {
 }
 
 function stripForSearch(search: string): string {
-  // Search should keep filters, but NOT pagination or acq_id
   return stripParams(search, ["page", "per_page", "acq_id"]);
 }
 
 function stripForView(search: string): string {
-  // View should keep page + filters, but NOT acq_id
   return stripParams(search, ["acq_id"]);
+}
+
+function isSearchCrumb(label: string) {
+  return label.toLowerCase() === "search";
 }
 
 const HOME_TO = "/";
@@ -81,12 +85,10 @@ const Breadcrumbs: React.FC<Props> = ({ className }) => {
     const { path, search } = route;
     const lower = path.toLowerCase();
 
-    // ✅ Home
     if (lower === "/" || lower === "/home") {
       return [{ label: "Home" }];
     }
 
-    // ✅ About
     if (lower === "/about") {
       return [
         { label: "Home", to: HOME_TO },
@@ -94,7 +96,6 @@ const Breadcrumbs: React.FC<Props> = ({ className }) => {
       ];
     }
 
-    // ✅ Acquisitions page (/daqs)
     if (
       lower === "/daqs" ||
       lower === "/daq" ||
@@ -103,47 +104,42 @@ const Breadcrumbs: React.FC<Props> = ({ className }) => {
     ) {
       return [
         { label: "Home", to: HOME_TO },
-        { label: "Acquisition" },
+        { label: "Acquisitions" },
       ];
     }
 
-    // ✅ Search (Home -> Acquisition -> Search)
     if (lower === "/search") {
       return [
         { label: "Home", to: HOME_TO },
-        { label: "Acquisition", to: ACQ_TO },
+        { label: "Acquisitions", to: ACQ_TO },
         { label: "Search" },
       ];
     }
 
-    // ✅ View (Home -> Acquisition -> Search?filters -> View)
     if (lower === "/view") {
-      // important: remove page/per_page from View query when going back to Search
       const searchTo = `/search${stripPageParams(search || "")}`;
 
       return [
         { label: "Home", to: HOME_TO },
-        { label: "Acquisition", to: ACQ_TO },
+        { label: "Acquisitions", to: ACQ_TO },
         { label: "Search", to: searchTo },
-        { label: "View" },
+        { label: "Results" },
       ];
     }
 
-    // ✅ Acquisition details (/acquisition/:id)
     if (/^\/acquisition(\/|$)/.test(lower) && lower !== "/acquisition") {
       const searchTo = `/search${stripForSearch(search || "")}`;
       const viewTo = `/View${stripForView(search || "")}`;
 
       return [
         { label: "Home", to: HOME_TO },
-        { label: "Acquisition", to: ACQ_TO },
+        { label: "Acquisitions", to: ACQ_TO },
         { label: "Search", to: searchTo },
-        { label: "View", to: viewTo },
-        { label: "Visualizer" },
+        { label: "Results", to: viewTo },
+        { label: "Details" },
       ];
     }
 
-    // ✅ fallback genérico
     return [
       { label: "Home", to: HOME_TO },
       { label: titleizeRoute(path) },
@@ -163,6 +159,13 @@ const Breadcrumbs: React.FC<Props> = ({ className }) => {
 
           {crumbs.map((c, idx) => {
             const isLast = idx === crumbs.length - 1;
+            const isSearch = isSearchCrumb(c.label);
+
+            const normalLink =
+              "hover:text-yellow-300 transition-colors";
+
+            const searchLink =
+  "text-zinc-400 hover:text-yellow-300 transition-colors";
 
             return (
               <React.Fragment key={`${c.label}-${idx}`}>
@@ -171,10 +174,13 @@ const Breadcrumbs: React.FC<Props> = ({ className }) => {
                 {c.to && !isLast ? (
                   <Link
                     to={normalizeTo(c.to)}
-                    className="hover:text-yellow-300 transition-colors"
-                    title={c.to}
+                    className={isSearch ? searchLink : normalLink}
+                    title={isSearch ? "Edit filters" : c.to}
                   >
                     {c.label}
+                    {isSearch && (
+                      <span className="ml-1 text-[10px] opacity-40">✎</span>
+                    )}
                   </Link>
                 ) : (
                   <span className={isLast ? "text-zinc-200" : ""}>
