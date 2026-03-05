@@ -43,18 +43,7 @@ const View: React.FC = () => {
     [currentQuery],
   );
 
-  const stripPaginationFromQuery = (qsWithMaybeQ: string): string => {
-    const raw = (qsWithMaybeQ || "").trim();
-    const qs = raw.startsWith("?") ? raw.slice(1) : raw;
-    if (!qs) return "";
 
-    const sp = new URLSearchParams(qs);
-    sp.delete("page");
-    sp.delete("per_page");
-
-    const out = sp.toString();
-    return out ? `?${out}` : "";
-  };
 
   const replaceViewHashPage = (page: number) => {
     if (typeof window === "undefined") return;
