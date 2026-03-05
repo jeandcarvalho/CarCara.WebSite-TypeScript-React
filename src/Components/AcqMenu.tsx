@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
-import Breadcrumbs from "./Breadcrumbs"; // ajuste o path se necessário
+import Breadcrumbs from "../Components/Breadcrumbs"; // ajuste o path se necessário
 type IconKey =
   | "visual"
   | "detection"

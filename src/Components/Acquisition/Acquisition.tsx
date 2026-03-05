@@ -843,28 +843,10 @@ const Acquisition: React.FC = () => {
                       </div>
                     )}
 
-                    {/* Right column: Go to photos / Back to video + Next */}
+                    {/* Right column: Next */}
                     <div className="flex flex-col gap-1 items-end">
                       {acqList.length > 0 && currentIndex >= 0 && (
                         <>
-                          {mainMode === "photo" ? (
-                            <button
-                              type="button"
-                              onClick={backToVideo}
-                              className="px-3 py-1 rounded-full border border-zinc-600 bg-zinc-800 hover:bg-zinc-700 text-gray-100"
-                            >
-                              Video Panel
-                            </button>
-                          ) : photos.length > 0 ? (
-                            <button
-                              type="button"
-                              onClick={goToFirstPhoto}
-                              className="px-3 py-1 rounded-full border border-zinc-600 bg-zinc-800 hover:bg-zinc-700 text-gray-100"
-                            >
-                              Go to photos
-                            </button>
-                          ) : null}
-
                           <button
                             type="button"
                             onClick={goNextAcq}
@@ -1011,6 +993,29 @@ const Acquisition: React.FC = () => {
                   )}
                 </div>
               </div>
+
+              {/* Quick switch: keep "Go to photos" near Active Filters / Downloads */}
+              {acqList.length > 0 && currentIndex >= 0 && photos.length > 0 && (
+                <div className="w-full flex items-center justify-end">
+                  {mainMode === "photo" ? (
+                    <button
+                      type="button"
+                      onClick={backToVideo}
+                      className="mt-2 px-3 py-1 rounded-full border border-zinc-600 bg-zinc-800 hover:bg-zinc-700 text-gray-100 text-[11px] sm:text-xs"
+                    >
+                      Video Panel
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={goToFirstPhoto}
+                      className="mt-2 px-3 py-1 rounded-full border border-zinc-600 bg-zinc-800 hover:bg-zinc-700 text-gray-100 text-[11px] sm:text-xs"
+                    >
+                      Go to photos
+                    </button>
+                  )}
+                </div>
+              )}
             </section>
 
             <section className="lg:col-span-1 bg-zinc-900 border border-zinc-800 rounded-lg p-3 sm:p-4 flex flex-col">
@@ -1114,14 +1119,14 @@ const Acquisition: React.FC = () => {
                         </div>
                       ) : (
                         <div className="flex flex-col gap-1">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap min-w-0">
                             <label className="text-[11px] sm:text-xs text-gray-200">
                               Collection:
                             </label>
                             <select
                               value={selectedCollectionId}
                               onChange={handleCollectionChange}
-                              className="flex-1 bg-zinc-950 border border-zinc-700 rounded px-2 py-1 text-[11px] sm:text-xs text-gray-100"
+                              className="flex-1 min-w-0 bg-zinc-950 border border-zinc-700 rounded px-2 py-1 text-[11px] sm:text-xs text-gray-100"
                             >
                               {collections.map((c) => (
                                 <option key={c.id} value={c.id}>
@@ -1135,7 +1140,7 @@ const Acquisition: React.FC = () => {
                                 setCreatingCollection((prev) => !prev);
                                 setCreateCollectionError("");
                               }}
-                              className="text-[11px] sm:text-xs px-2 py-1 rounded-full border border-zinc-600 bg-zinc-800 hover:bg-zinc-700 text-gray-100"
+                              className="shrink-0 text-[11px] sm:text-xs px-2 py-1 rounded-full border border-zinc-600 bg-zinc-800 hover:bg-zinc-700 text-gray-100"
                             >
                               + New
                             </button>

@@ -150,8 +150,13 @@ const View: React.FC = () => {
 
       setGroups((prev) => {
         const map = new Map<string, Group>();
-        // primeiro, tudo que já existia
-        for (const g of prev) {
+
+        // Quando append=false, esta chamada deve "resetar" o resultado
+        // (senão mistura resultados de queries diferentes e o linter reclama).
+        const base = append ? prev : [];
+
+        // primeiro, tudo que já existia (se append)
+        for (const g of base) {
           map.set(g.acq_id, { acq_id: g.acq_id, photos: [...g.photos] });
         }
         // depois, as novas imagens na ordem que vieram da API
