@@ -4,7 +4,7 @@ import Header from "../Header";
 import Footer from "../Footer";
 import loadgif from "../img/gif.gif";
 import { useNavigate } from "react-router-dom";
-import Breadcrumbs from "../Breadcrumbs"; // ajuste o path se necessário
+import Breadcrumbs from "../Breadcrumbs";
 import AcqPanel from "./AcqPanel";
 
 import {
@@ -114,6 +114,24 @@ const View: React.FC = () => {
   const canGoNextLoaded = panelPage < loadedPanelPages;
   const hasMoreOverall = panelPage < totalPanelPages;
 
+  // estado especial:
+  // a página pedida ainda não foi totalmente carregada da API
+const waitingRequestedPanel =
+  !!currentQuery &&
+  panelPage > loadedPanelPages &&
+  (isLoading || apiHasMore);
+
+const visibleGroups = useMemo(() => {
+  const start = (panelPage - 1) * PANELS_PER_PAGE;
+  return groups.slice(start, start + PANELS_PER_PAGE);
+}, [groups, panelPage]);
+
+const shouldShowEmpty =
+  !isLoading &&
+  !waitingRequestedPanel &&
+  visibleGroups.length === 0 &&
+  !apiHasMore;
+
   // scroll pro topo sempre que trocar de página de painel
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -182,7 +200,11 @@ const View: React.FC = () => {
     if (typeof window === "undefined") return;
 
     const hash = window.location.hash || "";
-    if (hash.startsWith("#/View") || hash.startsWith("#/view") || hash.startsWith("#/search")) {
+    if (
+      hash.startsWith("#/View") ||
+      hash.startsWith("#/view") ||
+      hash.startsWith("#/search")
+    ) {
       const qIndex = hash.indexOf("?");
       if (qIndex >= 0) {
         const paramsWithQ = hash.slice(qIndex); // inclui "?"
@@ -191,7 +213,8 @@ const View: React.FC = () => {
         try {
           const sp = new URLSearchParams(paramsWithQ.slice(1));
           const p = Number(sp.get("page") || "1");
-          initialPanelPageRef.current = Number.isFinite(p) && p > 0 ? Math.floor(p) : 1;
+          initialPanelPageRef.current =
+            Number.isFinite(p) && p > 0 ? Math.floor(p) : 1;
         } catch {
           initialPanelPageRef.current = 1;
         }
@@ -207,7 +230,7 @@ const View: React.FC = () => {
     replaceViewHashPage(panelPage);
   }, [panelPage, currentQuery]);
 
-  // se o usuário abriu direto numa página alta (ex: page=4), auto-carrega mais páginas da API
+  // se o usuário abriu direto numa página alta (ex: page=11), auto-carrega mais páginas da API
   useEffect(() => {
     if (!currentQuery) return;
     if (isLoading) return;
@@ -218,10 +241,7 @@ const View: React.FC = () => {
     }
   }, [panelPage, loadedPanelPages, apiHasMore, apiPage, currentQuery, isLoading]);
 
-  const visibleGroups = useMemo(() => {
-    const start = (panelPage - 1) * PANELS_PER_PAGE;
-    return groups.slice(start, start + PANELS_PER_PAGE);
-  }, [groups, panelPage]);
+
 
   const handlePrevPanel = () => {
     if (canGoPrevPanel) {
@@ -336,9 +356,16 @@ const View: React.FC = () => {
       </div>
 
       <main className="flex-grow w-full md:w-5/6 mx-auto p-4 flex flex-col gap-4">
-        {isLoading && groups.length === 0 ? (
-          <div className="flex justify-center">
-            <img src={loadgif} className="w-32 h-32" />
+        {(isLoading && groups.length === 0) || waitingRequestedPanel ? (
+          <div className="flex flex-col items-center justify-center gap-3 py-6">
+            <img
+              src={loadgif}
+              className="w-32 h-32"
+              alt="Loading acquisitions"
+            />
+            <p className="text-zinc-400 text-sm">
+              Loading acquisitions for page {panelPage}...
+            </p>
           </div>
         ) : visibleGroups.length > 0 ? (
           <>
@@ -361,10 +388,19 @@ const View: React.FC = () => {
 
             <PaginationBar />
           </>
-        ) : (
+        ) : shouldShowEmpty ? (
           <p className="text-center text-zinc-400 mt-6 text-base">
             No acquisitions found.
           </p>
+        ) : (
+          <div className="flex flex-col items-center justify-center gap-3 py-6">
+            <img
+              src={loadgif}
+              className="w-32 h-32"
+              alt="Loading acquisitions"
+            />
+            <p className="text-zinc-400 text-sm">Loading acquisitions...</p>
+          </div>
         )}
       </main>
 
